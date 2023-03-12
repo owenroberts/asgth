@@ -161,15 +161,16 @@ class Player extends ColliderSprite {
 		this.mapPosition = [...this.prevPosition]; // for collisions
 	}
 
-	spawn(map) {
-		const nodes = shuffle(map.nodes.filter(node => node.room));
-		let location;
-		for (let i = 0; i < nodes.length; i++) {
-			location = nodes[i].room.getCell('player');
-			if (location) break;
-		}
-		this.mapPosition[0] = location.x * cellSize.w; 
-		this.mapPosition[1] = location.y * cellSize.h;
+	spawn(location) {
+		// const nodes = shuffle(map.nodes.filter(node => node.room));
+		// let location = choice(map.walls);
+		// console.log(map.walls)
+		// for (let i = 0; i < nodes.length; i++) {
+		// 	location = nodes[i].room.getCell('player');
+		// 	if (location) break;
+		// }
+		this.position[0] = location[0];  
+		this.position[1] = location[1];
 	}
 
 	display() {

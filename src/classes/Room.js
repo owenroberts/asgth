@@ -2,15 +2,35 @@ class Room extends Area {
 	constructor(...args) {
 		super(...args);
 
-		this.texture = new Texture({
+		this.texture = new Trees({
 			center: true
 		}, false);
-		this.addTextureAnimation();
+		// this.addTextureAnimation();
 		this.takenCells = [];
 	}
 
-	addTextureAnimation() {
-		this.texture.addAnimation(gme.anims.sprites.room);
+	addTextureAnimation(animation) {
+		// this.texture.addAnimation(gme.anims.sprites.room);
+		this.texture.addAnimation(animation);
+	}
+
+	getLocations() {
+		let locations = [];
+		for (let x = this.x; x < this.x + this.w; x++) {
+			for (let y = this.y; y < this.y + this.h; y++) {
+				// this.texture.addLocation(x * cellSize.w + 32, y * cellSize.h + 32, index);
+				locations.push([x * cellSize.w + 32,  y * cellSize.h + 32]);
+			}
+		}
+		return locations;
+	}
+
+	addLocations(index) {
+		for (let x = this.x; x < this.x + this.w; x++) {
+			for (let y = this.y; y < this.y + this.h; y++) {
+				this.texture.addLocation(x * cellSize.w + 32, y * cellSize.h + 32, index);
+			}
+		}
 	}
 
 	addTextureLocations(matrix, rows, indexes) {
@@ -44,8 +64,6 @@ class Room extends Area {
 				} else {
 					// console.log('no state', mt);
 				}
-
-				
 			}
 		}
 
@@ -93,7 +111,8 @@ class Room extends Area {
 		}
 	}
 
-	update(offset) {
-		this.texture.update(offset);
+	update(player) {
+		// this.texture.update(offset);
+		return this.texture.update(player);
 	}
 }

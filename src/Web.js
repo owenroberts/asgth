@@ -5,9 +5,10 @@ function Web() {
 	animation.layers.push(new Layer({ 
 		color: '#FFFFFF', 
 		drawingIndex: 0,
-		segmentNum: 4,
+		segmentNum: 10,
+		wiggleRange: 4,
+		wiggleSegments: true,
 	}));
-	console.log(animation);
 	animation.setFrames();
 
 	let isActive = false;
@@ -35,8 +36,13 @@ function Web() {
 		drawing.add('end');
 	}
 
+	function clear() {
+		drawing.points = [];
+		drawing.offsets = [];
+	}
+
 	return { 
-		display, addPoint, insertPoint, start, end, 
+		display, addPoint, insertPoint, start, end, clear,
 		isActive() { return isActive; }
 	};
 

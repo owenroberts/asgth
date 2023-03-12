@@ -51,6 +51,13 @@ let goal;
 let build;
 let selectSprite;
 
+let webStructions = {
+	x: 2,
+	delay: 180,
+	xCount: 0,
+	delayCount: 0,
+};
+
 /* debugging */
 let mapAlpha = 0;
 let mapCellSize = 12;
@@ -149,8 +156,8 @@ function instructionsSetup() {
 		letters: sprites.letters,
 	}));
 
-	trees.addLocation(randomInt(2 * 64, 6 * 64), randomInt(3 * 64, 6 * 64), randomInt(25));
-	trees.addLocation(randomInt(5 * 64, 12 * 64), randomInt(3 * 64, 6 * 64), randomInt(25));
+	trees.addLocation(randomInt(2 * 64, 4 * 64), randomInt(3 * 64, 6 * 64), randomInt(25));
+	trees.addLocation(randomInt(7 * 64, 12 * 64), randomInt(3 * 64, 6 * 64), randomInt(25));
 }
 
 function introDialog() {
@@ -165,61 +172,32 @@ function introDialog() {
 	gme.scenes.current = 'narration';
 }
 
-function setupLevels(build, playerLetter) {
-	if (!textGenerator.isReady()) {
-		setTimeout(() => { setupLevels(build, playerLetter) }, 100);
-		return;
-	}
-	const { food, goal, npcs, money } = build;
+function setupLevels() {
 	
-	// goal.init(playerLetter);
-	// items.forEach(i => i.init(items));
-	// npcs.forEach(n => { n.init(items, build.levels); });
+	// text generator?
 
-	// debug give player a lot of money
-	// player.addItem(money, 100);
-	player.currencyCount = 100;
+	console.log('build levels');
+	const level = new Level('a', gme.anims.sprites.trees, randomInt(25));
+	trees.locations = [];
+	// trees.locations = level.locations;
+	level.locations.forEach(loc => trees.addLocation(...loc));
+	levels['a'] = level;
+	player.spawn(choice(level.walls));
+	// gme.scenes.current = 'game';
+	const scene = new Scene();
+	scene.needsUpdate = true;
+	scene.addSprite(level);
+	scene.addToDisplay(player);
+	scene.addToDisplay(trees);
+	gme.scenes.addScene(scene, 'a');
+	startLevel('a');
 
-	build.levels.forEach(letter => {
-		const level = new Level(letter);
-		levels[letter] = level;
-		level.addFood();
+	// console.log('level', 'a', level);
 
-		const scene = new Scene();
-		scene.needsUpdate = true;
-		scene.addSprite(level);
-		scene.addToDisplay(player);
-		gme.scenes.addScene(scene, letter);
-	});
-
-	npcs.forEach(letter => {
-		// let npc = new NPC(0, 0, letter, playerLetter);
-		const level = choice(build.levels);
-		const npc = levels[level].addNPC(letter);
-		npc.prophecies = [
-			textGenerator.getText('P'),
-			textGenerator.getText('P'),
-			textGenerator.getText('P'),
-		];
-		const scene = new Scene();
-		scene.isNPCScene = true;
-		scene.addToDisplay(frame);
-		const npcSprite = new Sprite(gme.width - 100, 100, spriteMap[letter].sprite);
-		scene.addToDisplay(npcSprite);
-
-		const npcDialog = NPCDialog(npc, level, transform);
-		scene.addSprite(npcDialog);
-
-		gme.scenes.addScene(scene, letter);
-	});
-
-	startLevel(choice(build.levels));
-	// console.log('levels', levels)
 }
 
 function startLevel(letter) {
 	currentLevel = letter;
-	player.spawn(levels[letter].map);
 	gme.scenes.current = currentLevel;
 }
 
@@ -246,10 +224,13 @@ gme.start = function() {
 	gme.scenes.instructionsMovement.needsUpdate = true;
 	gme.scenes.instructionsWeb.addSprite(player);
 	gme.scenes.instructionsWeb.needsUpdate = true;
+	gme.scenes.game.addSprite(player);
+	gme.scenes.game.needsUpdate = true;
 
 	trees = new Trees({ animation: sprites.trees, center: true });
 	gme.scenes.instructionsWeb.addSprite(trees);
-	console.log('trees', trees);
+	gme.scenes.game.addSprite(trees);
+	// console.log('trees', trees);
 
 	selectSprite = new Sprite(0, 0, sprites.select);
 	selectSprite.isActive = false;
@@ -261,7 +242,8 @@ gme.start = function() {
 	narration = Narration(onNarrationFinished);
 	gme.scenes.narration.addToDisplay(narration);
 
-	gme.scenes.current = 'instructionsWeb';
+	// gme.scenes.current = 'instructionsWeb';
+	setupLevels();
 
 	console.log('gme', gme);
 };
@@ -271,20 +253,14 @@ gme.update = function(timeElapsed) {
 	if (gme.scenes.current.needsUpdate) {
 		player.update(timeElapsed, true);
 
-		if (web.isActive()) {
-			if (!player.input.right && !player.input.left && !player.input.up && !player.input.up) {
-				
-			}
-		}
 		
 		const treeLoc = trees.update(player);
-		// console.log(treeLoc);
+		
 		if (treeLoc) {
 			selectSprite.position = treeLoc;
 			selectSprite.isActive = true;
 
 			if (player.input.x) {
-
 				player.resetInput();
 				if (!web.isActive()) {
 					web.start();
@@ -294,18 +270,32 @@ gme.update = function(timeElapsed) {
 					web.insertPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
 					web.end();
 				}
+
+				if (gme.scenes.isCurrent('instructionsWeb')) {
+					webStructions.xCount++;
+				}
 			}
-
-
 		} else {
 			selectSprite.isActive = false;
+		}
+
+		if (gme.scenes.isCurrent('instructionsWeb')) {
+			if (webStructions.xCount >= webStructions.x) {
+				webStructions.delayCount++;
+				if (webStructions.delayCount >= webStructions.delay) {
+					narration.add("... than a spider's web would have to stop a falling rock.");
+					gme.scenes.current = 'narration';
+					web.clear();
+					setupLevels();
+				}
+			}
 		}
 	}
 };
 
 gme.draw = function() {
 	gme.scenes.current.display();
-	web.display();
+	// if (gme.scenes.current.needsUpdate) web.display();
 };
 
 gme.keyDown = function(key) {

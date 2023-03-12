@@ -1,135 +1,91 @@
 class Level {
-	constructor(letter) {
+	constructor(letter, animation, index) {
 		this.letter = letter;
-		this.map = new BSPMap(20, 20, 5, 16);
+		this.map = new BSPMap(13, 7, 1, 6);
 		// console.log(this.map);
 
-		this.map.build({ w: 2, h: 2}, 16, {
-			walls: gme.anims.sprites[spriteMap[letter].sprite],
-		});
+		this.map.build({ w: 0, h: 0}, 16, false);
+
+		console.log('map', letter, this.map);
 
 		this.roomCount = this.map.nodes.filter(n => n.room).length;
-		this.cellCount = this.map.nodes.filter(n => n.room).map(n => n.room.w * n.room.h).reduce((s, n) => s + n);
+		this.cellCount = this.map.nodes
+			.filter(n => n.room)
+			.map(n => n.room.w * n.room.h)
+			.reduce((s, n) => s + n);
+
+		this.locations = [];
 
 		this.map.nodes
 			.filter(n => n.room)
 			.forEach(n => {
-				n.room.addTextureLocations(this.map.matrix, this.map.rows, [1, 3]);
+				// n.room.addTextureLocations(this.map.matrix, this.map.rows, [1, 3]);
+				// n.room.addTextureLocations()
+				// n.room.addTextureAnimation(animation);
+				// n.room.addLocations();
+				let i = randomInt(25);
+				n.room.getLocations().forEach(loc => {
+					this.locations.push([...loc, i]);
+				});
 			});
 
-		function addPaths(obj, map) {
-			if (obj.paths) {
-				obj.paths.forEach(path => {
-					// console.log('path', path.x, path.y);
-					path.addTextureLocations(map.matrix, map.rows, [2, 3])
-				});
+		this.walls = []; // not walls ...
+		this.wallTexture = new Texture({ animation: gme.anims.sprites.room, center: true });
+		for (let i = 0; i < this.map.matrix.length; i++) {
+			if (this.map.matrix[i] === 0) {
+				const x = i % this.map.cols;
+				const y = Math.floor(i / this.map.cols);
+				// console.log(x * cellSize.w + 32, y + cellSize.h + 32)
+				this.walls.push([x * cellSize.w + 32, y * cellSize.h + 32]);
+
+				let mt = this.map.getMatrixCell(x, y, 0);
+				console.log(gme.anims.sprites.room.states);
+				if (gme.anims.sprites.room.states[mt])
+				var f = 0;
+				if (gme.anims.sprites.room.states[mt]) f = gme.anims.sprites.room.states[mt].start;
+				this.wallTexture.addLocation(x * cellSize.w + 32, y * cellSize.h + 32, f);
 			}
-			if (obj.a) addPaths(obj.a, map);
-			if (obj.b) addPaths(obj.b, map);
-
 		}
-		this.map.nodes.forEach(n => { addPaths(n, this.map) });
-		// console.log(this.map);
-		this.items = new SpriteCollection();
-		this.food = new SpriteCollection();
-		this.npcs = new SpriteCollection();
-
+		console.log(this.map.matrix);
+		// console.log(this.walls);
 	}
 
-	get() {
-		return this.letter;
-	}
+
 
 	update(player) {
 
-		const offset = [
-			-player.mapPosition[0] + gme.view.halfWidth,
-			-player.mapPosition[1] + gme.view.halfHeight,
-		];
-
-		// this.nodes[0].update(offset);
-		for (let i = 0; i < this.map.nodes.length; i++) {
-			const node = this.map.nodes[i];
-			if (node.room) node.room.update(offset);
-			for (let j = 0; j < node.paths.length; j++) {
-				node.paths[j].update(offset);
-			}
-		}
-
-		for (let i = 0; i < this.map.walls.length; i++) {
-			this.map.walls[i].update(offset);
-		}
-
-		// can i fucking optimize this ... ?? -- shg ... 
-		let wallCollision = false;
-		for (let i = 0; i < this.map.walls.length; i++) {
-			const wall = this.map.walls[i];
-			if (wall.collide(player)) {
-				wallCollision = true;
-			}
-		}
-		if (wallCollision) player.back();
 
 
-		// this.items.all(item => { item.update(offset, player); });
-		this.food.all(f => { 
-			const isColliding = f.update(offset, player);
-			if (isColliding) {
-				player.eatFood();
-				this.food.remove(f);
-			}
-		});
+		// for (let i = 0; i < this.map.nodes.length; i++) {
+		// 	const node = this.map.nodes[i];
+		// 	if (node.room) {
+		// 		let treeLoc = node.room.update(player);
+		// 		return treeLoc;
+		// 	}
+		// }
 
-		this.items.all(i => { 
-			const isColliding = i.update(offset, player);
-			if (isColliding) {
-				player.addItem(i.get());
-				this.items.remove(i);
-			}
-		});
+		// for (let i = 0; i < this.map.walls.length; i++) {
+		// 	this.map.walls[i].update(offset);
+		// }
 
-		this.npcs.all(n => { 
-			const isColliding = n.update(offset, player);
-			if (isColliding) {
-				player.resetInput();
-				gme.scenes.current = n.get();
-				// console.log('talk to', n.get());
-				// player.addItem(i.get());
-				// this.items.remove(i);
-			}
-		});
+		// // can i fucking optimize this ... ?? -- shg ... 
+		// let wallCollision = false;
+		// for (let i = 0; i < this.map.walls.length; i++) {
+		// 	const wall = this.map.walls[i];
+		// 	if (wall.collide(player)) {
+		// 		wallCollision = true;
+		// 	}
+		// }
+		// if (wallCollision) player.back();
+		
 	}
 
 	display() {
 		this.map.nodes[0].display(); // displays through tree of nodes
-		for (let i = 0; i < this.map.walls.length; i++) {
-			this.map.walls[i].display();
-		}
-		this.items.all(i => { i.display(); });
-		this.food.all(f => { f.display(); });
-		this.npcs.all(n => { n.display(); });
-
+		this.wallTexture.display();
+		// for (let i = 0; i < this.map.walls.length; i++) {
+		// 	this.map.walls[i].display();
+		// }
 	}
 
-	addNPC(letter) {
-		const room = choice(this.map.nodes.filter(n => n.room)).room;
-		const location = room.getCell('npc');
-		const npc = new NPC(location.x * cellSize.w, location.y * cellSize.h, letter);
-		this.npcs.add(npc);
-		return npc;
-	}
-
-	addFood() {
-		const nodes = this.map.nodes.filter(n => n.room);
-		for (let i = 0; i < nodes.length; i++) {
-			const location = nodes[i].room.getCell('food');
-			const sprite = new Food(location.x * cellSize.w, location.y * cellSize.h, build.food);
-			this.food.add(sprite);
-		}
-	}
-
-	addMoney(position) {
-		const sprite = new Item(Math.round(position[0]), Math.round(position[1]), build.money);
-		this.items.add(sprite);
-	}
 }
