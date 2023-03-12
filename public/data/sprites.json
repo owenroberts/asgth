@@ -1,0 +1,11 @@
+{
+	"letters": { "src": "lines/drawings/letters.json" },
+	"path": { "src": "lines/drawings/path.json" },
+	"room": { "src": "lines/drawings/room.json" },
+
+	"spider": { "src": "lines/drawings/spider.json" },
+
+	"select": { "src": "lines/drawings/select.json" },
+	"trees": { "src": "lines/drawings/trees.json" }
+
+}
