@@ -1,6 +1,7 @@
 class Room extends Area {
 	constructor(...args) {
 		super(...args);
+		console.log(args);
 
 		this.texture = new Trees({
 			center: true
@@ -15,11 +16,12 @@ class Room extends Area {
 	}
 
 	getLocations() {
+		console.log(this.x, this.y);
 		let locations = [];
 		for (let x = this.x; x < this.x + this.w; x++) {
 			for (let y = this.y; y < this.y + this.h; y++) {
 				// this.texture.addLocation(x * cellSize.w + 32, y * cellSize.h + 32, index);
-				locations.push([x * cellSize.w + 32,  y * cellSize.h + 32]);
+				locations.push([x * cellSize.w,  y * cellSize.h]);
 			}
 		}
 		return locations;

@@ -2,6 +2,8 @@
 	"letters": { "src": "lines/drawings/letters.json" },
 	"path": { "src": "lines/drawings/path.json" },
 	"room": { "src": "lines/drawings/room.json" },
+	"grass_tiles": { "src": "lines/drawings/grass_tiles.json" },
+	"dirt_tiles": { "src": "lines/drawings/dirt_tiles.json" },
 
 	"spider": { "src": "lines/drawings/spider.json" },
 

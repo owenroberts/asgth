@@ -60,7 +60,7 @@ let webStructions = {
 
 /* debugging */
 let mapAlpha = 0;
-let mapCellSize = 12;
+let mapCellSize = 24;
 document.addEventListener('keydown', ev => {
 	if (ev.code == 'Equal') mapAlpha = Math.min(1, mapAlpha + 0.5);
 	else if (ev.code == 'Minus') mapAlpha = Math.max(0, mapAlpha - 0.5);
@@ -189,11 +189,11 @@ function setupLevels() {
 	scene.addSprite(level);
 	scene.addToDisplay(player);
 	scene.addToDisplay(trees);
+	scene.addToDisplay(selectSprite);
 	gme.scenes.addScene(scene, 'a');
 	startLevel('a');
 
 	// console.log('level', 'a', level);
-
 }
 
 function startLevel(letter) {
@@ -218,7 +218,7 @@ gme.start = function() {
 	gme.setBounds('bottom', 7 * cellSize.h);
 	
 	player = new Player(gme.halfWidth + 64 * 3, gme.halfHeight);
-	// player.debug = true;
+	player.debug = true;
 	player.setAnimation(sprites.spider);
 	gme.scenes.instructionsMovement.addSprite(player);
 	gme.scenes.instructionsMovement.needsUpdate = true;
@@ -227,7 +227,7 @@ gme.start = function() {
 	gme.scenes.game.addSprite(player);
 	gme.scenes.game.needsUpdate = true;
 
-	trees = new Trees({ animation: sprites.trees, center: true });
+	trees = new Trees({ animation: sprites.trees });
 	gme.scenes.instructionsWeb.addSprite(trees);
 	gme.scenes.game.addSprite(trees);
 	// console.log('trees', trees);
@@ -255,10 +255,10 @@ gme.update = function(timeElapsed) {
 
 		
 		const treeLoc = trees.update(player);
-		
 		if (treeLoc) {
 			selectSprite.position = treeLoc;
 			selectSprite.isActive = true;
+
 
 			if (player.input.x) {
 				player.resetInput();
@@ -295,7 +295,7 @@ gme.update = function(timeElapsed) {
 
 gme.draw = function() {
 	gme.scenes.current.display();
-	// if (gme.scenes.current.needsUpdate) web.display();
+	if (gme.scenes.current.needsUpdate) web.display();
 };
 
 gme.keyDown = function(key) {

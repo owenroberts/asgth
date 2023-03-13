@@ -1,4 +1,4 @@
-const { random, randomInt, choice, chance, shuffle } = Cool;
+const { random, randomInt, choice, chance, shuffle, tileMap } = Cool;
 
 const things = 'abcdefghijklmnopqrstuvwxyz';
 const cellSize = { w: 64, h: 64 }; // stupid global map thing

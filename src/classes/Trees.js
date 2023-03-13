@@ -9,7 +9,7 @@ class Trees extends Texture {
 				y -= this.halfHeight;
 			}
 
-			if (player.tap(x, y)) {
+			if (player.tap(x + 32, y + 32)) {
 				return [x, y];
 			}
 		}
