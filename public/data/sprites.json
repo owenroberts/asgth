@@ -8,6 +8,10 @@
 	"spider": { "src": "lines/drawings/spider.json" },
 
 	"select": { "src": "lines/drawings/select.json" },
-	"trees": { "src": "lines/drawings/trees.json" }
+	"trees": { "src": "lines/drawings/trees.json" },
+
+	"moon": { "src": "lines/drawings/moon.json" },
+	"sun": { "src": "lines/drawings/sun.json" },
+	"silk": { "src": "lines/drawings/silk.json" }
 
 }

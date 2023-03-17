@@ -6,8 +6,6 @@ class Level {
 
 		this.map.build({ w: 0, h: 0 }, { w: 0, h: 0 }, 16, false);
 
-		console.log('map', letter, this.map);
-
 		this.roomCount = this.map.nodes.filter(n => n.room).length;
 		this.cellCount = this.map.nodes
 			.filter(n => n.room)

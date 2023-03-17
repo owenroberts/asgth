@@ -9,7 +9,7 @@ let loadingInterval = setInterval(loadingAnimation, 1000 / 12);
 const isMobile = Cool.mobilecheck();
 if (isMobile) document.body.classList.add('mobile');
 
-const { Game, GameAnim, Scene, Sprite, SpriteCollection, ColliderSprite, ColliderEntity, TextSprite, Texture, UI } = LinesEngine;
+const { Game, GameAnim, Scene, Sprite, SpriteCollection, ColliderSprite, ColliderEntity, TextSprite, Texture, UI, Counter } = LinesEngine;
 const { Drawing, Layer } = Lines;
 
 /* this is the game part */
@@ -18,8 +18,8 @@ const gme = new Game({
 	dps: 24,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
-	width: 64 * 13,
-	height: 64 * 7,
+	width: 64 * 14,
+	height: 64 * 8,
 	multiColor: true,
 	retina: true,
 	bgColor: '#aeaaa6', //'#4a4047',
@@ -43,20 +43,16 @@ gme.load({
 let lettersTrack = 24, lettersLead = 52;
 let narration;
 let player;
+let sun, moon, silk, selectSprite;
 let web = Web();
 let currentLevel;
 let levels = {};
 let trees;
+let treeLoc, prevTreeLoc = [];
 let goal;
 let build;
-let selectSprite;
-
-let webStructions = {
-	x: 2,
-	delay: 180,
-	xCount: 0,
-	delayCount: 0,
-};
+// let counters = []; // add counters to scenes? use object?
+let counters = {};
 
 /* debugging */
 let mapAlpha = 0;
@@ -158,6 +154,16 @@ function instructionsSetup() {
 
 	trees.addLocation(randomInt(2 * 64, 4 * 64), randomInt(3 * 64, 6 * 64), randomInt(25));
 	trees.addLocation(randomInt(7 * 64, 12 * 64), randomInt(3 * 64, 6 * 64), randomInt(25));
+
+	counters.xPressCounter = new Counter(2);
+	
+	counters.webInstructionsDelay = new Counter(180, () => {
+		narration.add("... than a spider's web would have to stop a falling rock.");
+		gme.scenes.current = 'narration';
+		web.clear();
+		setupLevels();
+		currentLevel = 'a';
+	});
 }
 
 function introDialog() {
@@ -190,8 +196,11 @@ function setupLevels() {
 	scene.addToDisplay(player);
 	scene.addToDisplay(trees);
 	scene.addToDisplay(selectSprite);
+	scene.addToDisplay(sun);
+	scene.addToDisplay(silk);
+	scene.sunCounter = new Counter(1280);
 	gme.scenes.addScene(scene, 'a');
-	startLevel('a');
+	// startLevel('a');
 
 	// console.log('level', 'a', level);
 }
@@ -218,7 +227,7 @@ gme.start = function() {
 	gme.setBounds('bottom', 7 * cellSize.h);
 	
 	player = new Player(gme.halfWidth + 64 * 3, gme.halfHeight);
-	player.debug = true;
+	// player.debug = true;
 	player.setAnimation(sprites.spider);
 	gme.scenes.instructionsMovement.addSprite(player);
 	gme.scenes.instructionsMovement.needsUpdate = true;
@@ -241,9 +250,17 @@ gme.start = function() {
 	instructionsSetup();
 	narration = Narration(onNarrationFinished);
 	gme.scenes.narration.addToDisplay(narration);
+	
+	sun = new Sprite(13 * 64, 7 * 64, sprites.sun);
+	silk = new Sprite(12 * 64, 7 * 64, sprites.silk);
+	silk.length = silk.animation.drawings[0].length;
+	silk.animation.overrideProperty('endIndex', silk.length);
+	console.log('slik', silk);
 
-	// gme.scenes.current = 'instructionsWeb';
+	gme.scenes.current = 'instructionsWeb';
 	setupLevels();
+	// gme.scenes.current = 'a';
+	startLevel('a');
 
 	console.log('gme', gme);
 };
@@ -252,44 +269,54 @@ gme.update = function(timeElapsed) {
 	// scenes vs "game" with maps
 	if (gme.scenes.current.needsUpdate) {
 		player.update(timeElapsed, true);
-
 		
-		const treeLoc = trees.update(player);
+		treeLoc = trees.update(player);
 		if (treeLoc) {
 			selectSprite.position = treeLoc;
 			selectSprite.isActive = true;
-
 
 			if (player.input.x) {
 				player.resetInput();
 				if (!web.isActive()) {
 					web.start();
 					web.addPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
+					prevTreeLoc = treeLoc;
 					web.addPoint(player.position);
-				} else {
+					
+				} else if (prevTreeLoc[0] != treeLoc[0] || prevTreeLoc[1] != treeLoc[1]) {
 					web.insertPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
 					web.end();
 				}
 
 				if (gme.scenes.isCurrent('instructionsWeb')) {
-					webStructions.xCount++;
+					counters.xPressCounter.update();
 				}
 			}
 		} else {
 			selectSprite.isActive = false;
 		}
 
-		if (gme.scenes.isCurrent('instructionsWeb')) {
-			if (webStructions.xCount >= webStructions.x) {
-				webStructions.delayCount++;
-				if (webStructions.delayCount >= webStructions.delay) {
-					narration.add("... than a spider's web would have to stop a falling rock.");
-					gme.scenes.current = 'narration';
-					web.clear();
-					setupLevels();
-				}
+		if (web.isActive()) {
+			silk.animation.override.endIndex -= 1;
+			if (silk.animation.override.endIndex <= 0) {
+				web.end();
+				silk.animation.override.endIndex = 0;	
 			}
 		}
+
+		if (gme.scenes.isCurrent('instructionsWeb')) {
+			if (counters.xPressCounter.isDone()) {
+				counters.webInstructionsDelay.update();
+			}
+		}
+
+		if (gme.scenes.current.sunCounter) {
+			const counter = gme.scenes.current.sunCounter;
+			const count = counter.update();
+			sun.position[1] = map(Math.sin(count / counter.duration * Math.PI), 0, 1, gme.height - 64, 0);
+		}
+
+
 	}
 };
 
