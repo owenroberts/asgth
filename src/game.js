@@ -51,6 +51,7 @@ let trees;
 let treeLoc, prevTreeLoc = [];
 let goal;
 let build;
+let doodoo;
 // let counters = []; // add counters to scenes? use object?
 let counters = {};
 
@@ -78,7 +79,7 @@ function splashSetup() {
 	gme.scenes.splash.addToDisplay(title);
 
 	const startSound = new TextSprite({
-		msg: "z to start with sound",
+		msg: "x to start with sound",
 		countForward: true,
 		wrap: 24,
 		track: lettersTrack,
@@ -89,7 +90,7 @@ function splashSetup() {
 	gme.scenes.splash.addToDisplay(startSound);
 
 	const startSilent = new TextSprite({
-		msg: "x to start silent",
+		msg: "z to start silent",
 		countForward: true,
 		wrap: 14,
 		track: lettersTrack,
@@ -100,9 +101,18 @@ function splashSetup() {
 	gme.scenes.splash.addToDisplay(startSilent);
 }
 
-function startGame(withMusic) {
-	if (withMusic) {
+function startGame(withSound) {
+	if (withSound) {
 		// start doodoo
+		fetch('./doodoo/compositions/inf3_theme.json')
+			.then(res => res.json())
+			.then(json => {
+				doodoo = new Doodoo({
+					...json,
+					samplesURL: './doodoo/samples/',
+					volume: -6,
+				});
+			});
 		// start sfx
 	}
 	gme.scenes.current = 'instructionsMovement';
@@ -255,12 +265,11 @@ gme.start = function() {
 	silk = new Sprite(12 * 64, 7 * 64, sprites.silk);
 	silk.length = silk.animation.drawings[0].length;
 	silk.animation.overrideProperty('endIndex', silk.length);
-	console.log('slik', silk);
 
-	gme.scenes.current = 'instructionsWeb';
+	gme.scenes.current = 'splash';
 	setupLevels();
 	// gme.scenes.current = 'a';
-	startLevel('a');
+	// startLevel('a');
 
 	console.log('gme', gme);
 };
@@ -296,7 +305,7 @@ gme.update = function(timeElapsed) {
 			selectSprite.isActive = false;
 		}
 
-		if (web.isActive()) {
+		if (web.isActive() && player.isMoving()) {
 			silk.animation.override.endIndex -= 1;
 			if (silk.animation.override.endIndex <= 0) {
 				web.end();

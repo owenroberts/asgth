@@ -30,40 +30,12 @@ class Player extends ColliderSprite {
 			}
 		}
 
-		// this.items = [];
-		this.currencyCount = 0;
-
-		this.poopCounter = 0;
-		this.poopInterval = 100;
-		this.food = 0;
 	}
 
 	setAnimation(animation) {
 		this.addAnimation(animation);
 		this.animation.state = 'idle';
 		this.setCollider(8, 8, 48, 48);
-	}
-
-	addItem(letter, n) {
-		for (let i = 0; i < n; i++) {
-			this.items.push(letter);
-		}
-	}
-
-	removeItem(letter, n) {
-		for (let i = 0; i < n; i++) {
-			const index = this.items.indexOf(letter);
-			this.items.splice(index, 1);
-		}
-	}
-
-	eatFood() {
-		this.food++;
-		this.poopCounter = 0;
-	}
-
-	poop() {
-		levels[currentLevel].addMoney(this.mapPosition);
 	}
 
 	setSpeed(n) {
@@ -81,6 +53,10 @@ class Player extends ColliderSprite {
 
 	inputKey(key, state) {
 		this.input[key] = state;
+	}
+
+	isMoving() {
+		return this.input.up || this.input.down || this.input.right || this.input.left;
 	}
 
 	resetInput() {

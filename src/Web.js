@@ -10,7 +10,6 @@ function Web() {
 		wiggleSegments: true,
 	}));
 	animation.setFrames();
-	console.log(animation);
 
 	let isActive = false;
 
