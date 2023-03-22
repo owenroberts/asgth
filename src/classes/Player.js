@@ -13,8 +13,7 @@ class Player extends ColliderSprite {
 		this.soundEnabled = false;
 		this.stepCount = 0;
 		this.stepInterval = 32 - this.speed[0] * 2;
-
-		this.useSfx = false;
+		this.sfx = {};
 
 		this.states = {
 			idle: 'idle',
@@ -123,14 +122,6 @@ class Player extends ColliderSprite {
 		this.position[1] += speed[1];
 
 		this.animation.state = state;
-
-		if (this.soundEnabled) {
-			this.stepCount++;
-			if (state !== 'idle' && this.stepCount > this.stepInterval) {
-				this.sfxPlayer.player(this.stepSamples[idx]).start();
-				this.stepCount = 0;
-			}
-		}
 	}
 
 	back() {
@@ -169,76 +160,22 @@ class Player extends ColliderSprite {
 	}
 
 	playSFX(type) {
-		if (this.soundEnabled) {
-			if (!this.sfxSamples.hasOwnProperty(type)) type = 'special';
-			let sample = Cool.random(this.sfxSamples[type]);
-			this.sfxPlayer.player(sample).start();
-		}
+		if (!this.soundEnabled) return;
+		// if (!this.sfxSamples.hasOwnProperty(type)) type = 'special';
+		// let sample = Cool.random(this.sfxSamples[type]);
+		// this.sfxPlayer.player(sample).start();
+
+		this.sfx.web.play();
 	}
 
-	soundSetup() {
+	stopSFX(type) {
+		if (!this.soundEnabled) return;
+		this.sfx.web.pause();
+	}
 
-		sound.setBPM(player.speed[0]);
-
-		const urls = {};
-		const sfx = {
-			'continue': 2,
-			'dead': 2,
-			'eat': 2,
-			'fight': 1,
-			'gate': 6,
-			'read': 6,
-			'sacrifice': 3,
-			'special': 2
-		};
-
-		this.sfxSamples = {};
-
-		for (const key in sfx) {
-			this.sfxSamples[key] = [];
-			for (let i = 1; i <= sfx[key]; i++) {
-				urls[`${key}-${i}`] = `sfx/${key}-${i}.mp3`;
-				this.sfxSamples[key].push(`${key}-${i}`);
-			}
-		}
-
-		this.stepSamples = [];
-		const steps = {
-			'step': 10,
-			'stones': 6,
-			'mud': 6,
-			'splash': 3
-		};
-		
-		for (const key in steps) {
-			for (let i = 1; i <= steps[key]; i++) {
-				urls[`${key}-${i}`] = `footsteps/${key}-${i}.mp3`;
-				this.stepSamples.push(`${key}-${i}`);
-			}
-		}
-
-		this.sfxPlayer = new Tone.Players({volume: -6}).toDestination();
-		// this.sfxPlayer.volume = -6;
-		console.time('load sfx');
-		let samples = new Tone.ToneAudioBuffers({
-			urls: urls,
-			baseUrl: "./audio/",
-			onload: () => {
-				console.timeEnd('load sfx');
-				for (let url in urls) {
-					this.sfxPlayer.add(url, samples.get(url));
-				}
-				this.soundEnabled = true;
-			}
-		});
-
-		/*
-			sounds (remember to stick this somewhere visible)
-			https://freesound.org/people/MWLANDI/sounds/85858/
-			https://freesound.org/people/MWLANDI/sounds/85857/
-			https://freesound.org/people/InspectorJ/sounds/329603/
-			https://freesound.org/people/InspectorJ/sounds/329602/
-			https://freesound.org/people/florianreichelt/sounds/459964/
-		*/
+	addSFX(sounds) {
+		this.soundEnabled = true;
+		this.sfx.web = sounds.zip_lock;
+		this.sfx.web.loop = true;
 	}
 }

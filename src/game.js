@@ -9,8 +9,10 @@ let loadingInterval = setInterval(loadingAnimation, 1000 / 12);
 const isMobile = Cool.mobilecheck();
 if (isMobile) document.body.classList.add('mobile');
 
-const { Game, GameAnim, Scene, Sprite, SpriteCollection, ColliderSprite, ColliderEntity, TextSprite, Texture, UI, Counter } = LinesEngine;
+const { Game, GameAnim, Scene, Sprite, SpriteCollection, ColliderSprite, ColliderEntity, TextSprite, Texture, UI, Counter, SoundProvider } = LinesEngine;
 const { Drawing, Layer } = Lines;
+
+console.log(SoundProvider);
 
 /* this is the game part */
 let scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb'];
@@ -44,6 +46,7 @@ let lettersTrack = 24, lettersLead = 52;
 let narration;
 let player;
 let sun, moon, silk, selectSprite;
+let sunInterval = 120;
 let web = Web();
 let currentLevel;
 let levels = {};
@@ -51,7 +54,7 @@ let trees;
 let treeLoc, prevTreeLoc = [];
 let goal;
 let build;
-let doodoo;
+let doodoo, sfx;
 // let counters = []; // add counters to scenes? use object?
 let counters = {};
 
@@ -102,20 +105,30 @@ function splashSetup() {
 }
 
 function startGame(withSound) {
-	if (withSound) {
-		// start doodoo
-		fetch('./doodoo/compositions/inf3_theme.json')
-			.then(res => res.json())
-			.then(json => {
-				doodoo = new Doodoo({
-					...json,
-					samplesURL: './doodoo/samples/',
-					volume: -6,
-				});
-			});
-		// start sfx
-	}
+	if (withSound) setupSound();
 	gme.scenes.current = 'instructionsMovement';
+}
+
+function setupSound() {
+	// start doodoo
+	fetch('./doodoo/compositions/inf3_theme.json')
+		.then(res => res.json())
+		.then(json => {
+			doodoo = new Doodoo({
+				...json,
+				samplesURL: './doodoo/samples/',
+				volume: -6,
+			});
+		});
+	// start sfx
+	sfx = SoundProvider({
+		audioFiles: [
+			{ key: 'zip_lock', url: 'zip_lock.wav', }
+		]
+	}, soundFiles => {
+		console.log(soundFiles);
+		player.addSFX(soundFiles);
+	});
 }
 
 function instructionsSetup() {
@@ -208,7 +221,9 @@ function setupLevels() {
 	scene.addToDisplay(selectSprite);
 	scene.addToDisplay(sun);
 	scene.addToDisplay(silk);
-	scene.sunCounter = new Counter(1280);
+	scene.sunCounter = new Counter(sunInterval, () => {
+		startRock();
+	});
 	gme.scenes.addScene(scene, 'a');
 	// startLevel('a');
 
@@ -218,6 +233,26 @@ function setupLevels() {
 function startLevel(letter) {
 	currentLevel = letter;
 	gme.scenes.current = currentLevel;
+}
+
+function startRock() {
+	console.log('start rock');
+	console.log('trees', trees);
+	let w = 1, s = 0.1;
+	trees.animation.onDraw = () => {
+		if (w < 16) {
+			w += 0.004;
+			s += 0.0004;
+			trees.animation.overrideProperty('wiggleRange', w);
+			trees.animation.overrideProperty('wiggleSpeed', s);
+		}
+	}
+
+	// rock sound
+	// wiggle texture
+	// rock animation
+	// cut to narration or something
+	// next level
 }
 
 function onNarrationFinished() {
@@ -267,9 +302,11 @@ gme.start = function() {
 	silk.animation.overrideProperty('endIndex', silk.length);
 
 	gme.scenes.current = 'splash';
+	
+	setupSound();
 	setupLevels();
-	// gme.scenes.current = 'a';
-	// startLevel('a');
+	gme.scenes.current = 'a';
+	startLevel('a');
 
 	console.log('gme', gme);
 };
@@ -309,8 +346,12 @@ gme.update = function(timeElapsed) {
 			silk.animation.override.endIndex -= 1;
 			if (silk.animation.override.endIndex <= 0) {
 				web.end();
-				silk.animation.override.endIndex = 0;	
+				silk.animation.override.endIndex = 0;
+				startRock();
 			}
+			player.playSFX('web');
+		} else {
+			player.stopSFX('web');
 		}
 
 		if (gme.scenes.isCurrent('instructionsWeb')) {
@@ -324,8 +365,6 @@ gme.update = function(timeElapsed) {
 			const count = counter.update();
 			sun.position[1] = map(Math.sin(count / counter.duration * Math.PI), 0, 1, gme.height - 64, 0);
 		}
-
-
 	}
 };
 
