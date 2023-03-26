@@ -161,21 +161,40 @@ class Player extends ColliderSprite {
 
 	playSFX(type) {
 		if (!this.soundEnabled) return;
-		// if (!this.sfxSamples.hasOwnProperty(type)) type = 'special';
-		// let sample = Cool.random(this.sfxSamples[type]);
-		// this.sfxPlayer.player(sample).start();
 
-		this.sfx.web.play();
+		switch(type) {
+			case 'connect':
+				random(this.sfx.connects).play();
+			break;
+			default:
+				this.sfx[type].play();
+			break;
+		}
 	}
 
 	stopSFX(type) {
 		if (!this.soundEnabled) return;
-		this.sfx.web.pause();
+		if (type === 'web') this.sfx.web.pause();
 	}
 
 	addSFX(sounds) {
 		this.soundEnabled = true;
+
 		this.sfx.web = sounds.zip_lock;
 		this.sfx.web.loop = true;
+
+		this.sfx.button_1 = sounds.button_1;
+		this.sfx.button_2 = sounds.button_2;
+		this.sfx.button_3 = sounds.button_3;
+
+		this.sfx.cancel = sounds.cancel;
+
+		this.sfx.connects = [];
+		this.sfx.connects.push(sounds.connect_1);
+		this.sfx.connects.push(sounds.connect_2);
+		this.sfx.connects.push(sounds.connect_3);
+		this.sfx.connects.push(sounds.connect_4);
+		this.sfx.connects.push(sounds.connect_5);
+		this.sfx.connects.push(sounds.connect_6);
 	}
 }

@@ -12,10 +12,9 @@ if (isMobile) document.body.classList.add('mobile');
 const { Game, GameAnim, Scene, Sprite, SpriteCollection, ColliderSprite, ColliderEntity, TextSprite, Texture, UI, Counter, SoundProvider } = LinesEngine;
 const { Drawing, Layer } = Lines;
 
-console.log(SoundProvider);
-
 /* this is the game part */
 let scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb'];
+scenes.push('debug');
 const gme = new Game({
 	dps: 24,
 	lineWidth: 1,
@@ -45,7 +44,7 @@ gme.load({
 let lettersTrack = 24, lettersLead = 52;
 let narration;
 let player;
-let sun, moon, silk, selectSprite;
+let sun, moon, silk, selectSprite, stone;
 let sunInterval = 120;
 let web = Web();
 let currentLevel;
@@ -58,14 +57,12 @@ let doodoo, sfx;
 // let counters = []; // add counters to scenes? use object?
 let counters = {};
 
-/* debugging */
-let mapAlpha = 0;
-let mapCellSize = 24;
-document.addEventListener('keydown', ev => {
-	if (ev.code == 'Equal') mapAlpha = Math.min(1, mapAlpha + 0.5);
-	else if (ev.code == 'Minus') mapAlpha = Math.max(0, mapAlpha - 0.5);
-	// else if (ev.code == 'Enter') ui.message.continue.onClick(); // to move message without mouse
-});
+const edwardsQuote = [
+	'... and all your righteousness, would have no more influence to uphold you, and keep you out of hell ...',
+	"... than a spider's web would have to stop a falling rock."
+];
+
+
 
 function splashSetup() {
 	const { sprites } = gme.anims;
@@ -114,20 +111,27 @@ function setupSound() {
 	fetch('./doodoo/compositions/inf3_theme.json')
 		.then(res => res.json())
 		.then(json => {
-			doodoo = new Doodoo({
-				...json,
-				samplesURL: './doodoo/samples/',
-				volume: -6,
-			});
+			// doodoo = new Doodoo({
+			// 	...json,
+			// 	samplesURL: './doodoo/samples/',
+			// 	volume: -6,
+			// });
 		});
+
 	// start sfx
 	sfx = SoundProvider({
 		audioFiles: [
-			{ key: 'zip_lock', url: 'zip_lock.wav', }
+			{ key: 'zip_lock', url: 'zip_lock.wav', },
+			{ key: 'connect', sequence: [1, 6] },
+			{ key: 'cancel', url: 'cancel.wav', },
+			{ key: 'button', sequence: [1, 3] },
+			{ key: 'stone',  sequence: [1, 9] },
 		]
 	}, soundFiles => {
-		console.log(soundFiles);
 		player.addSFX(soundFiles);
+		narration.addSFX(soundFiles);
+		stone.sfx = Object.keys(soundFiles).filter(k => k.includes('stone')).map(f => soundFiles[f]);
+
 	});
 }
 
@@ -181,7 +185,7 @@ function instructionsSetup() {
 	counters.xPressCounter = new Counter(2);
 	
 	counters.webInstructionsDelay = new Counter(180, () => {
-		narration.add("... than a spider's web would have to stop a falling rock.");
+		narration.add(edwardsQuote[1]);
 		gme.scenes.current = 'narration';
 		web.clear();
 		setupLevels();
@@ -221,6 +225,7 @@ function setupLevels() {
 	scene.addToDisplay(selectSprite);
 	scene.addToDisplay(sun);
 	scene.addToDisplay(silk);
+	scene.addToDisplay(stone);
 	scene.sunCounter = new Counter(sunInterval, () => {
 		startRock();
 	});
@@ -248,6 +253,29 @@ function startRock() {
 		}
 	}
 
+	stone.position = [gme.width, -stone.halfHeight];
+	stone.isActive = true;
+
+	let stoneSFX = choice(stone.sfx);
+	stoneSFX.play();
+
+	stone.displayFunc = () => {
+		
+		stone.position[0] += random(-5, -1);
+		stone.position[1] += random(-2, 4);
+		
+		if (stoneSFX.paused) {
+			stoneSFX = choice(stone.sfx);
+			stoneSFX.play();
+		}
+
+		if (stone.position[0] < -stone.width) {
+			console.log('stone over');
+			stone.isActive = false;
+			stone.displayFunc = undefined;
+		}
+	};
+
 	// rock sound
 	// wiggle texture
 	// rock animation
@@ -258,6 +286,22 @@ function startRock() {
 function onNarrationFinished() {
 	// gme.scenes.current = 'game';
 	gme.scenes.current = currentLevel;
+}
+
+/* debugging */
+let mapAlpha = 0;
+let mapCellSize = 24;
+document.addEventListener('keydown', ev => {
+	if (ev.code == 'Equal') mapAlpha = Math.min(1, mapAlpha + 0.5);
+	else if (ev.code == 'Minus') mapAlpha = Math.max(0, mapAlpha - 0.5);
+	// else if (ev.code == 'Enter') ui.message.continue.onClick(); // to move message without mouse
+});
+
+function debugStart() {
+	setupSound();
+	setupLevels();
+	gme.scenes.current = 'a';
+	startLevel('a');
 }
 
 gme.start = function() {
@@ -301,12 +345,13 @@ gme.start = function() {
 	silk.length = silk.animation.drawings[0].length;
 	silk.animation.overrideProperty('endIndex', silk.length);
 
-	gme.scenes.current = 'splash';
+	stone = new Sprite(gme.width, -sprites.stone.height, sprites.stone);
+	stone.isActive = false;
+	stone.animation.isPlaying = true;
+
+	// gme.scenes.current = 'splash';
+	gme.scenes.current = 'debug';
 	
-	setupSound();
-	setupLevels();
-	gme.scenes.current = 'a';
-	startLevel('a');
 
 	console.log('gme', gme);
 };
@@ -322,16 +367,21 @@ gme.update = function(timeElapsed) {
 			selectSprite.isActive = true;
 
 			if (player.input.x) {
+
 				player.resetInput();
+				// web update func?
 				if (!web.isActive()) {
 					web.start();
 					web.addPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
 					prevTreeLoc = treeLoc;
 					web.addPoint(player.position);
-					
+					player.playSFX('connect');
 				} else if (prevTreeLoc[0] != treeLoc[0] || prevTreeLoc[1] != treeLoc[1]) {
 					web.insertPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
 					web.end();
+					player.playSFX('connect');
+				} else {
+					player.playSFX('cancel');
 				}
 
 				if (gme.scenes.isCurrent('instructionsWeb')) {
@@ -389,16 +439,22 @@ gme.keyDown = function(key) {
 		break;
 
 		case 'x':
+
+			if (gme.scenes.isCurrent('debug')) {
+				return debugStart();
+			}
+
 			// suspend player movement ?
 			if (gme.scenes.isCurrent('splash')) {
 				return startGame(true);
 			} else if (gme.scenes.isCurrent('instructionsMovement')) {
-				narration.add('... and all your righteousness, would have no more influence to uphold you, and keep you out of hell ...');
+				narration.add(edwardsQuote[0]);
 				gme.scenes.current = 'narration';
 				currentLevel = 'instructionsWeb';
 			}
 
 			player.inputKey('x', true);
+
 		break;
 
 		case 'z':

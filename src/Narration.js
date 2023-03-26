@@ -5,6 +5,8 @@
 function Narration(onFinshed) {
 
 	const { sprites } = gme.anims;
+	const sfx = {};
+	let soundEnabled = false;
 
 	let text = new TextSprite({
 		x: 32,
@@ -37,10 +39,12 @@ function Narration(onFinshed) {
 
 	function next() {
 		goNext = true;
+		if (soundEnabled) sfx.button_3.play();
 	}
 
 	function skip() {
 		text.skip();
+		if (soundEnabled) sfx.button_2.play();
 	}
 
 	function display() {
@@ -61,6 +65,13 @@ function Narration(onFinshed) {
 		}
 	}
 
-	return { add, next, display, skip };
+	function addSFX(sounds) {
+		soundEnabled = true;
+		sfx.button_1 = sounds.button_1;
+		sfx.button_2 = sounds.button_2;
+		sfx.button_3 = sounds.button_3;
+	}
+
+	return { add, next, display, skip, addSFX };
 
 }
