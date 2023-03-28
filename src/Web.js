@@ -41,8 +41,28 @@ function Web() {
 		drawing.offsets = [];
 	}
 
+	function startOverride() {
+		let w = 4, s = 0.1, n = 10;
+		animation.onDraw = () => {
+			if (w < 32) {
+				w += 0.04;
+				s += 0.004;
+				n += 0.1;
+				animation.overrideProperty('wiggleRange', w);
+				animation.overrideProperty('wiggleSpeed', s);
+				animation.overrideProperty('segmentNum', n);
+
+			}
+		}
+	}
+
+	function cancelOverride() {
+		animation.cancelOverride();
+		animation.onDraw = undefined;
+	}
+
 	return { 
-		display, addPoint, insertPoint, start, end, clear,
+		display, addPoint, insertPoint, start, end, clear, startOverride, cancelOverride,
 		isActive() { return isActive; }
 	};
 

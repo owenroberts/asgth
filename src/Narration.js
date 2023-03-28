@@ -19,8 +19,8 @@ function Narration(onFinshed) {
 	});
 
 	let xForNext = new TextSprite({
-		x: 64,
-		y: gme.height - 96,
+		x: 32,
+		y: gme.height - 128,
 		msg: 'x to continue',
 		track: lettersTrack,
 		letters: sprites.letters,
