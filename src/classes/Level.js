@@ -48,40 +48,8 @@ class Level {
 		// console.log(this.walls);
 	}
 
-
-
-	update(player) {
-
-		// for (let i = 0; i < this.map.nodes.length; i++) {
-		// 	const node = this.map.nodes[i];
-		// 	if (node.room) {
-		// 		let treeLoc = node.room.update(player);
-		// 		return treeLoc;
-		// 	}
-		// }
-
-		// for (let i = 0; i < this.map.walls.length; i++) {
-		// 	this.map.walls[i].update(offset);
-		// }
-
-		// // can i fucking optimize this ... ?? -- shg ... 
-		// let wallCollision = false;
-		// for (let i = 0; i < this.map.walls.length; i++) {
-		// 	const wall = this.map.walls[i];
-		// 	if (wall.collide(player)) {
-		// 		wallCollision = true;
-		// 	}
-		// }
-		// if (wallCollision) player.back();
-		
-	}
-
 	display() {
-		// this.map.nodes[0].display(); // displays through tree of nodes
 		this.wallTexture.display();
-		// for (let i = 0; i < this.map.walls.length; i++) {
-		// 	this.map.walls[i].display();
-		// }
 	}
 
 }
