@@ -128,14 +128,19 @@ function setupSound() {
 			{ key: 'stone',  sequence: [1, 9] },
 		]
 	}, soundFiles => {
-		player.addSFX(soundFiles);
+		web.addSFX(soundFiles);
 		narration.addSFX(soundFiles);
-		stone.sfx = Object.keys(soundFiles).filter(k => k.includes('stone')).map(f => soundFiles[f]);
+		
+		// add only stone sfx to sfx prop in stone sprite
+		stone.sfx = Object.keys(soundFiles)
+			.filter(k => k.includes('stone'))
+			.map(f => soundFiles[f]);
 	});
 }
 
 function instructionsSetup() {
 	const { sprites } = gme.anims;
+
 	gme.scenes.instructionsMovement.addToDisplay(new TextSprite({
 		countForward: true,
 		msg: "you are the spider",
@@ -188,7 +193,7 @@ function instructionsSetup() {
 		gme.scenes.current = 'narration';
 		web.clear();
 		setupLevel();
-		nextLevel = ''+levelCount;
+		nextLevel = 'level-'+levelCount;
 	});
 
 	gme.scenes.instructionsWeb.updateFunc = () => {
@@ -227,6 +232,7 @@ function setupLevel() {
 	});
 
 	scene.updateFunc = () => {
+
 		webUpdate();
 
 		if (web.isActive() && player.isMoving()) {
@@ -235,9 +241,9 @@ function setupLevel() {
 				silk.animation.override.endIndex = 0;
 				startRockScene();
 			}
-			player.playSFX('web');
+			web.playSFX('web');
 		} else {
-			player.stopSFX('web');
+			web.stopSFX('web');
 		}
 
 		const counter = gme.scenes.current.sunCounter;
@@ -264,17 +270,17 @@ function webUpdate() {
 				web.addPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
 				web.addPoint(player.position);
 				allTrees.push([...treeLoc]);
-				player.playSFX('connect');
+				web.playSFX('connect');
 				prevTreeLoc = treeLoc;
 				madeConnection = true;
 			} else if (prevTreeLoc[0] != treeLoc[0] || prevTreeLoc[1] != treeLoc[1]) {
 				web.insertPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
 				web.end();
-				player.playSFX('connect');
+				web.playSFX('connect');
 				allTrees.push([...treeLoc]);
 				madeConnection = true;
 			} else {
-				player.playSFX('cancel');
+				web.playSFX('cancel');
 			}
 		}
 	} else {
@@ -292,7 +298,7 @@ function startRockScene() {
 	
 	// unset web scene
 	web.end();
-	player.stopSFX('web');
+	web.stopSFX('web');
 	selectSprite.isActive = false;
 
 	const sceneName = 'rock-' + levelCount;
@@ -326,7 +332,7 @@ function startRockScene() {
 			onRockRolled();
 		}
 
-		moon.position[1] = map(Math.sin((gme.width - stone.position[0]) / gme.width * Math.PI), 0, 1, gme.height - 64, 0);
+		moon.position[1] = map(Math.sin(Math.min(gme.width, (gme.width - stone.position[0])) / gme.width * Math.PI), 0, 1, gme.height - 64, 0);
 	};
 
 	// trees and web start freaking out
@@ -343,7 +349,6 @@ function startRockScene() {
 
 	gme.scenes.addScene(scene, sceneName);
 	gme.scenes.current = sceneName;
-
 }
 
 function onRockRolled() {
@@ -398,7 +403,12 @@ gme.start = function() {
 	gme.setBounds('right', 13 * cellSize.w);
 	gme.setBounds('bottom', 7 * cellSize.h);
 	
-	player = new Player(gme.halfWidth + 64 * 3, gme.halfHeight);
+	player = new Player(gme.halfWidth + 64 * 3, gme.halfHeight, {
+		up_left: 'up_left', 
+		up_right: 'up_right', 
+		down_left: 'down_left', 
+		down_right: 'down_right',
+	});
 	// player.debug = true;
 	player.setAnimation(sprites.spider);
 	gme.scenes.instructionsMovement.addSprite(player);
@@ -438,8 +448,8 @@ gme.start = function() {
 	score.points = [];
 	gme.scenes.narration.addToDisplay(score);
 
-	// gme.scenes.current = 'splash';
-	gme.scenes.current = 'debug';
+	gme.scenes.current = 'splash';
+	// gme.scenes.current = 'debug';
 
 	console.log('gme', gme);
 };
@@ -447,7 +457,7 @@ gme.start = function() {
 gme.update = function(timeElapsed) {
 	if (gme.scenes.current.needsUpdate) {
 		player.update(timeElapsed, true);
-		gme.scenes.current.updateFunc();
+		if (gme.scenes.current.updateFunc) gme.scenes.current.updateFunc();
 	}
 };
 

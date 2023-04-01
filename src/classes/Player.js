@@ -28,7 +28,6 @@ class Player extends ColliderSprite {
 				this.states[k] = states[k];
 			}
 		}
-
 	}
 
 	setAnimation(animation) {
@@ -64,22 +63,24 @@ class Player extends ColliderSprite {
 
 	update(time, canMove) {
 
-		if (this.food > 0) {
-			this.poopCounter++;
-			if (this.poopCounter === this.poopInterval) {
-				this.poop();
-				this.food--;
-				if (this.food > 0) this.poopCounter = 0;
-			}
-		}
 
 		this.prevPosition = [...this.position];
 		
+		// moving states are up, down, left, right, up_right, down_right, down_left, up_left
+		// idle states have idle_ before
 		let state = this.animation.stateName.includes('idle') ?
 			this.animation.stateName :
-			Cool.random(['idle']);
+			'idle_' + this.animation.stateName;
 
 		const speed = [0, 0];
+		const buttonsPressed = (this.input.up ? 1 : 0) +
+			(this.input.down ? 1 : 0) + 
+			(this.input.right ? 1 : 0) + 
+			(this.input.left ? 1 : 0);
+		if (buttonsPressed > 2) {
+			this.animation.state = state;
+			return;
+		}
 
 		if (this.input.up) {
 			if (this.position[1] > gme.bounds.top && canMove) {
@@ -112,6 +113,12 @@ class Player extends ColliderSprite {
 			}
 			state = this.states.left;
 		}
+
+		if (this.input.up && this.input.left) state = this.states.up_left;
+		if (this.input.up && this.input.right) state = this.states.up_right;
+		if (this.input.down && this.input.left) state = this.states.down_left;
+		if (this.input.down && this.input.right) state = this.states.down_right;
+
 
 		speed[0] *= time / 100;
 		speed[1] *= time / 100;
@@ -159,42 +166,4 @@ class Player extends ColliderSprite {
 		}
 	}
 
-	playSFX(type) {
-		if (!this.soundEnabled) return;
-
-		switch(type) {
-			case 'connect':
-				random(this.sfx.connects).play();
-			break;
-			default:
-				this.sfx[type].play();
-			break;
-		}
-	}
-
-	stopSFX(type) {
-		if (!this.soundEnabled) return;
-		if (type === 'web') this.sfx.web.pause();
-	}
-
-	addSFX(sounds) {
-		this.soundEnabled = true;
-
-		this.sfx.web = sounds.zip_lock;
-		this.sfx.web.loop = true;
-
-		this.sfx.button_1 = sounds.button_1;
-		this.sfx.button_2 = sounds.button_2;
-		this.sfx.button_3 = sounds.button_3;
-
-		this.sfx.cancel = sounds.cancel;
-
-		this.sfx.connects = [];
-		this.sfx.connects.push(sounds.connect_1);
-		this.sfx.connects.push(sounds.connect_2);
-		this.sfx.connects.push(sounds.connect_3);
-		this.sfx.connects.push(sounds.connect_4);
-		this.sfx.connects.push(sounds.connect_5);
-		this.sfx.connects.push(sounds.connect_6);
-	}
 }

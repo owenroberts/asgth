@@ -45,7 +45,7 @@ function jsTask(done, isTest) {
 		.pipe(iife())
 		.pipe(terser().on('error', logError))
 		.pipe(sourcemaps.write('./src_maps'))
-		.pipe(dest('./build'))
+		.pipe(dest((isTest ? './buildTest' : './build')))
 		.on('error', function handleError() {
 			this.emit('end'); // Recover from errors
 		})

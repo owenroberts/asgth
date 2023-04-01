@@ -6,3 +6,4 @@ src_maps
 build/lib/tone/build/esm
 notes.txt
 *.gddoc
+buildTest
