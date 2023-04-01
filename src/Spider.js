@@ -64,8 +64,16 @@ class Spider extends Player {
 		speed[0] *= time / 100;
 		speed[1] *= time / 100;
 
-		this.position[0] += speed[0];
-		this.position[1] += speed[1];
+		if (this.position[0] + speed[0] > gme.bounds.left &&
+			this.position[0] + speed[0] < gme.bounds.right) {
+			this.position[0] += speed[0];
+		}
+
+		if (this.position[1] + speed[1] > gme.bounds.top &&
+			this.position[1] + speed[1] < gme.bounds.bottom) {
+			this.position[1] += speed[1];
+		}
+		
 
 	}
 
