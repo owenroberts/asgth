@@ -44,7 +44,7 @@ gme.load({
 let lettersTrack = 24, lettersLead = 52;
 let player;
 let sun, moon, silk, selectSprite, stone, score;
-let sunInterval = 480;
+let sunInterval = 1280;
 let web = Web();
 let trees;
 let treeLoc, prevTreeLoc = [], allTrees = [];
