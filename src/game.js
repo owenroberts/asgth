@@ -44,7 +44,7 @@ gme.load({
 let lettersTrack = 24, lettersLead = 52;
 let player;
 let sun, moon, silk, selectSprite, stone, score;
-let sunInterval = 480;
+let sunInterval = 1280;
 let web = Web();
 let trees;
 let treeLoc, prevTreeLoc = [], allTrees = [];
@@ -403,7 +403,7 @@ gme.start = function() {
 	gme.setBounds('right', 13 * cellSize.w);
 	gme.setBounds('bottom', 7 * cellSize.h);
 	
-	player = new Player(gme.halfWidth + 64 * 3, gme.halfHeight, {
+	player = new Spider(gme.halfWidth + 64 * 3, gme.halfHeight, {
 		up_left: 'up_left', 
 		up_right: 'up_right', 
 		down_left: 'down_left', 
