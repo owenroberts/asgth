@@ -7,3 +7,5 @@ build/lib/tone/build/esm
 notes.txt
 *.gddoc
 buildTest
+*.gdsheet
+reading/

@@ -1,5 +1,7 @@
 {
 	"letters": { "src": "lines/drawings/letters.json" },
+	"symbols": { "src": "lines/drawings/symbols.json" },
+
 	"path": { "src": "lines/drawings/path.json" },
 	"room": { "src": "lines/drawings/room.json" },
 	"grass_tiles": { "src": "lines/drawings/grass_tiles.json" },
@@ -13,7 +15,7 @@
 	"moon": { "src": "lines/drawings/moon.json" },
 	"sun": { "src": "lines/drawings/sun.json" },
 	"silk": { "src": "lines/drawings/silk.json" },
-	"stone": { "src": "lines/drawings/stone.json" },
+	"stone": { "src": "lines/drawings/ston_2.json" },
 	"score": { "src": "lines/drawings/score.json" }
 
 }

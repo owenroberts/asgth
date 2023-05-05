@@ -14,13 +14,23 @@ function Narration(onFinshed) {
 		wrap: 22,
 		letters: sprites.letters,
 		track: lettersTrack,
-		lead: 48,
+		lead: lettersLead,
 		countForward: true,
 	});
 
+	let symbols = new TextSprite({
+		x: gme.width - (64 * 3),
+		y: 32,
+		wrap: 3, 
+		letters: sprites.symbols,
+		track: lettersTrack,
+		letterIndexString: 'abcdefghijklmnopqrstuvwxyz',
+	});
+	symbols.isActive = false;
+
 	let xForNext = new TextSprite({
 		x: 32,
-		y: gme.height - 128,
+		y: gme.height - 96,
 		msg: 'x to continue',
 		track: lettersTrack,
 		letters: sprites.letters,
@@ -37,19 +47,29 @@ function Narration(onFinshed) {
 		}
 	}
 
-	function next() {
-		goNext = true;
-		if (soundEnabled) sfx.button_3.play();
+	function addSymbols(str) {
+		symbols.setMsg(str);
+		symbols.isActive = true;
 	}
 
-	function skip() {
-		text.skip();
-		if (soundEnabled) sfx.button_2.play();
+	function cancelSymbols() {
+		symbols.isActive = false;
+	}
+
+	function next() {
+		if (!text.isDone()) {
+			text.skip();
+			if (soundEnabled) sfx.button_2.play();
+		} else {
+			goNext = true;
+			if (soundEnabled) sfx.button_3.play();
+		}
 	}
 
 	function display() {
 
 		let isDone = text.display();
+		symbols.display();
 
 		if (!isDone) {
 			goNext = false;
@@ -72,6 +92,6 @@ function Narration(onFinshed) {
 		sfx.button_3 = sounds.button_3;
 	}
 
-	return { add, next, display, skip, addSFX };
+	return { add, addSymbols, cancelSymbols, next, display, addSFX };
 
 }
