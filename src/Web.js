@@ -32,6 +32,13 @@ function Web() {
 		isActive = true;
 	}
 
+	function cancel() {
+		drawing.points.pop();
+		drawing.points.pop();
+		isActive = false;
+		playSFX('cancel');
+	}
+
 	function end() {
 		drawing.points.pop();
 		isActive = false;
@@ -103,8 +110,12 @@ function Web() {
 	}
 
 	return { 
-		display, addPoint, insertPoint, start, end, clear, startOverride, cancelOverride, 
+		display, 
+		addPoint, insertPoint, 
+		start, end, clear, cancel,
+		startOverride, cancelOverride, 
 		addSFX, playSFX, stopSFX,
+		getPoints() { return drawing.points;  },
 		isActive() { return isActive; }
 	};
 

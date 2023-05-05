@@ -74,7 +74,6 @@ class Spider extends Player {
 			this.position[1] += speed[1];
 		}
 		
-
 	}
 
 	spawn(location) {
