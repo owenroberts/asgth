@@ -49,7 +49,7 @@ gme.load({
 let lettersTrack = 24, lettersLead = 56;
 let player;
 let sun, moon, silk, selectSprite, stone, score;
-let sunInterval = 1280;
+let sunInterval = 1280 * 3;
 let web = Web();
 let symbolMatch;
 let trees;
@@ -75,8 +75,8 @@ function splashSetup() {
 	const title = new TextSprite({
 		center: true,
 		countForward: true,
-		msg: "infinite hell 3",
-		wrap: 14,
+		msg: "all spiders go to hell",
+		wrap: 20,
 		track: lettersTrack,
 		lead: lettersLead,
 		x: gme.halfWidth,
@@ -172,7 +172,7 @@ function instructionsSetup() {
 		letters: sprites.letters,
 	}));
 
-	gme.scenes.instructionsMovement.addToDisplay(new TextSprite({
+	const xToContinue = gme.scenes.instructionsMovement.addToDisplay(new TextSprite({
 		countForward: true,
 		msg: "x to continue",
 		wrap: 24,
@@ -182,12 +182,28 @@ function instructionsSetup() {
 		y: 64 * 5,
 		letters: sprites.letters,
 	}));
+	xToContinue.isActive = false;
+
+	let arrowsPressed = { up: false, left: false, right: false };
+	const nextInstructionDelay = new Counter(120, () => {
+		xToContinue.isActive = true;
+		gme.scenes.instructionsMovement.xReady = true;
+	});
+
+	gme.scenes.instructionsMovement.updateFunc = () => {
+		let allArrowsPressed = true;
+		for (const dir in arrowsPressed) {
+			if (player.input[dir]) arrowsPressed[dir] = true;
+			if (!arrowsPressed[dir]) allArrowsPressed = false;
+		}
+		if (allArrowsPressed) nextInstructionDelay.update();
+	};
+
 
 	// instructionsWeb
-	
 	gme.scenes.instructionsWeb.addToDisplay(new TextSprite({
 		countForward: true,
-		msg: "press x over an object to connect a web",
+		msg: "press x over a tree to connect a web",
 		wrap: 22,
 		track: lettersTrack,
 		lead: lettersLead,
@@ -200,25 +216,19 @@ function instructionsSetup() {
 	trees.addLocation(randomInt(7 * 64, 12 * 64), randomInt(3 * 64, 6 * 64), randomInt(25));
 
 	const xPressCounter = new Counter(2);
-	
-	
 	const webInstructionsDelay = new Counter(180, () => {
-	
 		setupPractice();
 	});
 
 	gme.scenes.instructionsWeb.updateFunc = () => {
 		const madeConnection = webUpdate();
 		if (madeConnection) xPressCounter.update();
-		if (xPressCounter.isDone()) {
-			webInstructionsDelay.update();
-		}
+		if (xPressCounter.isDone()) webInstructionsDelay.update();
 	};
 }
 
 function setupPractice(practiceAttemptCount=0) {
-	const practiceSymbol = random('g'.split(''));
-	console.log('practiceSymbol', practiceSymbol)
+	const practiceSymbol = random('abcdefghijklm'.split(''));
 	if (practiceAttemptCount === 0) narration.add('Now practice drawing the symbol with your web.');	
 	if (practiceAttemptCount > 0) {
 		narration.add('Try again. Try to recrate the symbol on the right using the spider web. Create lines by connecting trees. You can connect more than one line to a tree.');
@@ -239,35 +249,50 @@ function setupPractice(practiceAttemptCount=0) {
 	}
 
 	const sym = gme.scenes.instructionsSymbol;
+	let gotSymbol = false; // so they can't fuck it up after
 	let attemptCount = 0;
+	const finishDelay = new Counter(120, () => {
+		web.clear();
+		trees.clear();
+		narration.cancelSymbols();
+		const nextSymbolString = getNextSymbolString();
+		narration.addSymbols(nextSymbolString);
+		narration.add([edwardsQuote[0], edwardsQuote[1]]);
+		gme.scenes.current = 'narration';
+		nextLevel = setupLevel(nextSymbolString);
+	});
+
 	sym.updateFunc = () => {
 		const madeConnection = webUpdate();
 		if (madeConnection) {
 			const symbol = symbolMatch.getMatch(web.getPoints(), 64, 32);
-			console.log('symbol', symbol);
-			if (symbol) console.log('is match', symbol);
-			if (symbol === practiceSymbol) {
-				web.clear();
-				trees.clear();
-				narration.cancelSymbols();
-				narration.add(edwardsQuote[1]);
-				gme.scenes.current = 'narration';
-				nextLevel = 'level-' + levelCount;
-				setupLevel();
-			}
+			if (symbol === practiceSymbol) gotSymbol = true;
+			attemptCount++;
+			// console.log(attemptCount);
 			if (attemptCount >= 12) {
 				setupPractice(practiceAttemptCount + 1);
 			}
 		}
+		// console.log(gotSymbol, finishDelay.isDone(), finishDelay.ratio())
+		if (gotSymbol) finishDelay.update();
 	}
 }
 
-function setupLevel() {
-	
+function getNextSymbolString() {
+	let str = '';
+	for (let i = 0; i < Math.max(2, levelCount); i++) {
+		str += random('abcdefghijklm'.split(''));
+	}
+	return str;
+}
+
+function setupLevel(symbolString) {
+
 	// text generator?
 	const levelName = 'level-' + levelCount;
 	const level = new Level(levelName, gme.anims.sprites.trees, randomInt(25));
-	console.log(levelName, level);
+	let symbolsMatched = [];
+	console.log(levelName, level, symbolString);
 	trees.locations = [];
 	level.locations.forEach(loc => trees.addLocation(...loc));
 	player.spawn(choice(level.walls));
@@ -282,7 +307,15 @@ function setupLevel() {
 	scene.addToDisplay(silk);
 	scene.addToDisplay(score);
 
+	function updateScore() {
+		let point = symbolString.split('').every(s => symbolsMatched.includes(s)) ? 1 : 0;
+		console.log(point, symbolString, symbolsMatched);
+		score.points.push(point);
+		score.addLocation((64 * (score.points.length - 1)), gme.height - 64, point);
+	}
+
 	scene.sunCounter = new Counter(sunInterval, () => {
+		updateScore();
 		startRockScene();
 	});
 
@@ -290,15 +323,21 @@ function setupLevel() {
 
 		const madeConnection = webUpdate();
 		if (madeConnection) {
-			const symbol = symbolMatch.getMatch(web.getPoints(), 64, 32);
-			console.log('symbol', symbol);
-			if (symbol) console.log('is match', symbol);
+			const matches = symbolMatch.getMatch(web.getPoints(), 64, 32);
+			if (matches) {
+				console.log('matches', matches);
+				for (let i = 0; i < matches.length; i++) {
+					const { symbol } = matches[i];
+					if (!symbolsMatched.includes(symbol)) symbolsMatched.push(symbol);
+				}
+			}
 		}
 
 		if (web.isActive() && player.isMoving()) {
 			silk.animation.override.endIndex -= 1;
 			if (silk.animation.override.endIndex <= 0) {
 				silk.animation.override.endIndex = 0;
+				updateScore();
 				startRockScene();
 			}
 			web.playSFX('web');
@@ -313,7 +352,6 @@ function setupLevel() {
 
 	gme.scenes.addScene(scene, levelName);
 	return levelName;
-	
 }
 
 function webUpdate() {
@@ -428,20 +466,13 @@ function onRockRolled() {
 	trees.animation.onDraw = undefined;
 	web.clear();
 	web.cancelOverride();
-
-	keepScore();
 	
 	levelCount++;
+	const nextSymbolString = getNextSymbolString();
+	narration.addSymbols(nextSymbolString);
 	narration.add(narrative[0]);
 	gme.scenes.current = 'narration';
-	const sceneName = setupLevel();
-	nextLevel = sceneName;
-}
-
-function keepScore() {
-	const point = chance(0.5) ? 0 : 1;
-	score.points.push(point);
-	score.addLocation((64 * (score.points.length - 1)), gme.height - 64, point);
+	nextLevel = setupLevel(nextSymbolString);
 }
 
 function onNarrationFinished() {
@@ -459,10 +490,15 @@ document.addEventListener('keydown', ev => {
 });
 
 function debugStart() {
-	setupPractice();
+	const nextSymbolString = getNextSymbolString();
+	narration.addSymbols(nextSymbolString);
+	narration.add([edwardsQuote[0], edwardsQuote[1]]);
+	gme.scenes.current = 'narration';
+	nextLevel = setupLevel(nextSymbolString);
 }
 
 gme.start = function() {
+	console.log(getNextSymbolString());
 	document.getElementById('splash').remove();
 	clearInterval(loadingInterval);
 
@@ -523,10 +559,8 @@ gme.start = function() {
 	score.points = [];
 	gme.scenes.narration.addToDisplay(score);
 
-	// gme.scenes.current = 'instructionsWeb';
-	// gme.scenes.current = 'debug';
+	// gme.scenes.current = 'splash';
 	debugStart();
-
 	console.log('gme', gme);
 };
 
@@ -566,10 +600,11 @@ gme.keyDown = function(key) {
 			// suspend player movement ?
 			if (gme.scenes.isCurrent('splash')) {
 				return startGame(true);
-			} else if (gme.scenes.isCurrent('instructionsMovement')) {
-				narration.add(edwardsQuote[0]);
-				gme.scenes.current = 'narration';
-				nextLevel = 'instructionsWeb';
+			} else if (gme.scenes.isCurrent('instructionsMovement') && gme.scenes.instructionsMovement.xReady) {
+				// narration.add(edwardsQuote[0]);
+				// gme.scenes.current = 'narration';
+				// nextLevel = 'instructionsWeb';
+				gme.scenes.current = 'instructionsWeb';
 			}
 
 			player.inputKey('x', true);

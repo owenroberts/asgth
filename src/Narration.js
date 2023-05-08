@@ -11,7 +11,7 @@ function Narration(onFinshed) {
 	let text = new TextSprite({
 		x: 32,
 		y: 32,
-		wrap: 22,
+		wrap: 20,
 		letters: sprites.letters,
 		track: lettersTrack,
 		lead: lettersLead,
@@ -21,16 +21,16 @@ function Narration(onFinshed) {
 	let symbols = new TextSprite({
 		x: gme.width - (64 * 3),
 		y: 32,
-		wrap: 3, 
+		wrap: 3,
 		letters: sprites.symbols,
-		track: lettersTrack,
+		track: 64,
 		letterIndexString: 'abcdefghijklmnopqrstuvwxyz',
 	});
 	symbols.isActive = false;
 
 	let xForNext = new TextSprite({
 		x: 32,
-		y: gme.height - 96,
+		y: gme.height - 128,
 		msg: 'x to continue',
 		track: lettersTrack,
 		letters: sprites.letters,
