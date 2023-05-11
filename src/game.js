@@ -56,8 +56,6 @@ let trees;
 let treeLoc, prevTreeLoc = [], allTrees = [];
 let narration; // handles text scenes
 let doodoo, sfx;
-// let counters = []; // add counters to scenes? use object?
-let counters = {};
 
 const edwardsQuote = [
 	'... and all your righteousness, would have no more influence to uphold you, and keep you out of hell ...',
@@ -112,6 +110,7 @@ function splashSetup() {
 
 function startGame(withSound) {
 	if (withSound) setupSound();
+	else sfx = SoundProvider(); // empty sound provider plays nothing
 	gme.scenes.current = 'instructionsMovement';
 }
 
@@ -130,20 +129,18 @@ function setupSound() {
 	// start sfx
 	sfx = SoundProvider({
 		audioFiles: [
-			{ key: 'zip_lock', url: 'zip_lock.wav', },
+			{ key: 'web', url: 'zip_lock.wav', },
 			{ key: 'connect', sequence: [1, 6] },
 			{ key: 'cancel', url: 'cancel.wav', },
-			{ key: 'button', sequence: [1, 3] },
+			// { key: 'button', sequence: [1, 3] },
+			{ key: 'skip_button', url: 'button_2.wav' },
+			{ key: 'next_button', url: 'button_3.wav' },
 			{ key: 'stone',  sequence: [1, 9] },
+			{ key: 'match', sequence: [1, 7] },
 		]
 	}, soundFiles => {
-		web.addSFX(soundFiles);
-		narration.addSFX(soundFiles);
-		
-		// add only stone sfx to sfx prop in stone sprite
-		stone.sfx = Object.keys(soundFiles)
-			.filter(k => k.includes('stone'))
-			.map(f => soundFiles[f]);
+		web.addSFX(sfx);
+		narration.addSFX(sfx);
 	});
 }
 
@@ -292,7 +289,7 @@ function setupLevel(symbolString) {
 	const levelName = 'level-' + levelCount;
 	const level = new Level(levelName, gme.anims.sprites.trees, randomInt(25));
 	let symbolsMatched = [];
-	console.log(levelName, level, symbolString);
+	console.log('level', levelName, level, symbolString);
 	trees.locations = [];
 	level.locations.forEach(loc => trees.addLocation(...loc));
 	player.spawn(choice(level.walls));
@@ -309,7 +306,7 @@ function setupLevel(symbolString) {
 
 	function updateScore() {
 		let point = symbolString.split('').every(s => symbolsMatched.includes(s)) ? 1 : 0;
-		console.log(point, symbolString, symbolsMatched);
+		console.log(symbolString, symbolsMatched, point);
 		score.points.push(point);
 		score.addLocation((64 * (score.points.length - 1)), gme.height - 64, point);
 	}
@@ -323,12 +320,19 @@ function setupLevel(symbolString) {
 
 		const madeConnection = webUpdate();
 		if (madeConnection) {
-			const matches = symbolMatch.getMatch(web.getPoints(), 64, 32);
-			if (matches) {
-				console.log('matches', matches);
-				for (let i = 0; i < matches.length; i++) {
-					const { symbol } = matches[i];
-					if (!symbolsMatched.includes(symbol)) symbolsMatched.push(symbol);
+			const symbolMatches = symbolMatch.getMatch(web.getPoints(), 64, 32);
+			console.log('symbolMatches', symbolMatches);
+			if (symbolMatches) {
+				for (let i = 0; i < symbolMatches.length; i++) {
+					const matches = symbolMatches[i];
+					if (matches.length === 0) continue;
+					const { symbol } = matches.reduce((a, b) => a.score > b.score ? a : b);
+					if (!symbolsMatched.includes(symbol)) {
+						symbolsMatched.push(symbol);
+						if (symbolString.includes(symbol)) {
+							sfx.play('match', true, 0.9, 1.1);
+						}
+					}
 				}
 			}
 		}
@@ -340,9 +344,9 @@ function setupLevel(symbolString) {
 				updateScore();
 				startRockScene();
 			}
-			web.playSFX('web');
+			sfx.play('web');
 		} else {
-			web.stopSFX('web');
+			sfx.pause('web');
 		}
 
 		const counter = gme.scenes.current.sunCounter;
@@ -378,17 +382,20 @@ function webUpdate() {
 				web.addPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
 				web.addPoint(player.position);
 				allTrees.push([...treeLoc]);
-				web.playSFX('connect');
+				// web.playSFX('connect');
+				if (sfx) sfx.play('connect');
 				prevTreeLoc = treeLoc;
 				madeConnection = true;
 			} else if (prevTreeLoc[0] != treeLoc[0] || prevTreeLoc[1] != treeLoc[1]) {
 				web.insertPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
 				web.end();
-				web.playSFX('connect');
+				// web.playSFX('connect');
+				if (sfx) sfx.play('connect');
 				allTrees.push([...treeLoc]);
 				madeConnection = true;
 			} else {
-				web.playSFX('cancel');
+				// web.playSFX('cancel');
+				if (sfx) sfx.play('cancel');
 			}
 		}
 	} else {
@@ -406,7 +413,8 @@ function startRockScene() {
 	
 	// unset web scene
 	web.end();
-	web.stopSFX('web');
+	// web.stopSFX('web');
+	if (sfx) sfx.pause('web');
 	selectSprite.isActive = false;
 
 	const sceneName = 'rock-' + levelCount;
@@ -422,19 +430,13 @@ function startRockScene() {
 	stone.position = [gme.width, -stone.halfHeight];
 	stone.isActive = true;
 
-	let stoneSFX = choice(stone.sfx);
-	if (stoneSFX) stoneSFX.play();
+	if (sfx) sfx.play('stone');
 
 	scene.updateFunc = () => {
 		stone.position[0] += random(-2, -1);
 		stone.position[1] += random(-1, 2);
 
-		if (stoneSFX) {
-			if (stoneSFX.paused) {
-				stoneSFX = choice(stone.sfx);
-				stoneSFX.play();
-			}
-		}
+		if (sfx) sfx.keepPlaying('stone');
 
 		if (stone.position[0] < -stone.width) {
 			stone.isActive = false;
@@ -490,6 +492,7 @@ document.addEventListener('keydown', ev => {
 });
 
 function debugStart() {
+	setupSound();
 	const nextSymbolString = getNextSymbolString();
 	narration.addSymbols(nextSymbolString);
 	narration.add([edwardsQuote[0], edwardsQuote[1]]);
@@ -560,7 +563,8 @@ gme.start = function() {
 	gme.scenes.narration.addToDisplay(score);
 
 	// gme.scenes.current = 'splash';
-	debugStart();
+	gme.scenes.current = 'debug'; // x to debugStart();
+	// debugStart();
 	console.log('gme', gme);
 };
 

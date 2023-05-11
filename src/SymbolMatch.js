@@ -221,7 +221,6 @@ function SymbolMatch(symbolProfiles) {
 		return Math.max(0, similarity);
 	}
 
-
 	function getMatch(drawing, unit, offset) {
 		const shapes = getShapes(drawing, unit, offset);
 		// console.log('shapes', shapes);
@@ -239,10 +238,6 @@ function SymbolMatch(symbolProfiles) {
 					matches[i].push({ symbol: profiles[j], score });
 				}
 			}
-			if (matches[i].length > 1) {
-				matches[i] = matches[i].reduce((a, b) => a.score > b.score ? a : b);
-			}
-
 		}
 
 		return matches;
