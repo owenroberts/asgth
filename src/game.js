@@ -16,7 +16,7 @@ const { Drawing, Layer } = Lines;
 const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol'];
 scenes.push('debug');
 const gme = new Game({
-	dps: 24,
+	dps: 30,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
 	width: 64 * 14,
@@ -25,10 +25,11 @@ const gme = new Game({
 	retina: true,
 	bgColor: '#aeaaa6', //'#4a4047',
 	// debug: true,
-	// stats: true,
+	stats: true,
 	suspend: true,
 	events: isMobile ? ['touch'] : ['keyboard', 'mouse'],
 	scenes: scenes,
+	// testPerformance: true,
 	bounds: {
 		left: -1024,
 		top: 1024,
@@ -49,7 +50,8 @@ gme.load({
 let lettersTrack = 24, lettersLead = 56;
 let player;
 let sun, moon, silk, selectSprite, stone, score;
-let sunInterval = 1280 * 3;
+let sunInterval = 120; //  1280 * 3;
+let shakeAmount = 2;
 let web = Web();
 let symbolMatch;
 let trees;
@@ -413,8 +415,7 @@ function startRockScene() {
 	
 	// unset web scene
 	web.end();
-	// web.stopSFX('web');
-	if (sfx) sfx.pause('web');
+	sfx.pause('web');
 	selectSprite.isActive = false;
 
 	const sceneName = 'rock-' + levelCount;
@@ -501,7 +502,6 @@ function debugStart() {
 }
 
 gme.start = function() {
-	console.log(getNextSymbolString());
 	document.getElementById('splash').remove();
 	clearInterval(loadingInterval);
 
@@ -572,6 +572,11 @@ gme.update = function(timeElapsed) {
 	if (gme.scenes.current.needsUpdate) {
 		player.update(timeElapsed, true);
 		if (gme.scenes.current.updateFunc) gme.scenes.current.updateFunc();
+	}
+	if (gme.scenes.currentName.includes('rock')) {
+		const shake = [randomInt(-shakeAmount, shakeAmount), randomInt(-shakeAmount, shakeAmount)];
+		trees.shake(shake);
+		player.shake(shake);
 	}
 };
 

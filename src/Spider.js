@@ -80,4 +80,9 @@ class Spider extends Player {
 		this.position[0] = location[0];  
 		this.position[1] = location[1];
 	}
+
+	shake(position) {
+		this.position[0] +=	position[0];
+		this.position[1] +=	position[1];
+	}
 }

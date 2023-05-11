@@ -14,6 +14,10 @@ class Trees extends Texture {
 			}
 		}
 		return false;
+	}
 
+	shake(offset) {
+		this.offset[0] = offset[0];
+		this.offset[1] = offset[1];
 	}
 }
