@@ -43,17 +43,18 @@ gme.load({
 		sprites: './public/data/sprites.json',	
 	},
 	data: {
-		shape_profiles: './public/data/shape_profiles.json'
+		shape_profiles: './public/data/shape_profiles.json',
+		shape_profiles_2: './public/data/shape_profiles_2.json',
 	}
 }, false);
 
 let lettersTrack = 24, lettersLead = 56;
 let player;
 let sun, moon, silk, selectSprite, stone, score;
-let sunInterval = 120; //  1280 * 3;
+let sunInterval = 1280 * 3;
 let shakeAmount = 2;
 let web = Web();
-let symbolMatch;
+let symbolMatch, symbolMatch2;
 let trees;
 let treeLoc, prevTreeLoc = [], allTrees = [];
 let narration; // handles text scenes
@@ -323,7 +324,7 @@ function setupLevel(symbolString) {
 		const madeConnection = webUpdate();
 		if (madeConnection) {
 			const symbolMatches = symbolMatch.getMatch(web.getPoints(), 64, 32);
-			console.log('symbolMatches', symbolMatches);
+			// console.log('symbolMatches', symbolMatches);
 			if (symbolMatches) {
 				for (let i = 0; i < symbolMatches.length; i++) {
 					const matches = symbolMatches[i];
@@ -337,6 +338,9 @@ function setupLevel(symbolString) {
 					}
 				}
 			}
+
+			const symbolMatches2 = symbolMatch2.getMatch(web.getPoints(), 64, 32);
+			console.log('symbolMatches2', symbolMatches2);
 		}
 
 		if (web.isActive() && player.isMoving()) {
@@ -508,6 +512,7 @@ gme.start = function() {
 	const { sprites } = gme.anims;
 
 	symbolMatch = SymbolMatch(gme.data.data.shape_profiles);
+	symbolMatch2 = SymbolMatch2(gme.data.data.shape_profiles_2);
 
 	gme.setBounds('left', 0);
 	gme.setBounds('top', 0);

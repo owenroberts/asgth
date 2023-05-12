@@ -153,7 +153,6 @@ function SymbolMatch(symbolProfiles) {
 		return Math.sqrt(x * x + y * y);
 	}
 
-	
 	function getPointsSimilarity(a, b) {
 		let similarity = 0; 
 		const usedPointIndexes = [];
