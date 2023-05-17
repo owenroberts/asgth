@@ -23,6 +23,7 @@ function Narration(onFinshed) {
 		wrap: 3,
 		letters: sprites.symbols,
 		track: 64,
+		lead: 72,
 		letterIndexString: 'abcdefghijklmnopqrstuvwxyz',
 	});
 	symbols.isActive = false;
@@ -48,6 +49,7 @@ function Narration(onFinshed) {
 
 	function addSymbols(str) {
 		symbols.setMsg(str);
+		symbols.setBreaks(true); // break with out spaces
 		symbols.isActive = true;
 	}
 

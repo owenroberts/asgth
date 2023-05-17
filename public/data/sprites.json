@@ -2,10 +2,10 @@
 	"letters": { "src": "lines/drawings/letters.json" },
 	"symbols": { "src": "lines/drawings/symbols.json" },
 
-	"path": { "src": "lines/drawings/path.json" },
-	"room": { "src": "lines/drawings/room.json" },
-	"grass_tiles": { "src": "lines/drawings/grass_tiles.json" },
-	"dirt_tiles": { "src": "lines/drawings/dirt_tiles.json" },
+	"tiles_grass": { "src": "lines/drawings/tiles_grass.json" },
+	"tiles_dirt": { "src": "lines/drawings/tiles_dirt.json" },
+	"tiles_sparse_grass": { "src": "lines/drawings/tiles_sparse_grass.json" },
+	"tiles_stones": { "src": "lines/drawings/tiles_stones.json" },
 
 	"spider": { "src": "lines/drawings/spider.json" },
 

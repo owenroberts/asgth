@@ -145,7 +145,6 @@ function SymbolMatch2(symbolProfiles) {
 	}
 
 	function getDirections(shape) {
-		// console.log('shape', shape);
 		const dict = {}; // map points to directions....
 		for (let i = 0; i < shape.length; i++) {
 			let { points, intersects } = shape[i];
@@ -161,6 +160,7 @@ function SymbolMatch2(symbolProfiles) {
 			for (let j = 0; j < intersects.length; j++) {
 				for (let k = 0; k < points.length; k++) {
 					if (matchPoints(intersects[j].point, points[k])) continue;
+					if (!intersects[j].point) continue; // not intersection, share points
 					const p1 = intersects[j].point.join(",");
 					const p2 = points[k].join(",");
 					if (!dict[p1]) dict[p1] = new Set();

@@ -106,9 +106,13 @@ function watchTask(){
 	watch('src/**/*.js', series(jsTask));
 	watch('hellmaps/src/**/*.js', series(jsTask));
 
+
 	if (doodoo) {
 		watch(['./doodoo/src/*.js', './doodoo/composer/src/**/*.js'], series(doodoo.exportTask, doodooCopy));
+	} else {
+		console.warn('Doodoo not defined in watch task.');
 	}
+
 	if (lines) {
 		watch([
 			'./lines/lib/cool/cool.js',
@@ -117,6 +121,8 @@ function watchTask(){
 			'./lines/game/src/*.js',
 		], 
 		series(lines.exportTask, linesCopy));
+	} else {
+		console.warn('Lines not defined in watch task.');
 	}
 
 	if (textTools) {

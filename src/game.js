@@ -16,7 +16,7 @@ const { Drawing, Layer } = Lines;
 const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol'];
 scenes.push('debug');
 const gme = new Game({
-	dps: 30,
+	dps: 24,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
 	width: 64 * 14,
@@ -51,7 +51,9 @@ gme.load({
 let lettersTrack = 24, lettersLead = 56;
 let player;
 let sun, moon, silk, selectSprite, stone, score;
+let points = { rock: 0, spider: 0 };
 let sunInterval = 1280 * 3;
+let sunFinish = 400;
 let shakeAmount = 2;
 let web = Web();
 let symbolMatch, symbolMatch2;
@@ -122,11 +124,12 @@ function setupSound() {
 	fetch('./doodoo/compositions/inf3_theme.json')
 		.then(res => res.json())
 		.then(json => {
-			// doodoo = new Doodoo({
-			// 	...json,
-			// 	samplesURL: './doodoo/samples/',
-			// 	volume: -6,
-			// });
+			doodoo = new Doodoo({
+				...json,
+				samplesURL: './doodoo/samples/',
+				volume: -12,
+				autoStart: false
+			});
 		});
 
 	// start sfx
@@ -139,6 +142,7 @@ function setupSound() {
 			{ key: 'skip_button', url: 'button_2.wav' },
 			{ key: 'next_button', url: 'button_3.wav' },
 			{ key: 'stone',  sequence: [1, 9] },
+			{ key: 'rock',  sequence: [1, 9] },
 			{ key: 'match', sequence: [1, 7] },
 		]
 	}, soundFiles => {
@@ -280,7 +284,7 @@ function setupPractice(practiceAttemptCount=0) {
 
 function getNextSymbolString() {
 	let str = '';
-	for (let i = 0; i < Math.max(2, levelCount); i++) {
+	for (let i = 0; i < Math.min(6, Math.max(2, levelCount - points.rock)); i++) {
 		str += random('abcdefghijklm'.split(''));
 	}
 	return str;
@@ -290,34 +294,62 @@ function setupLevel(symbolString) {
 
 	// text generator?
 	const levelName = 'level-' + levelCount;
-	const level = new Level(levelName, gme.anims.sprites.trees, randomInt(25));
+	// set max nodes based on level -- fewer nodes means bigger rooms
+	// random ground texture
+	const groundTexture = choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
+	const minNodeRoomSize = symbolString.length > 2 ? 2 : 1;
+	const maxNodes = 16 - levelCount + (points.rock - points.spider);
+	// console.log('room', minNodeRoomSize, 'nodes', maxNodes, 16, levelCount, points.rock - points.spider);
+	const level = new Level(minNodeRoomSize, maxNodes, gme.anims.sprites[groundTexture]);
 	let symbolsMatched = [];
-	console.log('level', levelName, level, symbolString);
+	// console.log('level', levelName, symbolString);
 	trees.locations = [];
 	level.locations.forEach(loc => trees.addLocation(...loc));
 	player.spawn(choice(level.walls));
+	silk.animation.overrideProperty('endIndex', silk.length);
 	
 	const scene = new Scene();
 	scene.needsUpdate = true;
-	scene.addSprite(level);
-	scene.addToDisplay(player);
-	scene.addToDisplay(trees);
-	scene.addToDisplay(selectSprite);
-	scene.addToDisplay(sun);
-	scene.addToDisplay(silk);
-	scene.addToDisplay(score);
+	scene.addSprite([level, player, trees, selectSprite, sun, silk, score]);
 
 	function updateScore() {
 		let point = symbolString.split('').every(s => symbolsMatched.includes(s)) ? 1 : 0;
-		console.log(symbolString, symbolsMatched, point);
+		// console.log(symbolString, symbolsMatched, point);
+		points[point === 1 ? 'spider' : 'rock']++;
 		score.points.push(point);
 		score.addLocation((64 * (score.points.length - 1)), gme.height - 64, point);
 	}
 
-	scene.sunCounter = new Counter(sunInterval, () => {
+	function checkFinished() {
+		if (symbolString.split('').every(s => symbolsMatched.includes(s))) {
+			const { count, duration } = sunCounter;
+			const ratio = sunCounter.getRatio();
+			sunCounter.set(-sunFinish);
+			const a = sunFinish * (duration / (duration - count));
+			sunAnimation = new Counter(a);
+			sunAnimation.set(ratio * a);
+		}
+	}
+
+	function checkSymbolMatch(symbol) {
+		// if (!symbolsMatched.includes(symbol)) {
+		// more instances of symbols to be matched than symbols matched
+		if (symbolString.split('').filter(s => s === symbol).length > 
+			symbolsMatched.filter(s => s === symbol).length) {
+			symbolsMatched.push(symbol);
+			if (symbolString.includes(symbol)) {
+				sfx.play('match', true, 0.9, 1.1);
+				checkFinished();
+			}
+		}
+	}
+
+	const sunCounter = new Counter(sunInterval, () => {
 		updateScore();
 		startRockScene();
 	});
+
+	let sunAnimation = new Counter(sunInterval);
 
 	scene.updateFunc = () => {
 
@@ -329,18 +361,23 @@ function setupLevel(symbolString) {
 				for (let i = 0; i < symbolMatches.length; i++) {
 					const matches = symbolMatches[i];
 					if (matches.length === 0) continue;
-					const { symbol } = matches.reduce((a, b) => a.score > b.score ? a : b);
-					if (!symbolsMatched.includes(symbol)) {
-						symbolsMatched.push(symbol);
-						if (symbolString.includes(symbol)) {
-							sfx.play('match', true, 0.9, 1.1);
-						}
-					}
+					const { symbol, score } = matches.reduce((a, b) => a.score > b.score ? a : b);
+					console.log('matched 1', symbol, score);
+					checkSymbolMatch(symbol);
 				}
 			}
 
+			// only adds if the first one didn't get it
 			const symbolMatches2 = symbolMatch2.getMatch(web.getPoints(), 64, 32);
-			console.log('symbolMatches2', symbolMatches2);
+			if (symbolMatches2) {
+				symbolMatches2.forEach(m => {
+					m.forEach(symbol => {
+						console.log('matched 2', symbol);
+						checkSymbolMatch(symbol);
+					});
+				});
+			}
+
 		}
 
 		if (web.isActive() && player.isMoving()) {
@@ -355,9 +392,9 @@ function setupLevel(symbolString) {
 			sfx.pause('web');
 		}
 
-		const counter = gme.scenes.current.sunCounter;
-		const count = counter.update();
-		sun.position[1] = map(Math.sin(count / counter.duration * Math.PI), 0, 1, gme.height - 64, 0);
+		sunCounter.update();
+		sunAnimation.update();
+		sun.position[1] = map(Math.sin(sunAnimation.getRatio() * Math.PI), 0, 1, gme.height - 64, 0, true);
 	};
 
 	gme.scenes.addScene(scene, levelName);
@@ -432,18 +469,23 @@ function startRockScene() {
 	scene.addToDisplay(score);
 
 	// rock starts animating
-	stone.position = [gme.width, -stone.halfHeight];
+	const dir = choice(-1, 1);
+	stone.position[0] = dir === 1 ? -stone.halfWidth : gme.width;
+	stone.position[1] = -stone.halfHeight;
 	stone.isActive = true;
 
-	if (sfx) sfx.play('stone');
+	sfx.play('stone');
+	sfx.play('rock');
 
 	scene.updateFunc = () => {
-		stone.position[0] += random(-2, -1);
+		stone.position[0] += random(2, 1) * dir;
 		stone.position[1] += random(-1, 2);
 
-		if (sfx) sfx.keepPlaying('stone');
+		sfx.keepPlaying('stone');
+		sfx.keepPlaying('rock');
 
-		if (stone.position[0] < -stone.width) {
+		if ((dir === -1 && stone.position[0] < -stone.width) || 
+			dir === 1 && stone.position[0] > gme.width) {
 			stone.isActive = false;
 			stone.displayFunc = undefined;
 			onRockRolled();
@@ -470,6 +512,7 @@ function startRockScene() {
 
 function onRockRolled() {
 	trees.animation.cancelOverride();
+	trees.animation.update(); // trees still on override ... 
 	trees.animation.onDraw = undefined;
 	web.clear();
 	web.cancelOverride();
@@ -503,6 +546,19 @@ function debugStart() {
 	narration.add([edwardsQuote[0], edwardsQuote[1]]);
 	gme.scenes.current = 'narration';
 	nextLevel = setupLevel(nextSymbolString);
+
+	// grass test
+	// const grass = new Texture({ animation: gme.anims.sprites.grass_tiles });
+	// gme.scenes.current.addToDisplay(grass);
+	// let x = 0, y = 0;
+	// for (let i = 0; i < 48; i++) {
+	// 	grass.addLocation(x + 32, y + 32, i);
+	// 	x += 64;
+	// 	if (x > 64 * 11) {
+	// 		x = 0;
+	// 		y += 64;
+	// 	}
+	// }
 }
 
 gme.start = function() {
