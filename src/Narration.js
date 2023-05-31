@@ -10,7 +10,7 @@ function Narration(onFinshed) {
 	let text = new TextSprite({
 		x: 32,
 		y: 32,
-		wrap: 20,
+		wrap: 19,
 		letters: sprites.letters,
 		track: lettersTrack,
 		lead: lettersLead,

@@ -67,9 +67,48 @@ const edwardsQuote = [
 	"... than a spider's web would have to stop a falling rock."
 ];
 
-const narrative = [
-	'This is the first sentence in the narrative.',
-];
+const narrative = {
+	spider: [
+		"When I was a young spider, I overheard a two-legged telling a story about a rock.",
+		"The two-legged believed an invisible power was contained in or guided by the rock.",
+		"They rolled the rock to judge the lives of other two-leggeds.",
+		"Among spiders, we considered the two-leggeds irrational, primitive creatures.",
+		"Spiders had long ceased believing in invisible forces.",
+		"In spider stories, the fates had been replaced by the whims of nature, and destinies with the hopes, flaws and disappointments of animals.",
+		"As a naive, young spider, I thought I could communicate with the two-legged.",
+		"I hoped to free them of their brutal reliance on a cold, smooth rock.",
+		"I studied the marks they made on rocks and leaves.",
+		"I spun into my webs messages about the hazards of believing stories.",
+		"They interpreted my messages as an epistle from Satan, and rolled their rock across them.",
+		"What could I write that would make the two-legged pause and read?",
+	],
+	rock: [
+		"For thousands of years I was just a part of the vast earth.",
+		"Over thousands of years more, I was separated and smoothed by water.",
+		"For thousands of years more, I sat motionless while plants grew around me.",
+		"The slow vibrations of the plants were joined by fast vibrations of moving creatures filled with liquid blood.",
+		"Then one day, a two-legged creature lifted me into the air.",
+		"I felt the smooth, hairless skin of the two-legged creature twisting me around in the air.",
+		"Then I was rolled across a patch of dirt. A long time later, I was rolled again.",
+		"With each roll, the earth was flattened under my weight.",
+		"At the end of each roll, I was covered in dirt, sticks, leaves and blood.",
+		"I felt vibrations in the air that pierced like screams.",
+		"Over time, the wind blew away all the fragments until my surface was smooth again.",
+		"I had provided an answer to those animals with the strength to lift me.",
+		"Whatever I crushed beneath doesn't begin to scar my surface, only after thousands of rolls might a stick make a scratch, or blood a stain.",
+	],
+	end: {
+		spider: {
+			a: "I wrote, look up, and they dropped the rock on their head.",
+			b: "I can only continue trying new messages until one day they might pause.",
+		},
+		rock: {
+			a: "Whatever I crushed beneath doesn't begin to scar my surface, only after thousands of rolls might a stick make a scratch, or blood a stain.",
+			b: "After the day I felt the two-legged creature's bones snap on my surface, the rolling ended.",
+		}
+	}
+}
+
 let levelCount = 0; // counts levels, also used to advance narrative
 let nextLevel; // save value of next level following dialog
 
@@ -291,6 +330,7 @@ function getNextSymbolString() {
 }
 
 function setupLevel(symbolString) {
+	console.clear(); // debug
 
 	// text generator?
 	const levelName = 'level-' + levelCount;
@@ -334,8 +374,10 @@ function setupLevel(symbolString) {
 	function checkSymbolMatch(symbol) {
 		// if (!symbolsMatched.includes(symbol)) {
 		// more instances of symbols to be matched than symbols matched
+		console.log(symbolString, symbolsMatched)
 		if (symbolString.split('').filter(s => s === symbol).length > 
 			symbolsMatched.filter(s => s === symbol).length) {
+			console.log('is match', symbol);
 			symbolsMatched.push(symbol);
 			if (symbolString.includes(symbol)) {
 				sfx.play('match', true, 0.9, 1.1);
@@ -362,7 +404,7 @@ function setupLevel(symbolString) {
 					const matches = symbolMatches[i];
 					if (matches.length === 0) continue;
 					const { symbol, score } = matches.reduce((a, b) => a.score > b.score ? a : b);
-					console.log('matched 1', symbol, score);
+					if (symbolString.includes(symbol)) console.log('matched', symbol, 1, score);
 					checkSymbolMatch(symbol);
 				}
 			}
@@ -372,7 +414,7 @@ function setupLevel(symbolString) {
 			if (symbolMatches2) {
 				symbolMatches2.forEach(m => {
 					m.forEach(symbol => {
-						console.log('matched 2', symbol);
+						if (symbolString.includes(symbol)) console.log('matched', symbol, 2);
 						checkSymbolMatch(symbol);
 					});
 				});
@@ -517,12 +559,25 @@ function onRockRolled() {
 	web.clear();
 	web.cancelOverride();
 	
-	levelCount++;
+	
 	const nextSymbolString = getNextSymbolString();
 	narration.addSymbols(nextSymbolString);
-	narration.add(narrative[0]);
+	const lastPoint = score.points.slice(-1)[0] === 0 ? 'rock' : 'spider';
+
+	const nextNarration = narrative[lastPoint][levelCount];
+	console.log('the end', levelCount, nextNarration)
+	if (!nextNarration) {
+		// end of game/round
+		const winner = score.points.filter(p => p === 1).length > score.points.filter(p => p === 0).length ? 'spider' : 'rock';
+		nextNarration = narrative.end[lastPoint][winner];
+		nextLevel = 'end';
+	} else {
+		nextLevel = setupLevel(nextSymbolString);
+	}
+	narration.add(nextNarration);
+	levelCount++;
 	gme.scenes.current = 'narration';
-	nextLevel = setupLevel(nextSymbolString);
+	
 }
 
 function onNarrationFinished() {
@@ -546,6 +601,8 @@ function debugStart() {
 	narration.add([edwardsQuote[0], edwardsQuote[1]]);
 	gme.scenes.current = 'narration';
 	nextLevel = setupLevel(nextSymbolString);
+
+
 
 	// grass test
 	// const grass = new Texture({ animation: gme.anims.sprites.grass_tiles });
@@ -622,6 +679,28 @@ gme.start = function() {
 	score = new Texture({ animation: sprites.score });
 	score.points = [];
 	gme.scenes.narration.addToDisplay(score);
+
+	gme.scenes.debug.addToDisplay(new TextSprite({
+		x: 32,
+		y: 32,
+		wrap: 19,
+		letters: sprites.letters,
+		track: lettersTrack,
+		lead: lettersLead,
+		msg: "... than a spider's web would have to stop a falling rock."
+	}));
+
+	const s = gme.scenes.debug.addToDisplay(new TextSprite({
+		x: gme.width - (64 * 3),
+		y: 32,
+		wrap: 3,
+		letters: sprites.symbols,
+		track: 64,
+		lead: 72,
+		letterIndexString: 'abcdefghijklmnopqrstuvwxyz',
+		msg: 'abdc',
+		breakWithOutSpaces: true,
+	}));
 
 	// gme.scenes.current = 'splash';
 	gme.scenes.current = 'debug'; // x to debugStart();
