@@ -63,7 +63,6 @@ class Player extends ColliderSprite {
 
 	update(time, canMove) {
 
-
 		this.prevPosition = [...this.position];
 		
 		// moving states are up, down, left, right, up_right, down_right, down_left, up_left

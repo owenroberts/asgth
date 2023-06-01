@@ -9,7 +9,7 @@ let loadingInterval = setInterval(loadingAnimation, 1000 / 12);
 const isMobile = Cool.mobilecheck();
 if (isMobile) document.body.classList.add('mobile');
 
-const { Game, GameAnim, Scene, Sprite, SpriteCollection, ColliderSprite, ColliderEntity, TextSprite, Texture, UI, Counter, SoundProvider } = LinesEngine;
+const { Game, GameAnim, Scene, Sprite, SpriteCollection, ColliderSprite, ColliderEntity, TextSprite, Texture, UI, Counter, SoundProvider, ColliderEmpty } = LinesEngine;
 const { Drawing, Layer } = Lines;
 
 /* this is the game part */
@@ -45,6 +45,7 @@ gme.load({
 	data: {
 		shape_profiles: './public/data/shape_profiles.json',
 		shape_profiles_2: './public/data/shape_profiles_2.json',
+		level_bounds: './public/data/level_bounds.json'
 	}
 }, false);
 
@@ -52,7 +53,7 @@ let lettersTrack = 24, lettersLead = 56;
 let player;
 let sun, moon, silk, selectSprite, stone, score;
 let points = { rock: 0, spider: 0 };
-let sunInterval = 1280 * 3;
+let sunInterval = 1280 * 3, moonInterval = 1280;
 let sunFinish = 400;
 let shakeAmount = 2;
 let web = Web();
@@ -506,7 +507,7 @@ function startRockScene() {
 	scene.needsUpdate = true;
 	scene.addToDisplay(player);
 	scene.addToDisplay(trees);
-	scene.addToDisplay(moon);
+	
 	scene.addToDisplay(stone);
 	scene.addToDisplay(score);
 
@@ -533,7 +534,7 @@ function startRockScene() {
 			onRockRolled();
 		}
 
-		moon.position[1] = map(Math.sin(Math.min(gme.width, (gme.width - stone.position[0])) / gme.width * Math.PI), 0, 1, gme.height - 64, 0);
+		
 	};
 
 	// trees and web start freaking out
@@ -559,12 +560,11 @@ function onRockRolled() {
 	web.clear();
 	web.cancelOverride();
 	
-	
 	const nextSymbolString = getNextSymbolString();
 	narration.addSymbols(nextSymbolString);
 	const lastPoint = score.points.slice(-1)[0] === 0 ? 'rock' : 'spider';
-
 	const nextNarration = narrative[lastPoint][levelCount];
+	
 	console.log('the end', levelCount, nextNarration)
 	if (!nextNarration) {
 		// end of game/round
@@ -572,12 +572,58 @@ function onRockRolled() {
 		nextNarration = narrative.end[lastPoint][winner];
 		nextLevel = 'end';
 	} else {
-		nextLevel = setupLevel(nextSymbolString);
+		// nextLevel = setupLevel(nextSymbolString);
+		nextLevel = setupWalkLevel(nextSymbolString);
 	}
-	narration.add(nextNarration);
 	levelCount++;
+	narration.add(nextNarration);
 	gme.scenes.current = 'narration';
-	
+}
+
+function setupWalkLevel(symbolString) {
+	const { levels } = gme.data.data.level_bounds;
+	const levelIndex = levelCount < levels.length ? levelCount : randomInt(0, levels.length);
+	const levelData = levels[levelIndex];
+	const levelName = 'walk-' + levelCount;
+
+	const scene = new Scene();
+	scene.needsUpdate = true;
+	const bg = new Sprite(0, 0, gme.anims.sprites.levels);
+	bg.animation.frame = levelIndex;
+	scene.addToDisplay(bg);
+	scene.addSprite(player);
+	scene.addToDisplay(moon);
+	scene.addToDisplay(score);
+
+	const colliders = levelData.bounds.map(b => {
+		const [x, y, w, h] = b;
+		const c = new ColliderEmpty(x * 64, y * 64, w * 64, h * 64);
+		c.debug = true;
+		return c;
+	});
+
+	let moonAnim = new Counter(moonInterval);
+
+	const end = levelData.end;
+	const ender = new ColliderEmpty(end[0] * 64, end[1] * 64, 64, 64);
+
+	scene.updateFunc = () => {
+		for (let i = 0; i < colliders.length; i++) {
+			if (player.collide(colliders[i])) player.back();
+			colliders[i].drawDebug();
+		}
+		ender.drawDebug();
+		if (player.collide(ender)) {
+			gme.scenes.current = setupLevel(symbolString)
+		}
+
+		moonAnim.update();
+		moon.position[1] = map(Math.sin(moonAnim.getRatio() * Math.PI), 0, 1, gme.height - 64, 0, true);
+	};
+
+	player.spawn([levelData.start[0] * 64 + 32, levelData.start[1] * 64 + 32]);
+	gme.scenes.addScene(scene, levelName);
+	return levelName;
 }
 
 function onNarrationFinished() {
@@ -600,6 +646,8 @@ function debugStart() {
 	narration.addSymbols(nextSymbolString);
 	narration.add([edwardsQuote[0], edwardsQuote[1]]);
 	gme.scenes.current = 'narration';
+	// levelCount = 2;
+	// gme.scenes.current = setupWalkLevel(nextSymbolString);
 	nextLevel = setupLevel(nextSymbolString);
 
 
@@ -679,28 +727,6 @@ gme.start = function() {
 	score = new Texture({ animation: sprites.score });
 	score.points = [];
 	gme.scenes.narration.addToDisplay(score);
-
-	gme.scenes.debug.addToDisplay(new TextSprite({
-		x: 32,
-		y: 32,
-		wrap: 19,
-		letters: sprites.letters,
-		track: lettersTrack,
-		lead: lettersLead,
-		msg: "... than a spider's web would have to stop a falling rock."
-	}));
-
-	const s = gme.scenes.debug.addToDisplay(new TextSprite({
-		x: gme.width - (64 * 3),
-		y: 32,
-		wrap: 3,
-		letters: sprites.symbols,
-		track: 64,
-		lead: 72,
-		letterIndexString: 'abcdefghijklmnopqrstuvwxyz',
-		msg: 'abdc',
-		breakWithOutSpaces: true,
-	}));
 
 	// gme.scenes.current = 'splash';
 	gme.scenes.current = 'debug'; // x to debugStart();

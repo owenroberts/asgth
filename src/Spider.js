@@ -81,6 +81,10 @@ class Spider extends Player {
 		this.position[1] = location[1];
 	}
 
+	back() {
+		this.position = [...this.prevPosition];
+	}
+
 	shake(position) {
 		this.position[0] +=	position[0];
 		this.position[1] +=	position[1];
