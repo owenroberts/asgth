@@ -6,7 +6,9 @@
 	"tiles_dirt": { "src": "lines/drawings/tiles_dirt.json" },
 	"tiles_sparse_grass": { "src": "lines/drawings/tiles_sparse_grass.json" },
 	"tiles_stones": { "src": "lines/drawings/tiles_stones.json" },
-	"levels": { "src": "lines/drawings/levels.json" },
+	"levels": { "src": "lines/drawings/inters_2.json" },
+	
+	"webs_1": { "src": "lines/drawings/webs_1.json" },
 
 	"spider": { "src": "lines/drawings/spider.json" },
 

@@ -13,7 +13,7 @@ const { Game, GameAnim, Scene, Sprite, SpriteCollection, ColliderSprite, Collide
 const { Drawing, Layer } = Lines;
 
 /* this is the game part */
-const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol'];
+const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol', 'webs'];
 scenes.push('debug');
 const gme = new Game({
 	dps: 24,
@@ -154,8 +154,13 @@ function splashSetup() {
 }
 
 function startGame(withSound) {
-	if (withSound) setupSound();
-	else sfx = SoundProvider(); // empty sound provider plays nothing
+	if (withSound) {
+		setupSound();
+	} else {
+		sfx = SoundProvider(); // empty sound provider plays nothing
+		web.addSFX(sfx); // error w no sfx
+		narration.addSFX(sfx);
+	}
 	gme.scenes.current = 'instructionsMovement';
 }
 
@@ -247,7 +252,7 @@ function instructionsSetup() {
 	// instructionsWeb
 	gme.scenes.instructionsWeb.addToDisplay(new TextSprite({
 		countForward: true,
-		msg: "press x over a tree to connect a web",
+		msg: "press x over a tree to connect a web, press z to cancel",
 		wrap: 22,
 		track: lettersTrack,
 		lead: lettersLead,
@@ -258,6 +263,7 @@ function instructionsSetup() {
 
 	trees.addLocation(randomInt(2 * 64, 4 * 64), randomInt(3 * 64, 6 * 64), randomInt(25));
 	trees.addLocation(randomInt(7 * 64, 12 * 64), randomInt(3 * 64, 6 * 64), randomInt(25));
+
 
 	const xPressCounter = new Counter(2);
 	const webInstructionsDelay = new Counter(180, () => {
@@ -273,14 +279,24 @@ function instructionsSetup() {
 
 function setupPractice(practiceAttemptCount=0) {
 	const practiceSymbol = random('abcdefghijklm'.split(''));
-	if (practiceAttemptCount === 0) narration.add('Now practice drawing the symbol with your web.');	
-	if (practiceAttemptCount > 0) {
-		narration.add('Try again. Try to recrate the symbol on the right using the spider web. Create lines by connecting trees. You can connect more than one line to a tree.');
+	if (practiceAttemptCount === 0) {
+		narration.add([
+			'practice drawing the symbol with your web',
+			// 'press z to cancel a web'
+		]);	
 	}
+	if (practiceAttemptCount > 0) {
+		narration.add([
+			'try again to recrate the symbol on the right',
+			'create lines by connecting trees', 
+			'you can connect more than one line to a tree'
+		]);
+	}
+	console.log('practiceSymbol', practiceSymbol)
 	narration.addSymbols(practiceSymbol);
 	gme.scenes.current = 'narration';
 	web.clear();
-	setupLevel();
+	setupLevel(getNextSymbolString(2));
 	nextLevel = 'instructionsSymbol';
 
 	// set up for instructions symbol
@@ -296,21 +312,35 @@ function setupPractice(practiceAttemptCount=0) {
 	let gotSymbol = false; // so they can't fuck it up after
 	let attemptCount = 0;
 	const finishDelay = new Counter(120, () => {
-		web.clear();
-		trees.clear();
-		narration.cancelSymbols();
-		const nextSymbolString = getNextSymbolString();
-		narration.addSymbols(nextSymbolString);
-		narration.add([edwardsQuote[0], edwardsQuote[1]]);
-		gme.scenes.current = 'narration';
-		nextLevel = setupLevel(nextSymbolString);
+		// play quick web scene and then load first level
+		gme.scenes.current = 'webs';
+		const webSprite = random(gme.scenes.webs.displaySprites.sprites);
+		console.log(webSprite);
+		webSprite.animation.currentFrame = 0;
+		webSprite.animation.play();
+		webSprite.animation.onPlayedOnce = () => {
+			web.clear();
+			trees.clear();
+			narration.cancelSymbols();
+			const nextSymbolString = getNextSymbolString();
+			narration.addSymbols(nextSymbolString);
+			narration.add([edwardsQuote[0], edwardsQuote[1]]);
+			gme.scenes.current = 'narration';
+			nextLevel = setupLevel(nextSymbolString);
+			localStorage.setItem('instructions-complete', true);
+		};
 	});
 
 	sym.updateFunc = () => {
 		const madeConnection = webUpdate();
 		if (madeConnection) {
-			const symbol = symbolMatch.getMatch(web.getPoints(), 64, 32);
-			if (symbol === practiceSymbol) gotSymbol = true;
+			const symbolMatches = symbolMatch.getMatch(web.getPoints(), 64, 32);
+			const symbolMatches2 = symbolMatch2.getMatch(web.getPoints(), 64, 32);
+			// console.log('symbol matches', symbolMatches.flatMap(m => m).map(m => m.symbol), symbolMatches2.flatMap(m => m));
+
+			if (symbolMatches.flatMap(m => m).map(m => m.symbol).includes(practiceSymbol)) gotSymbol = true;
+			if (symbolMatches2.flatMap(m => m).includes(practiceSymbol)) gotSymbol = true;
+
 			attemptCount++;
 			// console.log(attemptCount);
 			if (attemptCount >= 12) {
@@ -322,28 +352,39 @@ function setupPractice(practiceAttemptCount=0) {
 	}
 }
 
-function getNextSymbolString() {
+function getNextSymbolString(len) {
+	len = len ?? Math.min(4, Math.max(1, levelCount - points.rock));
 	let str = '';
-	for (let i = 0; i < Math.min(6, Math.max(2, levelCount - points.rock)); i++) {
+	for (let i = 0; i < len; i++) {
 		str += random('abcdefghijklm'.split(''));
 	}
 	return str;
 }
 
 function setupLevel(symbolString) {
-	console.clear(); // debug
+	// console.clear(); // debug
+	console.log('symbolString', symbolString);
 
 	// text generator?
 	const levelName = 'level-' + levelCount;
-	// set max nodes based on level -- fewer nodes means bigger rooms
+	
 	// random ground texture
 	const groundTexture = choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
-	const minNodeRoomSize = symbolString.length > 2 ? 2 : 1;
-	const maxNodes = 16 - levelCount + (points.rock - points.spider);
+
+	// min room size is size of room, 3+ is easiest/guaranteed
+	let minNodeRoomSize = symbolString.length > 2 ? 2 : 1; 
+
+	// set max nodes based on level -- fewer nodes means bigger rooms
+	// max 1x1 nodes 13x7 = 91, use 1/3 ish of that
+	// const maxNodes = 16 - levelCount + (points.rock - points.spider);
+	const maxNodes = Math.min(24, levelCount + 3 + (points.spider - points.rock));
 	// console.log('room', minNodeRoomSize, 'nodes', maxNodes, 16, levelCount, points.rock - points.spider);
+	if (levelCount === 0) minNodeRoomSize = 3;
 	const level = new Level(minNodeRoomSize, maxNodes, gme.anims.sprites[groundTexture]);
-	let symbolsMatched = [];
 	// console.log('level', levelName, symbolString);
+
+
+	let symbolsMatched = [];
 	trees.locations = [];
 	level.locations.forEach(loc => trees.addLocation(...loc));
 	player.spawn(choice(level.walls));
@@ -375,10 +416,10 @@ function setupLevel(symbolString) {
 	function checkSymbolMatch(symbol) {
 		// if (!symbolsMatched.includes(symbol)) {
 		// more instances of symbols to be matched than symbols matched
-		console.log(symbolString, symbolsMatched)
+		// console.log(symbolString, symbolsMatched)
 		if (symbolString.split('').filter(s => s === symbol).length > 
 			symbolsMatched.filter(s => s === symbol).length) {
-			console.log('is match', symbol);
+			// console.log('is match', symbol);
 			symbolsMatched.push(symbol);
 			if (symbolString.includes(symbol)) {
 				sfx.play('match', true, 0.9, 1.1);
@@ -397,7 +438,7 @@ function setupLevel(symbolString) {
 	scene.updateFunc = () => {
 
 		const madeConnection = webUpdate();
-		if (madeConnection) {
+		if (madeConnection === 2) {
 			const symbolMatches = symbolMatch.getMatch(web.getPoints(), 64, 32);
 			// console.log('symbolMatches', symbolMatches);
 			if (symbolMatches) {
@@ -454,7 +495,7 @@ function webUpdate() {
 		}
 	}
 
-	let madeConnection = false;
+	let madeConnection = 0; // falsey no connection
 	treeLoc = trees.update(player); // player colliding with tree
 
 	if (treeLoc) {
@@ -471,14 +512,14 @@ function webUpdate() {
 				// web.playSFX('connect');
 				if (sfx) sfx.play('connect');
 				prevTreeLoc = treeLoc;
-				madeConnection = true;
+				madeConnection = 1; // truthy 1 connect (started line)
 			} else if (prevTreeLoc[0] != treeLoc[0] || prevTreeLoc[1] != treeLoc[1]) {
 				web.insertPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
 				web.end();
 				// web.playSFX('connect');
 				if (sfx) sfx.play('connect');
 				allTrees.push([...treeLoc]);
-				madeConnection = true;
+				madeConnection = 2; // truthy 2 connect (finished line)
 			} else {
 				// web.playSFX('cancel');
 				if (sfx) sfx.play('cancel');
@@ -488,11 +529,6 @@ function webUpdate() {
 		selectSprite.isActive = false;
 	}
 	return madeConnection;
-}
-
-function startLevel(letter) {
-	nextLevel = letter;
-	gme.scenes.current = nextLevel;
 }
 
 function startRockScene() {
@@ -581,6 +617,7 @@ function onRockRolled() {
 }
 
 function setupWalkLevel(symbolString) {
+	console.clear(); // debug
 	const { levels } = gme.data.data.level_bounds;
 	const levelIndex = levelCount < levels.length ? levelCount : randomInt(0, levels.length);
 	const levelData = levels[levelIndex];
@@ -593,7 +630,7 @@ function setupWalkLevel(symbolString) {
 	scene.addToDisplay(bg);
 	scene.addSprite(player);
 	scene.addToDisplay(moon);
-	scene.addToDisplay(score);
+	// scene.addToDisplay(score);
 
 	const colliders = levelData.bounds.map(b => {
 		const [x, y, w, h] = b;
@@ -610,9 +647,10 @@ function setupWalkLevel(symbolString) {
 	scene.updateFunc = () => {
 		for (let i = 0; i < colliders.length; i++) {
 			if (player.collide(colliders[i])) player.back();
-			colliders[i].drawDebug();
+			// colliders[i].drawDebug();
 		}
-		ender.drawDebug();
+		// ender.drawDebug();
+		
 		if (player.collide(ender)) {
 			gme.scenes.current = setupLevel(symbolString)
 		}
@@ -639,32 +677,6 @@ document.addEventListener('keydown', ev => {
 	else if (ev.code == 'Minus') mapAlpha = Math.max(0, mapAlpha - 0.5);
 	// else if (ev.code == 'Enter') ui.message.continue.onClick(); // to move message without mouse
 });
-
-function debugStart() {
-	setupSound();
-	const nextSymbolString = getNextSymbolString();
-	narration.addSymbols(nextSymbolString);
-	narration.add([edwardsQuote[0], edwardsQuote[1]]);
-	gme.scenes.current = 'narration';
-	// levelCount = 2;
-	// gme.scenes.current = setupWalkLevel(nextSymbolString);
-	nextLevel = setupLevel(nextSymbolString);
-
-
-
-	// grass test
-	// const grass = new Texture({ animation: gme.anims.sprites.grass_tiles });
-	// gme.scenes.current.addToDisplay(grass);
-	// let x = 0, y = 0;
-	// for (let i = 0; i < 48; i++) {
-	// 	grass.addLocation(x + 32, y + 32, i);
-	// 	x += 64;
-	// 	if (x > 64 * 11) {
-	// 		x = 0;
-	// 		y += 64;
-	// 	}
-	// }
-}
 
 gme.start = function() {
 	document.getElementById('splash').remove();
@@ -728,11 +740,38 @@ gme.start = function() {
 	score.points = [];
 	gme.scenes.narration.addToDisplay(score);
 
-	// gme.scenes.current = 'splash';
-	gme.scenes.current = 'debug'; // x to debugStart();
-	// debugStart();
+	gme.scenes.webs.addToDisplay(new Sprite(0, 0, sprites.webs_1));
+
+	gme.scenes.current = 'splash';
+	// gme.scenes.current = 'debug'; // x to debugStart();
 	console.log('gme', gme);
 };
+
+function debugStart() {
+	setupSound();
+	const nextSymbolString = getNextSymbolString();
+	narration.addSymbols(nextSymbolString);
+	narration.add([edwardsQuote[0], edwardsQuote[1]]);
+	gme.scenes.current = 'narration';
+	// levelCount = 2;
+	// gme.scenes.current = setupWalkLevel(nextSymbolString);
+	nextLevel = setupLevel(nextSymbolString);
+
+
+
+	// grass test
+	// const grass = new Texture({ animation: gme.anims.sprites.grass_tiles });
+	// gme.scenes.current.addToDisplay(grass);
+	// let x = 0, y = 0;
+	// for (let i = 0; i < 48; i++) {
+	// 	grass.addLocation(x + 32, y + 32, i);
+	// 	x += 64;
+	// 	if (x > 64 * 11) {
+	// 		x = 0;
+	// 		y += 64;
+	// 	}
+	// }
+}
 
 gme.update = function(timeElapsed) {
 	if (gme.scenes.current.needsUpdate) {
@@ -775,11 +814,11 @@ gme.keyDown = function(key) {
 			// suspend player movement ?
 			if (gme.scenes.isCurrent('splash')) {
 				return startGame(true);
-			} else if (gme.scenes.isCurrent('instructionsMovement') && gme.scenes.instructionsMovement.xReady) {
-				// narration.add(edwardsQuote[0]);
-				// gme.scenes.current = 'narration';
-				// nextLevel = 'instructionsWeb';
+			} else if (gme.scenes.isCurrent('instructionsMovement') && 
+				gme.scenes.instructionsMovement.xReady) {
 				gme.scenes.current = 'instructionsWeb';
+				sfx.play('next_button');
+				return;
 			}
 
 			player.inputKey('x', true);
@@ -822,6 +861,7 @@ gme.keyUp = function(key) {
 		case 'x':
 			if (gme.scenes.isCurrent('narration')) {
 				narration.next();
+				player.resetInput();
 			}
 			player.inputKey('x', false);
 			break;

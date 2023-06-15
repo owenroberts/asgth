@@ -10,7 +10,7 @@ function Narration(onFinshed) {
 	let text = new TextSprite({
 		x: 32,
 		y: 32,
-		wrap: 19,
+		wrap: 23,
 		letters: sprites.letters,
 		track: lettersTrack,
 		lead: lettersLead,
@@ -18,7 +18,7 @@ function Narration(onFinshed) {
 	});
 
 	let symbols = new TextSprite({
-		x: gme.width - (64 * 3),
+		x: 64,// gme.width - (64 * 3),
 		y: 32,
 		wrap: 3,
 		letters: sprites.symbols,
@@ -45,12 +45,15 @@ function Narration(onFinshed) {
 		for (let i = 1; i < list.length; i++) {
 			dialogList.push(list[i]);
 		}
+
+		symbols.y = text.breaks.length * 64 + 64 + 32;
 	}
 
 	function addSymbols(str) {
 		symbols.setMsg(str);
 		symbols.setBreaks(true); // break with out spaces
 		symbols.isActive = true;
+		symbols.y = text.breaks.length * 64 + 64 + 32;
 	}
 
 	function cancelSymbols() {
@@ -60,10 +63,10 @@ function Narration(onFinshed) {
 	function next() {
 		if (!text.isDone()) {
 			text.skip();
-			if (sfx) sfx.play('skip_button', true);
+			sfx.play('skip_button', true);
 		} else {
 			goNext = true;
-			if (sfx) sfx.play('next_button', true);
+			sfx.play('next_button', true);
 		}
 	}
 
@@ -81,8 +84,12 @@ function Narration(onFinshed) {
 
 		if (goNext) {
 			goNext = false;
-			if (dialogList.length === 0) onFinshed();
-			else text.setMsg(dialogList.shift());
+			if (dialogList.length === 0) {
+				onFinshed();
+			} else {
+				text.setMsg(dialogList.shift());
+				symbols.y = text.breaks.length * 64 + 64 + 32;
+			}
 		}
 	}
 
