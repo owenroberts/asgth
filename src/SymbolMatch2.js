@@ -181,11 +181,11 @@ function SymbolMatch2(symbolProfiles) {
 		// console.log('shapes', shapes);
 		const matches = [];
 		for (let i = 0; i < shapes.length; i++) {
-			matches[i] = [];
+			// matches[i] = [];
 			for (const k in symbolProfiles) {
 				// console.log(i, shapes[i], k, symbolProfiles[k]);
 				const isMatch = matchSymbol(shapes[i], symbolProfiles[k]);
-				if (isMatch) matches[i].push(k);
+				if (isMatch) matches.push(k);
 			}
 		}
 		return matches;

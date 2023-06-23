@@ -225,7 +225,8 @@ function SymbolMatch(symbolProfiles) {
 		// console.log('shapes', shapes);
 		const matches = [];
 		for (let i = 0; i < shapes.length; i++) {
-			matches[i] = [];
+			// matches[i] = [];
+			let m = [];
 			let normalized = normalizeShape(shapes[i]);
 			let sampled = samplePoints(normalized);
 			let stringy = [...new Set(sampled.map(p => p.join(",")))];
@@ -234,9 +235,11 @@ function SymbolMatch(symbolProfiles) {
 				const profile = symbolProfiles[profiles[j]].map(p => p.split(",").map(c => +c));
 				const score = compareShape(points, profile);
 				if (score > 0.9) {
-					matches[i].push({ symbol: profiles[j], score });
+					m.push({ symbol: profiles[j], score });
 				}
 			}
+			if (m.length === 0) continue;
+			matches.push(m.reduce((a,b) => a.score > b.score ? a : b).symbol);
 		}
 
 		return matches;

@@ -412,64 +412,51 @@ function setupLevel(symbolString) {
 		score.addLocation((64 * (points.spider + points.rock - 1)), gme.height - 64, point);
 	}
 
-	function checkFinished() {
-		if (symbolString.split('').every(s => symbolsMatched.includes(s))) {
-			const { count, duration } = sunCounter;
-			const ratio = sunCounter.getRatio();
-			sunCounter.set(-sunFinish);
-			const a = sunFinish * (duration / (duration - count));
-			sunAnimation = new Counter(a);
-			sunAnimation.set(ratio * a);
-		}
-	}
-
-	function checkSymbolMatch(symbol) {
-		// if (!symbolsMatched.includes(symbol)) {
-		// more instances of symbols to be matched than symbols matched
-		// console.log(symbolString, symbolsMatched)
-		if (symbolString.split('').filter(s => s === symbol).length > 
-			symbolsMatched.filter(s => s === symbol).length) {
-			// console.log('is match', symbol);
-			symbolsMatched.push(symbol);
-			if (symbolString.includes(symbol)) {
-				sfx.play('match', true, 0.9, 1.1);
-				checkFinished();
-			}
-		}
-	}
-
 	const sunCounter = new Counter(sunInterval, () => {
 		updateScore();
 		startRockScene();
 	});
-
 	let sunAnimation = new Counter(sunInterval);
+	
+	let prevMatched = '';
+	const finishString = symbolString.split('').sort().join('');
 
 	scene.updateFunc = () => {
 
 		const madeConnection = webUpdate();
 		if (madeConnection === 2) {
+			// const matched = [];
 			const symbolMatches = symbolMatch.getMatch(web.getPoints(), 64, 32);
-			// console.log('symbolMatches', symbolMatches);
-			if (symbolMatches) {
-				for (let i = 0; i < symbolMatches.length; i++) {
-					const matches = symbolMatches[i];
-					if (matches.length === 0) continue;
-					const { symbol, score } = matches.reduce((a, b) => a.score > b.score ? a : b);
-					// if (symbolString.includes(symbol)) console.log('matched', symbol, 1, score);
-					checkSymbolMatch(symbol);
-				}
-			}
 
 			// only adds if the first one didn't get it
 			const symbolMatches2 = symbolMatch2.getMatch(web.getPoints(), 64, 32);
-			if (symbolMatches2) {
-				symbolMatches2.forEach(m => {
-					m.forEach(symbol => {
-						// if (symbolString.includes(symbol)) console.log('matched', symbol, 2);
-						checkSymbolMatch(symbol);
-					});
-				});
+			let matched = [...symbolMatches];
+			const used = [...symbolMatches];
+			symbolMatches2.forEach(s => {
+				if (!matched.includes(s)) {
+					matched.push(s);
+				} else if (!used.includes(s)) {
+					matched.push(s);
+				} else {
+					used.splice(used.indexOf(s), 1);
+				}
+			});
+
+			matched = matched.filter(s => finishString.includes(s));
+
+			if (matched.length > prevMatched.length) {
+				sfx.play('match', true, 0.9, 1.1);
+			}
+			prevMatched = matched.sort().join('');
+
+			if (prevMatched === finishString) {
+				// spider got it
+				const { count, duration } = sunCounter;
+				const ratio = sunCounter.getRatio();
+				sunCounter.set(-sunFinish);
+				const a = sunFinish * (duration / (duration - count));
+				sunAnimation = new Counter(a);
+				sunAnimation.set(ratio * a);
 			}
 
 		}
@@ -762,7 +749,7 @@ gme.start = function() {
 };
 
 function debugStart() {
-	// setupSound();
+	setupSound();
 	// const nextSymbolString = getNextSymbolString();
 	// narration.addSymbols(nextSymbolString);
 	// narration.add([edwardsQuote[0], edwardsQuote[1]]);
@@ -771,7 +758,7 @@ function debugStart() {
 	// // gme.scenes.current = setupWalkLevel(nextSymbolString);
 	// nextLevel = setupLevel(nextSymbolString);
 
-	gme.scenes.current = setupWalkLevel('a');
+	gme.scenes.current = setupLevel('aabb');
 
 
 }
