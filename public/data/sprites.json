@@ -19,6 +19,8 @@
 	"sun": { "src": "lines/drawings/sun.json" },
 	"silk": { "src": "lines/drawings/silk.json" },
 	"stone": { "src": "lines/drawings/ston_2.json" },
-	"score": { "src": "lines/drawings/score.json" }
+	"score": { "src": "lines/drawings/score.json" },
+	"ending": { "src": "lines/drawings/ending.json" }
+
 
 }

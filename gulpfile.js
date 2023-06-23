@@ -93,10 +93,13 @@ function textToolsCopy() {
 function webBuild() {
 	return src([
 			'./build/*.js',
+			'./build/lib/**/*.js',
 			'./public/**/*',
 			'./lib/**/*.js',
 			'./lines/drawings/*',
-			'./doodoo/samples/*',
+			'./doodoo/samples/choir/**/*',
+			'./doodoo/samples/piano/*',
+			'./doodoo/compositions/inf3_theme.json',
 			'index.html',
 		], { base: './' })
 		.pipe(dest('./web'));

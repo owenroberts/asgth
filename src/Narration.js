@@ -20,7 +20,7 @@ function Narration(onFinshed) {
 	let symbols = new TextSprite({
 		x: 64,// gme.width - (64 * 3),
 		y: 32,
-		wrap: 3,
+		wrap: 6,
 		letters: sprites.symbols,
 		track: 64,
 		lead: 72,

@@ -13,7 +13,7 @@ const { Game, GameAnim, Scene, Sprite, SpriteCollection, ColliderSprite, Collide
 const { Drawing, Layer } = Lines;
 
 /* this is the game part */
-const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol', 'webs'];
+const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol', 'webs', 'end'];
 scenes.push('debug');
 const gme = new Game({
 	dps: 24,
@@ -53,6 +53,7 @@ let lettersTrack = 24, lettersLead = 56;
 let player;
 let sun, moon, silk, selectSprite, stone, score;
 let points = { rock: 0, spider: 0 };
+let lastPoint;
 let sunInterval = 1280 * 3, moonInterval = 1280;
 let sunFinish = 400;
 let shakeAmount = 2;
@@ -77,11 +78,11 @@ const narrative = {
 		"Spiders had long ceased believing in invisible forces.",
 		"In spider stories, the fates had been replaced by the whims of nature, and destinies with the hopes, flaws and disappointments of animals.",
 		"As a naive, young spider, I thought I could communicate with the two-legged.",
-		"I hoped to free them of their brutal reliance on a cold, smooth rock.",
+		"I hoped to free them of their brutal reliance on the cold, smooth rock.",
 		"I studied the marks they made on rocks and leaves.",
-		"I spun into my webs messages about the hazards of believing stories.",
+		"I spun into my webs messages about the hazards of believing in stories.",
 		"They interpreted my messages as an epistle from Satan, and rolled their rock across them.",
-		"What could I write that would make the two-legged pause and read?",
+		"What could I write that would make the two-legged pause to read?",
 	],
 	rock: [
 		"For thousands of years I was just a part of the vast earth.",
@@ -100,12 +101,12 @@ const narrative = {
 	],
 	end: {
 		spider: {
-			a: "I wrote, look up, and they dropped the rock on their head.",
-			b: "I can only continue trying new messages until one day they might pause.",
+			a: "I wrote, look up, and they dropped the rock on their head.", // spider win
+			b: "I can only continue trying new messages until one day they might pause.", // spider lose
 		},
 		rock: {
-			a: "Whatever I crushed beneath doesn't begin to scar my surface, only after thousands of rolls might a stick make a scratch, or blood a stain.",
-			b: "After the day I felt the two-legged creature's bones snap on my surface, the rolling ended.",
+			a: "After the day I felt the two-legged creature's bones snap on my surface, the rolling ended.", // spider win
+			b: "Whatever I crushed beneath doesn't begin to scar my surface, only after thousands of rolls might a stick make a scratch, or blood a stain.", // spider lose
 		}
 	}
 }
@@ -277,8 +278,8 @@ function instructionsSetup() {
 	};
 }
 
-function setupPractice(practiceAttemptCount=0) {
-	const practiceSymbol = random('abcdefghijklm'.split(''));
+function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
+	const practiceSymbol = practiceSymbolPrevious ?? random('abcdefghijklm'.split(''));
 	if (practiceAttemptCount === 0) {
 		narration.add([
 			'practice drawing the symbol with your web',
@@ -287,12 +288,13 @@ function setupPractice(practiceAttemptCount=0) {
 	}
 	if (practiceAttemptCount > 0) {
 		narration.add([
-			'try again to recrate the symbol on the right',
+			'try again to recreate the symbol',
 			'create lines by connecting trees', 
 			'you can connect more than one line to a tree'
 		]);
 	}
-	console.log('practiceSymbol', practiceSymbol)
+	// what to do after multiple attempts?
+	// console.log('practiceSymbol', practiceSymbol)
 	narration.addSymbols(practiceSymbol);
 	gme.scenes.current = 'narration';
 	web.clear();
@@ -315,7 +317,7 @@ function setupPractice(practiceAttemptCount=0) {
 		// play quick web scene and then load first level
 		gme.scenes.current = 'webs';
 		const webSprite = random(gme.scenes.webs.displaySprites.sprites);
-		console.log(webSprite);
+		// console.log(webSprite);
 		webSprite.animation.currentFrame = 0;
 		webSprite.animation.play();
 		webSprite.animation.onPlayedOnce = () => {
@@ -333,7 +335,7 @@ function setupPractice(practiceAttemptCount=0) {
 
 	sym.updateFunc = () => {
 		const madeConnection = webUpdate();
-		if (madeConnection) {
+		if (madeConnection === 2) {
 			const symbolMatches = symbolMatch.getMatch(web.getPoints(), 64, 32);
 			const symbolMatches2 = symbolMatch2.getMatch(web.getPoints(), 64, 32);
 			// console.log('symbol matches', symbolMatches.flatMap(m => m).map(m => m.symbol), symbolMatches2.flatMap(m => m));
@@ -341,19 +343,26 @@ function setupPractice(practiceAttemptCount=0) {
 			if (symbolMatches.flatMap(m => m).map(m => m.symbol).includes(practiceSymbol)) gotSymbol = true;
 			if (symbolMatches2.flatMap(m => m).includes(practiceSymbol)) gotSymbol = true;
 
+			if (gotSymbol) {
+				sfx.play('match', true, 0.9, 1.1);
+			}
+
 			attemptCount++;
 			// console.log(attemptCount);
 			if (attemptCount >= 12) {
-				setupPractice(practiceAttemptCount + 1);
+				setupPractice(practiceAttemptCount + 1, practiceSymbol);
 			}
 		}
 		// console.log(gotSymbol, finishDelay.isDone(), finishDelay.ratio())
-		if (gotSymbol) finishDelay.update();
+		if (gotSymbol) {
+			finishDelay.update();
+		}
 	}
 }
 
 function getNextSymbolString(len) {
-	len = len ?? Math.min(4, Math.max(1, levelCount - points.rock));
+	// console.log(levelCount, points);
+	len = len ?? Math.min(3, Math.max(1, levelCount - points.rock));
 	let str = '';
 	for (let i = 0; i < len; i++) {
 		str += random('abcdefghijklm'.split(''));
@@ -363,7 +372,7 @@ function getNextSymbolString(len) {
 
 function setupLevel(symbolString) {
 	// console.clear(); // debug
-	console.log('symbolString', symbolString);
+	// console.log('symbolString', symbolString);
 
 	// text generator?
 	const levelName = 'level-' + levelCount;
@@ -397,9 +406,10 @@ function setupLevel(symbolString) {
 	function updateScore() {
 		let point = symbolString.split('').every(s => symbolsMatched.includes(s)) ? 1 : 0;
 		// console.log(symbolString, symbolsMatched, point);
-		points[point === 1 ? 'spider' : 'rock']++;
-		score.points.push(point);
-		score.addLocation((64 * (score.points.length - 1)), gme.height - 64, point);
+		lastPoint = point === 1 ? 'spider' : 'rock';
+		points[lastPoint]++;
+		// score.points.push(point);
+		score.addLocation((64 * (points.spider + points.rock - 1)), gme.height - 64, point);
 	}
 
 	function checkFinished() {
@@ -446,7 +456,7 @@ function setupLevel(symbolString) {
 					const matches = symbolMatches[i];
 					if (matches.length === 0) continue;
 					const { symbol, score } = matches.reduce((a, b) => a.score > b.score ? a : b);
-					if (symbolString.includes(symbol)) console.log('matched', symbol, 1, score);
+					// if (symbolString.includes(symbol)) console.log('matched', symbol, 1, score);
 					checkSymbolMatch(symbol);
 				}
 			}
@@ -456,7 +466,7 @@ function setupLevel(symbolString) {
 			if (symbolMatches2) {
 				symbolMatches2.forEach(m => {
 					m.forEach(symbol => {
-						if (symbolString.includes(symbol)) console.log('matched', symbol, 2);
+						// if (symbolString.includes(symbol)) console.log('matched', symbol, 2);
 						checkSymbolMatch(symbol);
 					});
 				});
@@ -598,15 +608,16 @@ function onRockRolled() {
 	
 	const nextSymbolString = getNextSymbolString();
 	narration.addSymbols(nextSymbolString);
-	const lastPoint = score.points.slice(-1)[0] === 0 ? 'rock' : 'spider';
-	const nextNarration = narrative[lastPoint][levelCount];
+	// const lastPoint = score.points.slice(-1)[0] === 0 ? 'rock' : 'spider';
+	let nextNarration = narrative[lastPoint][levelCount];
 	
-	console.log('the end', levelCount, nextNarration)
 	if (!nextNarration) {
 		// end of game/round
-		const winner = score.points.filter(p => p === 1).length > score.points.filter(p => p === 0).length ? 'spider' : 'rock';
+		// const winner = score.points.filter(p => p === 1).length > score.points.filter(p => p === 0).length ? 'spider' : 'rock';
+		const winner = points.spider > points.rock ? 'a' : 'b';
 		nextNarration = narrative.end[lastPoint][winner];
 		nextLevel = 'end';
+		narration.cancelSymbols();
 	} else {
 		// nextLevel = setupLevel(nextSymbolString);
 		nextLevel = setupWalkLevel(nextSymbolString);
@@ -617,9 +628,9 @@ function onRockRolled() {
 }
 
 function setupWalkLevel(symbolString) {
-	console.clear(); // debug
+	// console.clear(); // debug
 	const { levels } = gme.data.data.level_bounds;
-	const levelIndex = levelCount < levels.length ? levelCount : randomInt(0, levels.length);
+	const levelIndex = 12; // levelCount < levels.length ? levelCount : randomInt(0, levels.length - 1);
 	const levelData = levels[levelIndex];
 	const levelName = 'walk-' + levelCount;
 
@@ -737,40 +748,32 @@ gme.start = function() {
 	stone.animation.isPlaying = true;
 
 	score = new Texture({ animation: sprites.score });
-	score.points = [];
 	gme.scenes.narration.addToDisplay(score);
 
 	gme.scenes.webs.addToDisplay(new Sprite(0, 0, sprites.webs_1));
+	const ending = new Sprite(0, 0, sprites.ending, animation => {
+		animation.play();
+	});
+	gme.scenes.end.addToDisplay(ending);
 
-	gme.scenes.current = 'splash';
-	// gme.scenes.current = 'debug'; // x to debugStart();
-	console.log('gme', gme);
+	// gme.scenes.current = 'splash';
+	gme.scenes.current = 'debug'; // x to debugStart();
+	// console.log('gme', gme);
 };
 
 function debugStart() {
-	setupSound();
-	const nextSymbolString = getNextSymbolString();
-	narration.addSymbols(nextSymbolString);
-	narration.add([edwardsQuote[0], edwardsQuote[1]]);
-	gme.scenes.current = 'narration';
-	// levelCount = 2;
-	// gme.scenes.current = setupWalkLevel(nextSymbolString);
-	nextLevel = setupLevel(nextSymbolString);
+	// setupSound();
+	// const nextSymbolString = getNextSymbolString();
+	// narration.addSymbols(nextSymbolString);
+	// narration.add([edwardsQuote[0], edwardsQuote[1]]);
+	// gme.scenes.current = 'narration';
+	// // levelCount = 2;
+	// // gme.scenes.current = setupWalkLevel(nextSymbolString);
+	// nextLevel = setupLevel(nextSymbolString);
+
+	gme.scenes.current = setupWalkLevel('a');
 
 
-
-	// grass test
-	// const grass = new Texture({ animation: gme.anims.sprites.grass_tiles });
-	// gme.scenes.current.addToDisplay(grass);
-	// let x = 0, y = 0;
-	// for (let i = 0; i < 48; i++) {
-	// 	grass.addLocation(x + 32, y + 32, i);
-	// 	x += 64;
-	// 	if (x > 64 * 11) {
-	// 		x = 0;
-	// 		y += 64;
-	// 	}
-	// }
 }
 
 gme.update = function(timeElapsed) {
@@ -862,6 +865,7 @@ gme.keyUp = function(key) {
 			if (gme.scenes.isCurrent('narration')) {
 				narration.next();
 				player.resetInput();
+				return;
 			}
 			player.inputKey('x', false);
 			break;
