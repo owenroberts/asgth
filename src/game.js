@@ -181,7 +181,7 @@ function setupSound() {
 				...json,
 				samplesURL: './doodoo/samples/',
 				volume: -12,
-				autoStart: false
+				// autoStart: false
 			});
 		});
 
