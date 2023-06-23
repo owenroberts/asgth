@@ -9,11 +9,13 @@ let loadingInterval = setInterval(loadingAnimation, 1000 / 12);
 const isMobile = Cool.mobilecheck();
 if (isMobile) document.body.classList.add('mobile');
 
+const playedInstructions = localStorage.getItem('spider-instructions-complete');
+
 const { Game, GameAnim, Scene, Sprite, SpriteCollection, ColliderSprite, ColliderEntity, TextSprite, Texture, UI, Counter, SoundProvider, ColliderEmpty } = LinesEngine;
 const { Drawing, Layer } = Lines;
 
 /* this is the game part */
-const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol', 'webs', 'end'];
+const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol', 'webs', 'end', 'chooseInstructions'];
 scenes.push('debug');
 const gme = new Game({
 	dps: 24,
@@ -162,7 +164,12 @@ function startGame(withSound) {
 		web.addSFX(sfx); // error w no sfx
 		narration.addSFX(sfx);
 	}
-	gme.scenes.current = 'instructionsMovement';
+	if (playedInstructions) {
+		chooseInstructions();
+	} else {
+		gme.scenes.current = 'instructionsMovement';
+	}
+	
 }
 
 function setupSound() {
@@ -277,6 +284,48 @@ function instructionsSetup() {
 	};
 }
 
+function chooseInstructions() {
+	const { sprites } = gme.anims;
+	gme.scenes.current = 'chooseInstructions';
+	gme.scenes.chooseInstructions.needsUpdate = true;
+	gme.scenes.chooseInstructions.addToDisplay(new TextSprite({
+		countForward: true,
+		msg: "press z to review instructions, press x to continue",
+		wrap: 14,
+		track: lettersTrack,
+		lead: lettersLead,
+		x: 32,
+		y: 64 * 2,
+		letters: sprites.letters,
+	}));
+
+	gme.scenes.chooseInstructions.updateFunc = () => {
+		if (player.input.x) startAfterPractice();
+		if (player.input.z) gme.scenes.current = 'instructionsMovement';
+		player.resetInput();
+	};
+}
+
+function startAfterPractice() {
+	// play quick web scene and then load first level
+	gme.scenes.current = 'webs';
+	const webSprite = random(gme.scenes.webs.displaySprites.sprites);
+	// console.log(webSprite);
+	webSprite.animation.currentFrame = 0;
+	webSprite.animation.play();
+	webSprite.animation.onPlayedOnce = () => {
+		web.clear();
+		trees.clear();
+		narration.cancelSymbols();
+		const nextSymbolString = getNextSymbolString();
+		narration.addSymbols(nextSymbolString);
+		narration.add(["The premise", edwardsQuote[0], edwardsQuote[1]]);
+		gme.scenes.current = 'narration';
+		nextLevel = setupLevel(nextSymbolString);
+		localStorage.setItem('spider-instructions-complete', true);
+	};
+}
+
 function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 	const practiceSymbol = practiceSymbolPrevious ?? random('abcdefghijklm'.split(''));
 	if (practiceAttemptCount === 0) {
@@ -313,23 +362,7 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 	let gotSymbol = false; // so they can't fuck it up after
 	let attemptCount = 0;
 	const finishDelay = new Counter(120, () => {
-		// play quick web scene and then load first level
-		gme.scenes.current = 'webs';
-		const webSprite = random(gme.scenes.webs.displaySprites.sprites);
-		// console.log(webSprite);
-		webSprite.animation.currentFrame = 0;
-		webSprite.animation.play();
-		webSprite.animation.onPlayedOnce = () => {
-			web.clear();
-			trees.clear();
-			narration.cancelSymbols();
-			const nextSymbolString = getNextSymbolString();
-			narration.addSymbols(nextSymbolString);
-			narration.add(["The premise", edwardsQuote[0], edwardsQuote[1]]);
-			gme.scenes.current = 'narration';
-			nextLevel = setupLevel(nextSymbolString);
-			localStorage.setItem('instructions-complete', true);
-		};
+		startAfterPractice();
 	});
 
 	sym.updateFunc = () => {
