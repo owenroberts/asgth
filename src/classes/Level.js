@@ -27,7 +27,7 @@ class Level {
 			});
 
 		this.walls = []; // not walls ...
-		const { grass_tiles, dirt_tiles } = gme.anims.sprites;
+
 		this.ground = new Texture({ animation: groundTexture });
 		for (let i = 0; i < this.map.matrix.length; i++) {
 			if (this.map.matrix[i] === 0) {
