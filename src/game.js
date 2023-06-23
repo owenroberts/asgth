@@ -223,7 +223,6 @@ function instructionsSetup() {
 	}));
 
 	const xToContinue = gme.scenes.instructionsMovement.addToDisplay(new TextSprite({
-		countForward: true,
 		msg: "x to continue",
 		wrap: 24,
 		track: lettersTrack,
@@ -326,7 +325,7 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 			narration.cancelSymbols();
 			const nextSymbolString = getNextSymbolString();
 			narration.addSymbols(nextSymbolString);
-			narration.add([edwardsQuote[0], edwardsQuote[1]]);
+			narration.add(["The premise", edwardsQuote[0], edwardsQuote[1]]);
 			gme.scenes.current = 'narration';
 			nextLevel = setupLevel(nextSymbolString);
 			localStorage.setItem('instructions-complete', true);
@@ -404,7 +403,7 @@ function setupLevel(symbolString) {
 	scene.addSprite([level, player, trees, selectSprite, sun, silk, score]);
 
 	function updateScore() {
-		let point = symbolString.split('').every(s => symbolsMatched.includes(s)) ? 1 : 0;
+		let point = prevMatched === finishString ? 1 : 0;
 		// console.log(symbolString, symbolsMatched, point);
 		lastPoint = point === 1 ? 'spider' : 'rock';
 		points[lastPoint]++;
@@ -592,6 +591,9 @@ function onRockRolled() {
 	narration.addSymbols(nextSymbolString);
 	// const lastPoint = score.points.slice(-1)[0] === 0 ? 'rock' : 'spider';
 	let nextNarration = narrative[lastPoint][levelCount];
+	// let intro = 'The tale of the ' + lastPoint;
+	let intro = `the ${lastPoint === 'spider' ? 'tale' : 'story'} of the ${lastPoint}`;
+
 	
 	if (!nextNarration) {
 		// end of game/round
@@ -605,7 +607,7 @@ function onRockRolled() {
 		nextLevel = setupWalkLevel(nextSymbolString);
 	}
 	levelCount++;
-	narration.add(nextNarration);
+	narration.add([intro, nextNarration]);
 	gme.scenes.current = 'narration';
 }
 
@@ -719,7 +721,7 @@ function setupWalkLevel(symbolString) {
 	scene.updateFunc = () => {
 		for (let i = 0; i < colliders.length; i++) {
 			if (player.collide(colliders[i])) player.back();
-			colliders[i].drawDebug();
+			// colliders[i].drawDebug();
 		}
 		// ender.drawDebug();
 		
@@ -817,8 +819,8 @@ gme.start = function() {
 	});
 	gme.scenes.end.addToDisplay(ending);
 
-	// gme.scenes.current = 'splash';
-	gme.scenes.current = 'debug'; // x to debugStart();
+	gme.scenes.current = 'splash';
+	// gme.scenes.current = 'debug'; // x to debugStart();
 	// console.log('gme', gme);
 };
 

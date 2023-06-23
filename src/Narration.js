@@ -73,7 +73,8 @@ function Narration(onFinshed) {
 	function display() {
 
 		let isDone = text.display();
-		symbols.display();
+		// console.log(dialogList)
+		if (dialogList.length === 0) symbols.display();
 
 		if (!isDone) {
 			goNext = false;
