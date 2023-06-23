@@ -414,7 +414,7 @@ function setupLevel(symbolString) {
 
 	const sunCounter = new Counter(sunInterval, () => {
 		updateScore();
-		startRockScene();
+		startRockScene(scene);
 	});
 	let sunAnimation = new Counter(sunInterval);
 	
@@ -528,21 +528,21 @@ function webUpdate() {
 	return madeConnection;
 }
 
-function startRockScene() {
+function startRockScene(scene) {
 	
 	// unset web scene
 	web.end();
 	sfx.pause('web');
 	selectSprite.isActive = false;
 
-	const sceneName = 'rock-' + levelCount;
-	const scene = new Scene();
-	scene.needsUpdate = true;
-	scene.addToDisplay(player);
-	scene.addToDisplay(trees);
+	// const sceneName = 'rock-' + levelCount;
+	// const scene = new Scene();
+	// scene.needsUpdate = true;
+	// scene.addToDisplay(player);
+	// scene.addToDisplay(trees);
 	
 	scene.addToDisplay(stone);
-	scene.addToDisplay(score);
+	// scene.addToDisplay(score);
 
 	// rock starts animating
 	const dir = choice(-1, 1);
@@ -567,7 +567,9 @@ function startRockScene() {
 			onRockRolled();
 		}
 
-		
+		const shake = [randomInt(-shakeAmount, shakeAmount), randomInt(-shakeAmount, shakeAmount)];
+		trees.shake(shake);
+		player.shake(shake);
 	};
 
 	// trees and web start freaking out
@@ -582,8 +584,8 @@ function startRockScene() {
 	}
 	web.startOverride();
 
-	gme.scenes.addScene(scene, sceneName);
-	gme.scenes.current = sceneName;
+	// gme.scenes.addScene(scene, sceneName);
+	// gme.scenes.current = sceneName;
 }
 
 function onRockRolled() {
@@ -758,7 +760,7 @@ function debugStart() {
 	// // gme.scenes.current = setupWalkLevel(nextSymbolString);
 	// nextLevel = setupLevel(nextSymbolString);
 
-	gme.scenes.current = setupLevel('aabb');
+	gme.scenes.current = setupLevel('a');
 
 
 }
@@ -767,11 +769,6 @@ gme.update = function(timeElapsed) {
 	if (gme.scenes.current.needsUpdate) {
 		player.update(timeElapsed, true);
 		if (gme.scenes.current.updateFunc) gme.scenes.current.updateFunc();
-	}
-	if (gme.scenes.currentName.includes('rock')) {
-		const shake = [randomInt(-shakeAmount, shakeAmount), randomInt(-shakeAmount, shakeAmount)];
-		trees.shake(shake);
-		player.shake(shake);
 	}
 };
 
