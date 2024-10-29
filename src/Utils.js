@@ -3,6 +3,9 @@
 const things = 'abcdefghijklmnopqrstuvwxyz';
 const cellSize = { w: 64, h: 64 }; // stupid global map thing
 const lettersTrack = 24, lettersLead = 56;
+const sunFinish = 400;
+const shakeAmount = 2;
+const sunInterval = 1280 * 3, moonInterval = 1280;
 
 const edwardsQuote = [
 	'... and all your righteousness, would have no more influence to uphold you, and keep you out of hell ...',
@@ -68,4 +71,4 @@ function getRange(min, max) {
 	return a < b ? [a, b] : [b, a];
 }
 
-export { edwardsQuote, narrative, lettersTrack, lettersLead, things, cellSize, assignList, getRange };
+export { sunFinish, shakeAmount, sunInterval, moonInterval, edwardsQuote, narrative, lettersTrack, lettersLead, things, cellSize, assignList, getRange };

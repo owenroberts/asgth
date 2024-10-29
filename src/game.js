@@ -11,7 +11,7 @@ import { Level } from './classes/Level.js';
 
 import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 
-import { edwardsQuote, narrative, cellSize, lettersTrack, lettersLead } from './Utils.js';
+import { sunFinish, shakeAmount, sunInterval, moonInterval, edwardsQuote, narrative, cellSize, lettersTrack, lettersLead } from './Utils.js';
 
 // loading animation pre lines render
 const title = document.getElementById('title');
@@ -25,7 +25,6 @@ const isMobile = Cool.mobilecheck();
 if (isMobile) document.body.classList.add('mobile');
 
 const playedInstructions = localStorage.getItem('spider-instructions-complete');
-
 
 /* this is the game part */
 const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol', 'webs', 'end', 'chooseInstructions'];
@@ -64,22 +63,17 @@ gme.load({
 	}
 }, false);
 
-
 let player;
 let sun, moon, silk, selectSprite, stone, score;
 let points = { rock: 0, spider: 0 };
 let lastPoint;
-let sunInterval = 1280 * 3, moonInterval = 1280;
-let sunFinish = 400;
-let shakeAmount = 2;
+
 let web = Web();
 let symbolMatch, symbolMatch2;
 let trees;
 let treeLoc, prevTreeLoc = [], allTrees = [];
 let narration; // handles text scenes
 let doodoo, sfx;
-
-
 
 let levelCount = 0; // counts levels, also used to advance narrative
 let nextLevel; // save value of next level following dialog
@@ -538,7 +532,6 @@ function startRockScene(scene) {
 	sfx.pause('web');
 	selectSprite.isActive = false;
 
-	console.log('scene', scene);
 	scene.addToDisplay(stone);
 
 	// rock starts animating
@@ -564,20 +557,31 @@ function startRockScene(scene) {
 			onRockRolled();
 		}
 
-		const shake = [Cool.randomInt(-shakeAmount, shakeAmount), Cool.randomInt(-shakeAmount, shakeAmount)];
+		const shake = [
+			Cool.randomInt(-shakeAmount, shakeAmount), 
+			Cool.randomInt(-shakeAmount, shakeAmount)
+		];
 		trees.shake(shake);
 		player.shake(shake);
 	};
 
 	// trees and web start freaking out
-	let w = 1, s = 0.1;
+	let s = 1, j = 1;
+	let drawingLength = trees.animation.getCurrentDrawing().length;
+
+	let si = 0, ei = drawingLength;
 	trees.animation.onDraw = () => {
-		if (w < 32) {
-			w += 0.004;
-			s += 0.0004;
-			trees.animation.overrideProperty('wiggleRange', w);
-			trees.animation.overrideProperty('wiggleSpeed', s);
-		}
+
+		s = Math.max(1, s + Cool.random(-0.0005, 0.001));
+		j = Math.max(1, j + Cool.random(-0.0005, 0.001));
+
+		si = Math.max(1, si + Cool.random(-0.015, 0.02));
+		ei = Math.max(1, Math.min(drawingLength, ei + Cool.random(-0.02, 0.015)));
+
+		trees.animation.overrideProperty('segmentNum', Math.round(s));
+		trees.animation.overrideProperty('jiggleRange', Math.round(j));
+		trees.animation.overrideProperty('startIndex', Math.round(si));
+		trees.animation.overrideProperty('endIndex', Math.round(ei));
 	}
 	web.startOverride();
 
