@@ -169,7 +169,6 @@ function startGame(withSound) {
 	} else {
 		gme.scenes.current = 'instructionsMovement';
 	}
-	
 }
 
 function setupSound() {
