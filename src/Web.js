@@ -1,4 +1,12 @@
-function Web() {
+/*
+	this is the spider's web?
+*/
+
+import { GameAnim } from '../lines/src/GameEngine.js';
+import { Drawing, Layer } from '../lines/src/Lines.js';
+
+export function Web() {
+	
 	const animation = new GameAnim();
 	const drawing = new Drawing();
 	animation.drawings.push(drawing);

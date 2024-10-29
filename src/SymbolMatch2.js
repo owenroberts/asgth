@@ -5,7 +5,7 @@
 	5 4 3
 */
 
-function SymbolMatch2(symbolProfiles) {
+export function SymbolMatch2(symbolProfiles) {
 
 	const vectorMap = {
 		"0-1": 0,

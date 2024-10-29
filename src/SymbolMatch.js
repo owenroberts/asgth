@@ -2,7 +2,9 @@
 	match normalized drawings to symbol data
 */
 
-function SymbolMatch(symbolProfiles) {
+import * as Cool from '../cool/cool.js';
+
+export function SymbolMatch(symbolProfiles) {
 
 	const profiles = 'abcdefghijklm'.split('');
 
@@ -192,7 +194,7 @@ function SymbolMatch(symbolProfiles) {
 			}
 			
 			// add up scores and divide by number of points
-			similarity += map(distance, 0, far, 1, 0);
+			similarity += Cool.map(distance, 0, far, 1, 0);
 		}
 		
 		return { similarity, usedPointIndexes };

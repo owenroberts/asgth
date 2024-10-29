@@ -1,5 +1,8 @@
-class Spider extends Player {
-	constructor(x, y, states, debug) {
+import { Player } from './classes/Player.js';
+import { Counter} from '../lines/src/GameEngine.js';
+
+export class Spider extends Player {
+	constructor(x, y, states, bounds, debug) {
 		super(Math.round(x), Math.round(y));
 
 		/* 
@@ -28,6 +31,7 @@ class Spider extends Player {
 		this.leftCounter = new Counter(8);
 		this.rightCounter.end();
 		this.leftCounter.end();
+		this.bounds = structuredClone(bounds);
 	}
 
 	setAnimation(animation) {
@@ -64,13 +68,13 @@ class Spider extends Player {
 		speed[0] *= time / 100;
 		speed[1] *= time / 100;
 
-		if (this.position[0] + speed[0] > gme.bounds.left &&
-			this.position[0] + speed[0] < gme.bounds.right) {
+		if (this.position[0] + speed[0] > this.bounds.left &&
+			this.position[0] + speed[0] < this.bounds.right) {
 			this.position[0] += speed[0];
 		}
 
-		if (this.position[1] + speed[1] > gme.bounds.top &&
-			this.position[1] + speed[1] < gme.bounds.bottom) {
+		if (this.position[1] + speed[1] > this.bounds.top &&
+			this.position[1] + speed[1] < this.bounds.bottom) {
 			this.position[1] += speed[1];
 		}
 		

@@ -1,4 +1,6 @@
-class Trees extends Texture {
+import { Texture } from '../../lines/src/GameEngine.js';
+
+export class Trees extends Texture {
 	update(player) {
 		// return this.collide(player);
 		for (let i = 0; i < this.locations.length; i++) {

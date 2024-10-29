@@ -1,3 +1,18 @@
+import * as Cool from '../cool/cool.js';
+import { Doodoo } from '../doodoo/src/Doodoo.js';
+import { Game, Sprite, TextButton, TextSprite, Button, SoundProvider, Counter, Texture, Scene, ColliderEmpty } from '../lines/src/GameEngine.js';
+import { Web } from './Web.js';
+import { Narration } from './Narration.js';
+import { SymbolMatch } from './SymbolMatch.js';
+import { SymbolMatch2 } from './SymbolMatch2.js';
+import { Spider } from './Spider.js';
+import { Trees } from './classes/Trees.js';
+import { Level } from './classes/Level.js';
+
+import themeFile from '../doodoo/compositions/inf3_theme_v.json';
+
+import { edwardsQuote, narrative, cellSize, lettersTrack, lettersLead } from './Utils.js';
+
 // loading animation pre lines render
 const title = document.getElementById('title');
 function loadingAnimation() {
@@ -11,8 +26,6 @@ if (isMobile) document.body.classList.add('mobile');
 
 const playedInstructions = localStorage.getItem('spider-instructions-complete');
 
-const { Game, GameAnim, Scene, Sprite, SpriteCollection, ColliderSprite, ColliderEntity, TextSprite, Texture, UI, Counter, SoundProvider, ColliderEmpty } = LinesEngine;
-const { Drawing, Layer } = Lines;
 
 /* this is the game part */
 const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol', 'webs', 'end', 'chooseInstructions'];
@@ -42,16 +55,16 @@ const gme = new Game({
 
 gme.load({
 	animations: {
-		sprites: './public/data/sprites.json',	
+		sprites: './data/sprites.json',	
 	},
 	data: {
-		shape_profiles: './public/data/shape_profiles.json',
-		shape_profiles_2: './public/data/shape_profiles_2.json',
-		level_bounds: './public/data/level_bounds.json'
+		shape_profiles: './data/shape_profiles.json',
+		shape_profiles_2: './data/shape_profiles_2.json',
+		level_bounds: './data/level_bounds.json'
 	}
 }, false);
 
-let lettersTrack = 24, lettersLead = 56;
+
 let player;
 let sun, moon, silk, selectSprite, stone, score;
 let points = { rock: 0, spider: 0 };
@@ -66,52 +79,7 @@ let treeLoc, prevTreeLoc = [], allTrees = [];
 let narration; // handles text scenes
 let doodoo, sfx;
 
-const edwardsQuote = [
-	'... and all your righteousness, would have no more influence to uphold you, and keep you out of hell ...',
-	"... than a spider's web would have to stop a falling rock."
-];
 
-const narrative = {
-	spider: [
-		"When I was a young spider, I overheard a two-legged telling a story about a rock.",
-		"The two-legged believed an invisible power was contained in or guided by the rock.",
-		"They rolled the rock to judge the lives of other two-leggeds.",
-		"Among spiders, we considered the two-leggeds irrational, primitive creatures.",
-		"Spiders had long ceased believing in invisible forces.",
-		"In spider stories, the fates had been replaced by the whims of nature, and destinies with the hopes, flaws and disappointments of animals.",
-		"As a naive, young spider, I thought I could communicate with the two-legged.",
-		"I hoped to free them of their brutal reliance on the cold, smooth rock.",
-		"I studied the marks they made on rocks and leaves.",
-		"I spun into my webs messages about the hazards of believing in stories.",
-		"They interpreted my messages as an epistle from Satan, and rolled their rock across them.",
-		"What could I write that would make the two-legged pause to read?",
-	],
-	rock: [
-		"For thousands of years I was just a part of the vast earth.",
-		"Over thousands of years more, I was separated and smoothed by water.",
-		"For thousands of years more, I sat motionless while plants grew around me.",
-		"The slow vibrations of the plants were joined by fast vibrations of moving creatures filled with liquid blood.",
-		"Then one day, a two-legged creature lifted me into the air.",
-		"I felt the smooth, hairless skin of the two-legged creature twisting me around in the air.",
-		"Then I was rolled across a patch of dirt. A long time later, I was rolled again.",
-		"With each roll, the earth was flattened under my weight.",
-		"At the end of each roll, I was covered in dirt, sticks, leaves and blood.",
-		"I felt vibrations in the air that pierced like screams.",
-		"Over time, the wind blew away all the fragments until my surface was smooth again.",
-		"I had provided an answer to those animals with the strength to lift me.",
-		"Whatever I crushed beneath doesn't begin to scar my surface, only after thousands of rolls might a stick make a scratch, or blood a stain.",
-	],
-	end: {
-		spider: {
-			a: "I wrote, look up, and they dropped the rock on their head.", // spider win
-			b: "I can only continue trying new messages until one day they might pause.", // spider lose
-		},
-		rock: {
-			a: "After the day I felt the two-legged creature's bones snap on my surface, the rolling ended.", // spider win
-			b: "Whatever I crushed beneath doesn't begin to scar my surface, only after thousands of rolls might a stick make a scratch, or blood a stain.", // spider lose
-		}
-	}
-}
 
 let levelCount = 0; // counts levels, also used to advance narrative
 let nextLevel; // save value of next level following dialog
@@ -173,16 +141,12 @@ function startGame(withSound) {
 
 function setupSound() {
 	// start doodoo
-	fetch('./doodoo/compositions/inf3_theme.json')
-		.then(res => res.json())
-		.then(json => {
-			doodoo = new Doodoo({
-				...json,
-				samplesURL: './doodoo/samples/',
-				volume: -12,
-				// autoStart: false
-			});
-		});
+	doodoo = new Doodoo({
+		...themeFile,
+		samplesURL: './doodoo/samples/',
+		volume: -12,
+		// autoStart: false
+	});
 
 	// start sfx
 	sfx = SoundProvider({
@@ -267,8 +231,16 @@ function instructionsSetup() {
 		letters: sprites.letters,
 	}));
 
-	trees.addLocation(randomInt(2 * 64, 4 * 64), randomInt(3 * 64, 6 * 64), randomInt(25));
-	trees.addLocation(randomInt(7 * 64, 12 * 64), randomInt(3 * 64, 6 * 64), randomInt(25));
+	trees.addLocation(
+		Cool.randomInt(2 * 64, 4 * 64), 
+		Cool.randomInt(3 * 64, 6 * 64), 
+		Cool.randomInt(25)
+	);
+	trees.addLocation(
+		Cool.randomInt(7 * 64, 12 * 64), 
+		Cool.randomInt(3 * 64, 6 * 64), 
+		Cool.randomInt(25)
+	);
 
 
 	const xPressCounter = new Counter(2);
@@ -308,7 +280,7 @@ function chooseInstructions() {
 function startAfterPractice() {
 	// play quick web scene and then load first level
 	gme.scenes.current = 'webs';
-	const webSprite = random(gme.scenes.webs.displaySprites.sprites);
+	const webSprite = Cool.random(gme.scenes.webs.displaySprites.sprites);
 	// console.log(webSprite);
 	webSprite.animation.currentFrame = 0;
 	webSprite.animation.play();
@@ -326,7 +298,7 @@ function startAfterPractice() {
 }
 
 function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
-	const practiceSymbol = practiceSymbolPrevious ?? random('abcdefghijklm'.split(''));
+	const practiceSymbol = practiceSymbolPrevious ?? Cool.random('abcdefghijklm'.split(''));
 	if (practiceAttemptCount === 0) {
 		narration.add([
 			'practice drawing the symbol with your web',
@@ -353,7 +325,7 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 	for (let x = 1 * 64; x < 12 * 64; x += 64) {
 		for (let y = 1 * 64; y < 6 * 64; y += 64) {
 			if ((x + y) % 128) continue; // every other tree
-			trees.addLocation(x, y, randomInt(25));
+			trees.addLocation(x, y, Cool.randomInt(25));
 		}
 	}
 
@@ -396,7 +368,7 @@ function getNextSymbolString(len) {
 	len = len ?? Math.min(3, Math.max(1, levelCount - points.rock));
 	let str = '';
 	for (let i = 0; i < len; i++) {
-		str += random('abcdefghijklm'.split(''));
+		str += Cool.random('abcdefghijklm'.split(''));
 	}
 	return str;
 }
@@ -408,8 +380,8 @@ function setupLevel(symbolString) {
 	// text generator?
 	const levelName = 'level-' + levelCount;
 	
-	// random ground texture
-	const groundTexture = choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
+	// Cool.random ground texture
+	const groundTexture = Cool.choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
 
 	// min room size is size of room, 3+ is easiest/guaranteed
 	let minNodeRoomSize = symbolString.length > 2 ? 2 : 1; 
@@ -427,7 +399,7 @@ function setupLevel(symbolString) {
 	let symbolsMatched = [];
 	trees.locations = [];
 	level.locations.forEach(loc => trees.addLocation(...loc));
-	player.spawn(choice(level.walls));
+	player.spawn(Cool.choice(level.walls));
 	silk.animation.overrideProperty('endIndex', silk.length);
 	
 	const scene = new Scene();
@@ -497,7 +469,7 @@ function setupLevel(symbolString) {
 			if (silk.animation.override.endIndex <= 0) {
 				silk.animation.override.endIndex = 0;
 				updateScore();
-				startRockScene();
+				startRockScene(scene); // error when not passing a scene ??
 			}
 			sfx.play('web');
 		} else {
@@ -506,7 +478,7 @@ function setupLevel(symbolString) {
 
 		sunCounter.update();
 		sunAnimation.update();
-		sun.position[1] = map(Math.sin(sunAnimation.getRatio() * Math.PI), 0, 1, gme.height - 64, 0, true);
+		sun.position[1] = Cool.map(Math.sin(sunAnimation.getRatio() * Math.PI), 0, 1, gme.height - 64, 0, true);
 	};
 
 	gme.scenes.addScene(scene, levelName);
@@ -565,11 +537,12 @@ function startRockScene(scene) {
 	web.end();
 	sfx.pause('web');
 	selectSprite.isActive = false;
-	
+
+	console.log('scene', scene);
 	scene.addToDisplay(stone);
 
 	// rock starts animating
-	const dir = choice(-1, 1);
+	const dir = Cool.choice(-1, 1);
 	stone.position[0] = dir === 1 ? -stone.halfWidth : gme.width;
 	stone.position[1] = -stone.halfHeight;
 	stone.isActive = true;
@@ -578,8 +551,8 @@ function startRockScene(scene) {
 	sfx.play('rock');
 
 	scene.updateFunc = () => {
-		stone.position[0] += random(2, 1) * dir;
-		stone.position[1] += random(-1, 2);
+		stone.position[0] += Cool.random(2, 1) * dir;
+		stone.position[1] += Cool.random(-1, 2);
 
 		sfx.keepPlaying('stone');
 		sfx.keepPlaying('rock');
@@ -591,7 +564,7 @@ function startRockScene(scene) {
 			onRockRolled();
 		}
 
-		const shake = [randomInt(-shakeAmount, shakeAmount), randomInt(-shakeAmount, shakeAmount)];
+		const shake = [Cool.randomInt(-shakeAmount, shakeAmount), Cool.randomInt(-shakeAmount, shakeAmount)];
 		trees.shake(shake);
 		player.shake(shake);
 	};
@@ -624,7 +597,7 @@ function onRockRolled() {
 	// const lastPoint = score.points.slice(-1)[0] === 0 ? 'rock' : 'spider';
 	let nextNarration = narrative[lastPoint][levelCount];
 	// let intro = 'The tale of the ' + lastPoint;
-	let intro = `the ${lastPoint === 'spider' ? 'tale' : 'story'} of the ${lastPoint}`;
+	let intro = `The ${lastPoint === 'spider' ? 'tale' : 'story'} of the ${lastPoint}`;
 
 	
 	if (!nextNarration) {
@@ -646,7 +619,7 @@ function onRockRolled() {
 function setupWalkLevel(symbolString) {
 	// console.clear(); // debug
 	const { levels } = gme.data.data.level_bounds;
-	const levelIndex = levelCount < levels.length ? levelCount : randomInt(0, levels.length - 1);
+	const levelIndex = levelCount < levels.length ? levelCount : Cool.randomInt(0, levels.length - 1);
 	const levelData = levels[levelIndex];
 	const levelName = 'walk-' + levelCount;
 
@@ -659,7 +632,7 @@ function setupWalkLevel(symbolString) {
 	scene.addToDisplay(moon);
 	// scene.addToDisplay(score);
 
-	const groundTexture = choice('tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
+	const groundTexture = Cool.choice('tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
 	const ground = new Texture({ animation: gme.anims.sprites[groundTexture] });
 	scene.addToDisplay(ground);
 	const matrix = [];
@@ -740,7 +713,7 @@ function setupWalkLevel(symbolString) {
 			const y = Math.floor(i / 13);
 			const mt = getMatrixCell(x, y, 0);
 			const n = getWangBlobNum(mt);
-			const f = tileMap.indexOf(n);
+			const f = Cool.tileMap.indexOf(n);
 			ground.addLocation(x * 64, y * 64, f);
 		}
 	}
@@ -762,7 +735,7 @@ function setupWalkLevel(symbolString) {
 		}
 
 		moonAnim.update();
-		moon.position[1] = map(Math.sin(moonAnim.getRatio() * Math.PI), 0, 1, gme.height - 64, 0, true);
+		moon.position[1] = Cool.map(Math.sin(moonAnim.getRatio() * Math.PI), 0, 1, gme.height - 64, 0, true);
 	};
 
 	player.spawn([levelData.start[0] * 64 + 32, levelData.start[1] * 64 + 32]);
@@ -803,7 +776,7 @@ gme.start = function() {
 		up_right: 'up_right', 
 		down_left: 'down_left', 
 		down_right: 'down_right',
-	});
+	}, gme.bounds);
 	// player.debug = true;
 	player.setAnimation(sprites.spider);
 	gme.scenes.instructionsMovement.addSprite(player);
@@ -828,7 +801,7 @@ gme.start = function() {
 
 	splashSetup();
 	instructionsSetup();
-	narration = Narration(onNarrationFinished);
+	narration = Narration(gme, onNarrationFinished);
 	gme.scenes.narration.addToDisplay(narration);
 	
 	sun = new Sprite(13 * 64, 7 * 64, sprites.sun);

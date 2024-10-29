@@ -7,3 +7,9 @@
 [submodule "hellmaps"]
 	path = hellmaps
 	url = https://github.com/owenroberts/hellmaps
+[submodule "cool"]
+	path = cool
+	url = https://github.com/owenroberts/cool
+[submodule "ui"]
+	path = ui
+	url = https://github.com/owenroberts/ui

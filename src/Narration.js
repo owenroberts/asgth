@@ -2,7 +2,10 @@
 	handles displaying narration
 */
 
-function Narration(onFinshed) {
+import { TextSprite } from '../lines/src/GameEngine.js';
+import { cellSize, lettersTrack, lettersLead } from './Utils.js';
+
+export function Narration(gme, onFinshed) {
 
 	const { sprites } = gme.anims;
 	let sfx;

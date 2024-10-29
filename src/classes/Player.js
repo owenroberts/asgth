@@ -1,4 +1,6 @@
-class Player extends ColliderSprite {
+import { ColliderSprite} from '../../lines/src/GameEngine.js';
+
+export class Player extends ColliderSprite {
 	constructor(x, y, states, debug) {
 		super(Math.round(x), Math.round(y));
 		this.mapPosition = [Math.round(x), Math.round(y)];
@@ -150,19 +152,20 @@ class Player extends ColliderSprite {
 		super.display();
 
 		// debug opject ?
-		if (mapAlpha > 0) {
-			gme.renderer.ctx.globalAlpha = mapAlpha;
-			gme.renderer.ctx.fillStyle = 'blue';
+		// how to debug with modules?
+		// if (mapAlpha > 0) {
+		// 	gme.renderer.ctx.globalAlpha = mapAlpha;
+		// 	gme.renderer.ctx.fillStyle = 'blue';
 
-			gme.renderer.ctx.fillRect(
-				this.mapPosition[0] / cellSize.w * mapCellSize - mapCellSize * 0.5, 
-				this.mapPosition[1] / cellSize.h * mapCellSize - mapCellSize * 0.5, 
-				mapCellSize / 2,
-				mapCellSize / 2,
-			);
+		// 	gme.renderer.ctx.fillRect(
+		// 		this.mapPosition[0] / cellSize.w * mapCellSize - mapCellSize * 0.5, 
+		// 		this.mapPosition[1] / cellSize.h * mapCellSize - mapCellSize * 0.5, 
+		// 		mapCellSize / 2,
+		// 		mapCellSize / 2,
+		// 	);
 
-			gme.renderer.ctx.globalAlpha = 1.0;
-		}
+		// 	gme.renderer.ctx.globalAlpha = 1.0;
+		// }
 	}
 
 }

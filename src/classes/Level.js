@@ -1,8 +1,13 @@
-class Level {
+import * as Cool from '../../cool/cool.js';
+import { Texture } from '../../lines/src/GameEngine.js';
+import { BSPMap } from "../../hellmaps/src/Map.js";
+import { cellSize } from '../Utils.js';
+
+export class Level {
 	constructor(minNodeRoomSize, maxNodes, groundTexture) {
 		
 		this.map = new BSPMap(13, 7, minNodeRoomSize, 6, minNodeRoomSize);
-		this.map.build({ w: 0, h: 0 }, { w: 0, h: 0 }, maxNodes, false);
+		this.map.build({ w: 0, h: 0 }, { w: 0, h: 0 }, maxNodes, cellSize, false);
 		this.roomCount = this.map.nodes.filter(n => n.room).length;
 		this.cellCount = this.map.nodes
 			.filter(n => n.room)
@@ -17,7 +22,7 @@ class Level {
 		this.map.nodes
 			.filter(n => n.room)
 			.forEach(n => {
-				const i = randomInt(25);
+				const i = Cool.randomInt(25);
 				const r = n.room;
 				for (let x = r.x; x < r.x + r.w; x++) {
 					for (let y = r.y; y < r.y + r.h; y++) {
@@ -36,7 +41,7 @@ class Level {
 				this.walls.push([x * cellSize.w , y * cellSize.h]);
 				let mt = this.map.getMatrixCell(x, y, [0]);
 				let n = this.map.getWangBlobNum(mt);
-				let f = tileMap.indexOf(n);
+				let f = Cool.tileMap.indexOf(n);
 				this.ground.addLocation(x * cellSize.w , y * cellSize.h, f);
 			}
 		}
