@@ -68,6 +68,7 @@ gme.load({
 }, false);
 
 let player;
+let continuousWeb = true;
 let sun, moon, silk, selectSprite, stone, score;
 let points = { rock: 0, spider: 0 };
 let lastPoint;
@@ -75,7 +76,7 @@ let lastPoint;
 let web = Web();
 let symbolMatch, symbolMatch2;
 let trees;
-let treeLoc, prevTreeLoc = [], allTrees = [];
+let playerOnTreeLoc = [], prevTreeLoc = [], allTrees = [];
 let narration; // handles text scenes
 let doodoo, sfx;
 
@@ -354,7 +355,8 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 
 	sym.updateFunc = () => {
 		const madeConnection = webUpdate();
-		if (madeConnection === 2) {
+		if (madeConnection === 3) {
+			console.log('points', web.getPoints());
 			const symbolMatches = symbolMatch.getMatch(web.getPoints(), 64, 32);
 			const symbolMatches2 = symbolMatch2.getMatch(web.getPoints(), 64, 32);
 			// console.log('symbol matches', symbolMatches.flatMap(m => m).map(m => m.symbol), symbolMatches2.flatMap(m => m));
@@ -400,7 +402,9 @@ function setupLevel(symbolString) {
 	const groundTexture = Cool.choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
 
 	// min room size is size of room, 3+ is easiest/guaranteed
-	let minNodeRoomSize = symbolString.length > 2 ? 2 : 1; 
+	let minNodeRoomSize = symbolString.length > 2 ? 2 : 1;
+	// make at least one with 3 for each 3 symbol
+	// or something more complex to make sure there are 3x3 grids for each symbol ... 
 
 	// set max nodes based on level -- fewer nodes means bigger rooms
 	// max 1x1 nodes 13x7 = 91, use 1/3 ish of that
@@ -410,7 +414,6 @@ function setupLevel(symbolString) {
 	if (levelCount === 0) minNodeRoomSize = 3;
 	const level = new Level(minNodeRoomSize, maxNodes, gme.anims.sprites[groundTexture]);
 	// console.log('level', levelName, symbolString);
-
 
 	let symbolsMatched = [];
 	trees.locations = [];
@@ -443,7 +446,7 @@ function setupLevel(symbolString) {
 	scene.updateFunc = () => {
 
 		const madeConnection = webUpdate();
-		if (madeConnection === 2) {
+		if (madeConnection === 3) {
 			// const matched = [];
 			const symbolMatches = symbolMatch.getMatch(web.getPoints(), 64, 32);
 
@@ -506,44 +509,57 @@ function webUpdate() {
 	// cancel web
 	if (player.input.z) {
 		player.resetInput();
+		if (allTrees.length > 1 && continuousWeb) {
+			web.popPoint(); // last spider point
+			web.end();
+			allTrees = [];
+			sfx.play('cancel');
+			return 3; // made connection 3
+		}
 		if (web.isActive()) {
 			web.cancel();
 		}
 	}
 
 	let madeConnection = 0; // falsey no connection
-	treeLoc = trees.update(player); // player colliding with tree
+	playerOnTreeLoc = trees.update(player); // player colliding with tree
 
-	if (treeLoc) {
-		selectSprite.position = treeLoc;
+	if (playerOnTreeLoc) {
+		selectSprite.position = playerOnTreeLoc;
 		selectSprite.isActive = true;
 
 		if (player.input.x) {
 			player.resetInput();
 			if (!web.isActive()) {
 				web.start();
-				web.addPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
+				web.addPoint([playerOnTreeLoc[0] + 32, playerOnTreeLoc[1] + 32]);
 				web.addPoint(player.position);
-				allTrees.push([...treeLoc]);
-				// web.playSFX('connect');
-				if (sfx) sfx.play('connect');
-				prevTreeLoc = treeLoc;
+				allTrees.push([...playerOnTreeLoc]);
+				
+				sfx.play('connect');
+				prevTreeLoc = playerOnTreeLoc;
 				madeConnection = 1; // truthy 1 connect (started line)
-			} else if (prevTreeLoc[0] != treeLoc[0] || prevTreeLoc[1] != treeLoc[1]) {
-				web.insertPoint([treeLoc[0] + 32, treeLoc[1] + 32]);
-				web.end();
-				// web.playSFX('connect');
-				if (sfx) sfx.play('connect');
-				allTrees.push([...treeLoc]);
-				madeConnection = 2; // truthy 2 connect (finished line)
+			} else if (prevTreeLoc[0] != playerOnTreeLoc[0] || prevTreeLoc[1] != playerOnTreeLoc[1]) {
+				web.insertPoint([playerOnTreeLoc[0] + 32, playerOnTreeLoc[1] + 32]);
+				if (!continuousWeb) {
+					web.end();
+					madeConnection = 3;
+				} else {
+					web.insertEnd();
+					web.insertPoint([playerOnTreeLoc[0] + 32, playerOnTreeLoc[1] + 32]); 
+					prevTreeLoc = playerOnTreeLoc;
+					allTrees.push([...playerOnTreeLoc]);
+					madeConnection = 2; // truthy 2 connect (finished line)
+				}
+				sfx.play('connect');
 			} else {
-				// web.playSFX('cancel');
-				if (sfx) sfx.play('cancel');
+				sfx.play('cancel');
 			}
 		}
 	} else {
 		selectSprite.isActive = false;
 	}
+
 	return madeConnection;
 }
 
@@ -778,8 +794,12 @@ function onNarrationFinished() {
 let mapAlpha = 0;
 let mapCellSize = 24;
 document.addEventListener('keydown', ev => {
-	if (ev.code == 'Equal') mapAlpha = Math.min(1, mapAlpha + 0.5);
-	else if (ev.code == 'Minus') mapAlpha = Math.max(0, mapAlpha - 0.5);
+	if (ev.code === 'Equal') mapAlpha = Math.min(1, mapAlpha + 0.5);
+	else if (ev.code === 'Minus') mapAlpha = Math.max(0, mapAlpha - 0.5);
+	if (ev.code === 'KeyT') {
+		continuousWeb = !continuousWeb;
+		console.log('Continuous Web Toggled', continuousWeb);
+	}
 	// else if (ev.code == 'Enter') ui.message.continue.onClick(); // to move message without mouse
 });
 

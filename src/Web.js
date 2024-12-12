@@ -31,8 +31,17 @@ export function Web() {
 	}
 
 	function insertPoint(point) {
-		drawing.points.splice(drawing.length - 2, 0, point);
-		drawing.offsets.splice(drawing.length - 2, 0, [[0,0],[0,0]]);
+		drawing.points.splice(drawing.length - 1, 0, point);
+		drawing.offsets.splice(drawing.length - 1, 0, [[0,0],[0,0]]);
+	}
+
+	function insertEnd() {
+		drawing.points.splice(drawing.length - 1, 0, "end");
+		drawing.offsets.splice(drawing.length - 1, 0, [[0,0],[0,0]]);
+	}
+
+	function popPoint() {
+		drawing.points.pop();
 	}
 
 	function start() {
@@ -43,15 +52,15 @@ export function Web() {
 		drawing.points.pop();
 		drawing.points.pop();
 		isActive = false;
-		// playSFX('cancel');
-		// build if into sfx class/sound provider?
-		if (sfx) sfx.play('cancel'); 
+		sfx.play('cancel'); 
 	}
 
 	function end() {
 		drawing.points.pop();
 		isActive = false;
-		drawing.add('end');
+		if (drawing.points.slice(-1) !== "end") {
+			drawing.add("end");
+		}
 	}
 
 	function clear() {
@@ -86,7 +95,7 @@ export function Web() {
 
 	return { 
 		display, 
-		addPoint, insertPoint, 
+		addPoint, insertPoint, insertEnd, popPoint,
 		start, end, clear, cancel,
 		startOverride, cancelOverride, 
 		addSFX,
