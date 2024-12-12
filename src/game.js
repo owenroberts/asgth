@@ -11,7 +11,9 @@ import { Level } from './classes/Level.js';
 
 import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 
-import { sunFinish, shakeAmount, sunInterval, moonInterval, edwardsQuote, narrative, cellSize, lettersTrack, lettersLead } from './Utils.js';
+import { sunFinish, shakeAmount, sunInterval, moonInterval, edwardsQuote, narrative, cellSize, lettersTrack, lettersLead, things } from './Utils.js';
+
+import { Strings } from './Strings.js';
 
 // loading animation pre lines render
 const title = document.getElementById('title');
@@ -24,10 +26,10 @@ let loadingInterval = setInterval(loadingAnimation, 1000 / 12);
 const isMobile = Cool.mobilecheck();
 if (isMobile) document.body.classList.add('mobile');
 
-const playedInstructions = localStorage.getItem('spider-instructions-complete');
+const playedInstructions = false; // localStorage.getItem('spider-instructions-complete');
 
 /* this is the game part */
-const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol', 'webs', 'end', 'chooseInstructions'];
+const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol', 'webs', 'end', 'chooseInstructions', 'debug'];
 scenes.push('debug');
 const gme = new Game({
 	dps: 24,
@@ -51,6 +53,8 @@ const gme = new Game({
 		bottom: 1024,
 	}
 });
+const debug = true; // glob debug val
+const debugScene = "instructionsSymbol";
 
 gme.load({
 	animations: {
@@ -99,7 +103,7 @@ function splashSetup() {
 		wrap: 24,
 		track: lettersTrack,
 		lead: lettersLead,
-		x: 32,
+		x: 32 * 4,
 		y: gme.halfHeight,
 		letters: sprites.letters,
 	});
@@ -111,7 +115,7 @@ function splashSetup() {
 		wrap: 14,
 		track: lettersTrack,
 		lead: lettersLead,
-		x: 32 * 2,
+		x: 32 * 6,
 		y: gme.halfHeight + 64,
 		letters: sprites.letters,
 	});
@@ -134,12 +138,13 @@ function startGame(withSound) {
 }
 
 function setupSound() {
+
 	// start doodoo
 	doodoo = new Doodoo({
 		...themeFile,
 		samplesURL: './doodoo/samples/',
 		volume: -12,
-		// autoStart: false
+		autoStart: !debug
 	});
 
 	// start sfx
@@ -230,6 +235,7 @@ function instructionsSetup() {
 		Cool.randomInt(3 * 64, 6 * 64), 
 		Cool.randomInt(25)
 	);
+
 	trees.addLocation(
 		Cool.randomInt(7 * 64, 12 * 64), 
 		Cool.randomInt(3 * 64, 6 * 64), 
@@ -244,7 +250,10 @@ function instructionsSetup() {
 
 	gme.scenes.instructionsWeb.updateFunc = () => {
 		const madeConnection = webUpdate();
-		if (madeConnection) xPressCounter.update();
+		// if (madeConnection) xPressCounter.update();
+
+		// this didn't work
+		if (madeConnection > 0) xPressCounter.set(madeConnection); // 1 is first x, 2 is trees connected
 		if (xPressCounter.isDone()) webInstructionsDelay.update();
 	};
 }
@@ -292,11 +301,10 @@ function startAfterPractice() {
 }
 
 function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
-	const practiceSymbol = practiceSymbolPrevious ?? Cool.random('abcdefghijklm'.split(''));
+	const practiceSymbol = practiceSymbolPrevious ?? Cool.random('abcd'.split(''));
 	if (practiceAttemptCount === 0) {
 		narration.add([
-			'practice drawing the symbol with your web',
-			// 'press z to cancel a web'
+			'practice drawing a symbol with your web',
 		]);	
 	}
 	if (practiceAttemptCount > 0) {
@@ -316,12 +324,26 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 
 	// set up for instructions symbol
 	trees.clear();
-	for (let x = 1 * 64; x < 12 * 64; x += 64) {
-		for (let y = 1 * 64; y < 6 * 64; y += 64) {
-			if ((x + y) % 128) continue; // every other tree
+	for (let x = 4 * 64; x <= 10 * 64; x += 64) {
+		for (let y = 1 * 64; y <= 3 * 64; y += 64) {
+			// if ((x + y) % 128) continue; // every other tree
+			if (x === 64 * 7) continue;
 			trees.addLocation(x, y, Cool.randomInt(25));
 		}
 	}
+
+	const symbolSprite = new TextSprite({
+		msg: practiceSymbol,
+		x: 64,
+		y: 32,
+		wrap: 6,
+		letters: gme.anims.sprites.symbols,
+		track: 64,
+		lead: 72,
+		letterIndexString: things,
+	});
+	gme.scenes.instructionsSymbol.addToDisplay(symbolSprite);
+	player.spawn([128, 196]);
 
 	const sym = gme.scenes.instructionsSymbol;
 	let gotSymbol = false; // so they can't fuck it up after
@@ -761,6 +783,14 @@ document.addEventListener('keydown', ev => {
 	// else if (ev.code == 'Enter') ui.message.continue.onClick(); // to move message without mouse
 });
 
+function debugStart() {
+	setupSound();
+	if (debugScene === 'instructionsSymbol') {
+		setupPractice();
+	}
+	gme.scenes.current = debugScene;
+}
+
 gme.start = function() {
 	document.getElementById('splash').remove();
 	clearInterval(loadingInterval);
@@ -828,23 +858,18 @@ gme.start = function() {
 	});
 	gme.scenes.end.addToDisplay(ending);
 
-	gme.scenes.current = 'splash';
-	// gme.scenes.current = 'debug'; // x to debugStart();
-	// console.log('gme', gme);
-};
+	gme.scenes.current = debug ? 'debug' : 'splash';
 
-function debugStart() {
-	setupSound();
-	// const nextSymbolString = getNextSymbolString();
-	// narration.addSymbols(nextSymbolString);
-	// narration.add([edwardsQuote[0], edwardsQuote[1]]);
-	// gme.scenes.current = 'narration';
-	// // levelCount = 2;
-	// // gme.scenes.current = setupWalkLevel(nextSymbolString);
-	// nextLevel = setupLevel(nextSymbolString);
-	// gme.scenes.current = setupLevel('a');
-	gme.scenes.current = setupWalkLevel('a');
-}
+	if (debug) {
+		gme.scenes.debug.add(new TextSprite({
+			msg: "x to start debug",
+			x: 64,
+			y: 64,
+			letters: gme.anims.sprites.letters,
+			letterIndexString: things,
+		}));
+	}
+};
 
 gme.update = function(timeElapsed) {
 	if (gme.scenes.current.needsUpdate) {
@@ -947,16 +972,4 @@ gme.keyUp = function(key) {
 			player.inputKey(key, false);
 		break;
 	}
-};
-
-gme.mouseDown = function(x, y) {
-	gme.scenes.current.mouseDown(x, y);
-};
-
-gme.mouseUp = function(x, y) {
-	gme.scenes.current.mouseUp(x, y);
-};
-
-gme.mouseMoved = function(x, y) {
-	gme.scenes.current.mouseMoved(x, y);
 };

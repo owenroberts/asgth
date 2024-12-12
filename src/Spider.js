@@ -77,7 +77,6 @@ export class Spider extends Player {
 			this.position[1] + speed[1] < this.bounds.bottom) {
 			this.position[1] += speed[1];
 		}
-		
 	}
 
 	spawn(location) {

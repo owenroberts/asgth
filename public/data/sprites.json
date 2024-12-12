@@ -1,6 +1,6 @@
 {
 	"letters": { "src": "lines/drawings/letters.json" },
-	"symbols": { "src": "lines/drawings/symbols.json" },
+	"symbols": { "src": "lines/drawings/symbols_big.json" },
 
 	"tiles_grass": { "src": "lines/drawings/tiles_grass.json" },
 	"tiles_dirt": { "src": "lines/drawings/tiles_dirt.json" },
@@ -21,6 +21,5 @@
 	"stone": { "src": "lines/drawings/ston_2.json" },
 	"score": { "src": "lines/drawings/score.json" },
 	"ending": { "src": "lines/drawings/ending.json" }
-
 
 }
