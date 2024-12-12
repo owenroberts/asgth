@@ -29,7 +29,7 @@ if (isMobile) document.body.classList.add('mobile');
 const playedInstructions = false; // localStorage.getItem('spider-instructions-complete');
 
 /* this is the game part */
-const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol', 'webs', 'end', 'chooseInstructions', 'debug'];
+const scenes = ['game', 'splash', 'loading', 'narration', 'instructionsMovement', 'instructionsWeb', 'instructionsSymbol', 'webs', 'end', 'chooseInstructions'];
 scenes.push('debug');
 const gme = new Game({
 	dps: 24,
@@ -54,7 +54,7 @@ const gme = new Game({
 	}
 });
 const debug = true; // glob debug val
-const debugScene = "instructionsSymbol";
+const debugScene = "game";
 
 gme.load({
 	animations: {
@@ -69,7 +69,7 @@ gme.load({
 
 let player;
 let continuousWeb = true;
-let sun, moon, silk, selectSprite, stone, score;
+let sun, moon, selectSprite, stone, score;
 let points = { rock: 0, spider: 0 };
 let lastPoint;
 
@@ -419,11 +419,10 @@ function setupLevel(symbolString) {
 	trees.locations = [];
 	level.locations.forEach(loc => trees.addLocation(...loc));
 	player.spawn(Cool.choice(level.walls));
-	silk.animation.overrideProperty('endIndex', silk.length);
 	
 	const scene = new Scene();
 	scene.needsUpdate = true;
-	scene.addSprite([level, player, trees, selectSprite, sun, silk, score]);
+	scene.addSprite([level, player, trees, selectSprite, sun, score]);
 
 	function updateScore() {
 		let point = prevMatched === finishString ? 1 : 0;
@@ -484,12 +483,6 @@ function setupLevel(symbolString) {
 		}
 
 		if (web.isActive() && player.isMoving()) {
-			silk.animation.override.endIndex -= 1;
-			if (silk.animation.override.endIndex <= 0) {
-				silk.animation.override.endIndex = 0;
-				updateScore();
-				startRockScene(scene); // error when not passing a scene ??
-			}
 			sfx.play('web');
 		} else {
 			sfx.pause('web');
@@ -808,6 +801,10 @@ function debugStart() {
 	if (debugScene === 'instructionsSymbol') {
 		setupPractice();
 	}
+	if (debugScene === 'game') {
+		gme.scenes.current = setupLevel(Cool.random('abcd'.split('')));
+		return;
+	}
 	gme.scenes.current = debugScene;
 }
 
@@ -860,10 +857,6 @@ gme.start = function() {
 	
 	sun = new Sprite(13 * 64, 7 * 64, sprites.sun);
 	moon = new Sprite(13 * 64, 7 * 64, sprites.moon);
-
-	silk = new Sprite(12 * 64, 7 * 64, sprites.silk);
-	silk.length = silk.animation.drawings[0].length;
-	silk.animation.overrideProperty('endIndex', silk.length);
 
 	stone = new Sprite(gme.width, -sprites.stone.height, sprites.stone);
 	stone.isActive = false;
