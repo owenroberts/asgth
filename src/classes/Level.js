@@ -22,11 +22,12 @@ export class Level {
 		this.map.nodes
 			.filter(n => n.room)
 			.forEach(n => {
-				const i = Cool.randomInt(25);
+				const i = Cool.randomInt(25 - 3);
 				const r = n.room;
 				for (let x = r.x; x < r.x + r.w; x++) {
 					for (let y = r.y; y < r.y + r.h; y++) {
-						this.locations.push([x * cellSize.w, y * cellSize.h, i]);
+						let textureChoice = Cool.randomInt(i, i + 3);
+						this.locations.push([x * cellSize.w, y * cellSize.h, textureChoice]);
 					}
 				}
 			});

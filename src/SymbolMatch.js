@@ -57,9 +57,6 @@ export function SymbolMatch(symbolProfiles) {
 			.filter(p => typeof p !== "string")
 			.map(p => p.map((c) => (c - offset) / unit));
 
-
-		console.log('grid points', points);
-
 		const lines = [];
 		let shapeCount = 0;
 		for (let i = 0; i < points.length; i += 2) {

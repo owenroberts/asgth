@@ -9,6 +9,7 @@ export function Narration(gme, onFinshed) {
 
 	const { sprites } = gme.anims;
 	let sfx;
+	let dialogList, goNext = false;
 
 	let text = new TextSprite({
 		x: 32,
@@ -21,7 +22,7 @@ export function Narration(gme, onFinshed) {
 	});
 
 	let symbols = new TextSprite({
-		x: 64,// gme.width - (64 * 3),
+		x: 32,// gme.width - (64 * 3),
 		y: 32,
 		wrap: 6,
 		letters: sprites.symbols,
@@ -32,14 +33,12 @@ export function Narration(gme, onFinshed) {
 	symbols.isActive = false;
 
 	let xForNext = new TextSprite({
-		x: 32,
-		y: gme.height - 128,
+		x: 64 * 0.5,
+		y: 64 * 5.5,
 		msg: 'x to continue',
 		track: lettersTrack,
 		letters: sprites.letters,
 	});
-
-	let dialogList, goNext = false;
 
 	function add(list) {
 		if (!Array.isArray(list)) list = [list];
