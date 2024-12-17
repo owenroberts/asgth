@@ -16,7 +16,6 @@ import { sunFinish, shakeAmount, sunInterval, moonInterval, edwardsQuote, narrat
 import { Strings } from './Strings.js';
 import { Consts } from './Consts.js';
 
-
 // loading animation pre lines render
 const title = document.getElementById('title');
 function loadingAnimation() {
@@ -58,7 +57,7 @@ const gme = new Game({
 
 /* debugging */
 const debug = false; // glob debug val
-const debugScene = "instructionsSymbol";
+const debugScene = "splash";
 if (debug) console.log('gme', gme);
 let mapAlpha = 0;
 let mapCellSize = 24;
@@ -202,9 +201,30 @@ function spritesSetup() {
 	gme.scenes.narration.addToDisplay(levelDisplay);
 
 	gme.scenes.webs.addToDisplay(new Sprite(0, 0, sprites.webs_1));
-	const ending = new Sprite(0, 0, sprites.ending, animation => {
-		animation.play();
-	});
+	
+	const ending = new Sprite(0, 0, sprites.ending);
+	ending.animation.play();
+	ending.animation.onPlayedOnce = function() {
+		ending.animation.onPlayedOnce = undefined;
+		ending.animation.state = "still_frame";
+		
+		gme.scenes.end.addToDisplay(new TextSprite({
+			msg: Strings.RESET_BTN,
+			x: 64 * 2,
+			y: 64 * 5.5,
+			letters: sprites.letters_keyboard,
+		}));
+		
+		gme.scenes.end.addToDisplay(new TextSprite({
+			msg: Strings.INST_RESTART,
+			wrap: 24,
+			track: lettersTrack,
+			lead: lettersLead,
+			x: 64 * 3,
+			y: 64 * 5.5,
+			letters: sprites.letters,
+		}));
+	};
 	gme.scenes.end.addToDisplay(ending);
 }
 
@@ -814,7 +834,8 @@ function startRockScene(scene) {
 
 	trees.animation.onDraw = () => {
 		animator.update();
-	}
+	};
+
 	web.startOverride();
 }
 
@@ -1000,6 +1021,17 @@ function onNarrationFinished() {
 	gme.scenes.current = nextLevel;
 }
 
+function resetGame() {
+	levelCount = 0;
+	gme.scenes.current = "splash";
+	lastPointWinner = undefined;
+	nextLevel = undefined;
+	if (doodoo) {
+		doodoo.stop();
+		doodoo.play();
+	}
+}
+
 gme.start = function() {
 	document.getElementById('splash').remove();
 	clearInterval(loadingInterval);
@@ -1121,6 +1153,13 @@ gme.keyUp = function(key) {
 			break;
 		case 'down':
 			player.inputKey('down', false);
+			break;
+
+		case Strings.RESET_BTN:
+			if (gme.scenes.isCurrent('end')) {
+				sfx.play('next_button');
+				resetGame();
+			}
 			break;
 
 		case 'x':
