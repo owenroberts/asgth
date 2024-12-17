@@ -56,7 +56,7 @@ const gme = new Game({
 
 /* debugging */
 const debug = true; // glob debug val
-const debugScene = "splash";
+const debugScene = "instructionsSymbol";
 if (debug) console.log('gme', gme);
 let mapAlpha = 0;
 let mapCellSize = 24;
@@ -65,7 +65,11 @@ document.addEventListener('keydown', ev => {
 	else if (ev.code === 'Minus') mapAlpha = Math.max(0, mapAlpha - 0.5);
 	if (ev.code === 'KeyT') {
 		continuousWeb = !continuousWeb;
-		console.log('Continuous Web Toggled', continuousWeb);
+		console.log('Continuous web toggled', continuousWeb);
+	}
+	if (ev.code === 'KeyY') {
+		checkUnfinishedConnection = !checkUnfinishedConnection;
+		console.log('Check unfinished toggled', checkUnfinishedConnection);
 	}
 	// else if (ev.code == 'Enter') ui.message.continue.onClick(); // to move message without mouse
 });
@@ -83,6 +87,7 @@ gme.load({
 
 let player;
 let continuousWeb = true;
+let checkUnfinishedConnection = true;
 let sun, moon, selectSprite, stone, scoreDisplay;
 let sunCounter = new Counter(sunInterval);
 let sunAnimation = new Counter(sunInterval);
@@ -455,15 +460,29 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 
 	gme.scenes.instructionsSymbol.updateFunc = () => {
 		const madeConnection = webUpdate();
-		if (madeConnection === 3) {
-			const symbolMatches = symbolMatch.getMatch(web.getPoints(), 64, 32);
-			const symbolMatches2 = symbolMatch2.getMatch(web.getPoints(), 64, 32);
+		if ((madeConnection === 2 && checkUnfinishedConnection) || madeConnection === 3) {
+
+			const points = structuredClone(web.getPoints());
+			if (madeConnection === 2) {
+				while (points.slice(-1)[0] !== 'end' && points.length > 0) {
+					points.pop();
+				}
+			}
+
+
+			const symbolMatches = symbolMatch.getMatch(points, 64, 32);
+			const symbolMatches2 = symbolMatch2.getMatch(points, 64, 32);
 			// console.log('symbol matches', symbolMatches.flatMap(m => m).map(m => m.symbol), symbolMatches2.flatMap(m => m));
 
 			if (symbolMatches.flatMap(m => m).map(m => m.symbol).includes(practiceSymbol)) gotSymbol = true;
 			if (symbolMatches2.flatMap(m => m).includes(practiceSymbol)) gotSymbol = true;
 
+			console.log('got symbol', gotSymbol);
+
 			if (gotSymbol) {
+				if (madeConnection === 2) {
+					web.cancel();
+				}
 				sfx.play('match', true, 0.9, 1.1);
 				finishSun();
 			}
@@ -595,14 +614,24 @@ function setupLevel(symbolString) {
 	scene.updateFunc = () => {
 
 		const madeConnection = webUpdate();
-		if (madeConnection === 3) {
+		if ((madeConnection === 2 && checkUnfinishedConnection) || madeConnection === 3) {
+
+			const points = structuredClone(web.getPoints());
+			if (madeConnection === 2) {
+				while (points.slice(-1)[0] !== 'end' && points.length > 0) {
+					points.pop();
+				}
+			}
+			
 			// const matched = [];
-			const symbolMatches = symbolMatch.getMatch(web.getPoints(), 64, 32);
+			const symbolMatches = symbolMatch.getMatch(points, 64, 32);
 
 			// only adds if the first one didn't get it
-			const symbolMatches2 = symbolMatch2.getMatch(web.getPoints(), 64, 32);
+			const symbolMatches2 = symbolMatch2.getMatch(points, 64, 32);
+			
 			let matched = [...symbolMatches];
 			const used = [...symbolMatches];
+			
 			symbolMatches2.forEach(s => {
 				if (!matched.includes(s)) {
 					matched.push(s);
