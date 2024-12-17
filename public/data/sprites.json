@@ -14,6 +14,8 @@
 	"levels": { "src": "lines/drawings/inters_2.json" },
 	
 	"webs_1": { "src": "lines/drawings/webs_1.json" },
+	"webs_2": { "src": "lines/drawings/webs_2.json" },
+
 
 	"spider": { "src": "lines/drawings/spider.json" },
 

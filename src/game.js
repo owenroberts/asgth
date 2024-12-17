@@ -89,7 +89,8 @@ gme.load({
 let player;
 let continuousWeb = true;
 let checkUnfinishedConnection = true;
-let sun, moon, selectSprite, stone, scoreDisplay, levelDisplay;
+let sun, moon, selectSprite, stone, scoreDisplay, levelDisplay
+let webs, websAnimator, websCounter;
 let sunCounter = new Counter(sunInterval);
 let sunAnimation = new Counter(sunInterval);
 let points = { rock: 0, spider: 0 };
@@ -194,13 +195,22 @@ function spritesSetup() {
 	stone.isActive = false;
 	stone.animation.isPlaying = true;
 
+	webs = new Sprite(0, 0, sprites.webs_2);
+	websAnimator = new Animator(webs.animation, {
+		segmentNum: [1, 3],
+		jiggleRange: [1, 2],
+	});
+	websCounter = new Counter(Consts.WEBS_INTERVAL);
+	gme.scenes.webs.addToDisplay(webs);
+	gme.scenes.webs.needsUpdate = true;
+
 	scoreDisplay = new Texture({ animation: sprites.score });
 	gme.scenes.narration.addToDisplay(scoreDisplay);
 
 	levelDisplay = new Texture({ animation: sprites.symbols_small });
 	gme.scenes.narration.addToDisplay(levelDisplay);
 
-	gme.scenes.webs.addToDisplay(new Sprite(0, 0, sprites.webs_1));
+	// gme.scenes.webs.addToDisplay(new Sprite(0, 0, sprites.webs_1));
 	
 	const ending = new Sprite(0, 0, sprites.ending);
 	ending.animation.play();
@@ -530,7 +540,8 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 
 		if (sunCounter.isDone()) {
 			if (gotSymbol) {
-				startAfterPractice();
+				// startAfterPractice();
+				setupWebsScene(startAfterPractice);
 			} else {
 				setupPractice(practiceAttemptCount + 1, practiceSymbol);
 			}
@@ -539,28 +550,34 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 }
 
 function startAfterPractice() {
-	// play quick web scene and then load first level
+	web.clear();
+	trees.clear();
+	narration.cancelSymbols();
+	const nextSymbolString = getNextSymbolString();
+	narration.addSymbols(nextSymbolString);
+	narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2, Strings.INST_DRAW]);
+	sfx.play('level_start', true);
+	gme.scenes.current = 'narration';
+	nextLevel = setupLevel(nextSymbolString);
+	localStorage.setItem('spider-instructions-complete', true);
+}
+
+function setupWebsScene(callback) {
+	web.clear();
 	gme.scenes.current = 'webs';
-	const webSprite = Cool.random(gme.scenes.webs.displaySprites.sprites);
-	// console.log(webSprite);
-	webSprite.animation.currentFrame = 0;
-	webSprite.animation.play();
-	webSprite.animation.onPlayedOnce = () => {
-		web.clear();
-		trees.clear();
-		narration.cancelSymbols();
-		const nextSymbolString = getNextSymbolString();
-		narration.addSymbols(nextSymbolString);
-		narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2, Strings.INST_DRAW]);
-		sfx.play('level_start', true);
-		gme.scenes.current = 'narration';
-		nextLevel = setupLevel(nextSymbolString);
-		localStorage.setItem('spider-instructions-complete', true);
+	webs.animation.currentFrame = Cool.randomInt(0, 6);
+	websCounter.reset();
+	gme.scenes.webs.updateFunc = function() {
+		websAnimator.update();
+		websCounter.update();
+		if (websCounter.isDone()) {
+			callback();
+		}
 	};
 }
 
 function getNextSymbolString(len) {
-	return Consts.LEVEL_ORDER.split('')[levelCount];
+	return Consts.LEVEL_ORDER.charAt(levelCount);
 
 	// old way 
 
@@ -712,7 +729,7 @@ function setupLevel(symbolString) {
 		if (sunCounter.isDone()) {
 			let whoScored = updateScore();
 			if (whoScored === 'spider') {
-				onRockRolled();
+				setupWebsScene(onRockRolled);
 			} else {
 				startRockScene(scene);
 			}
