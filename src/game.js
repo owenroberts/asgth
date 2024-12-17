@@ -1,6 +1,7 @@
 import * as Cool from '../cool/cool.js';
 import { Doodoo } from '../doodoo/src/Doodoo.js';
 import { Game, Sprite, TextButton, TextSprite, Button, SoundProvider, Counter, Texture, Scene, ColliderEmpty, ColliderSprite } from '../lines/src/GameEngine.js';
+import { Animator } from '../lines/src/Lines.js';
 import { Web } from './Web.js';
 import { Narration } from './Narration.js';
 import { SymbolMatch } from './SymbolMatch.js';
@@ -55,7 +56,7 @@ const gme = new Game({
 
 /* debugging */
 const debug = true; // glob debug val
-const debugScene = "rock";
+const debugScene = "splash";
 if (debug) console.log('gme', gme);
 let mapAlpha = 0;
 let mapCellSize = 24;
@@ -247,45 +248,52 @@ function instructionsSetup() {
 	const { sprites } = gme.anims;
 	const instMove = gme.scenes.instructionsMovement;
 	const instWeb = gme.scenes.instructionsWeb;
+	
+	instMove.onXPress = function() {
+		if (!arrowsPressed.every(a => a)) return;
+		gme.scenes.current = 'instructionsWeb';
+		sfx.play('next_button');
+		xBtn.setPosition(64 * 0.5, 64 * 0.5);
+	};
 
 	// movement instructions
-
 	player.spawn([64 * 10, 64 * 1]);
 
 	instMove.addToDisplay(new TextSprite({
 		countForward: true,
-		msg: "you are the spider",
-		wrap: 14,
+		msg: Strings.INST_MOVE_YOU,
 		track: lettersTrack,
 		lead: lettersLead,
 		x: 64 * 0.5,
 		y: 64 * 0.5,
 		letters: sprites.letters,
+		wrap: 14,
 	}));
 
 	instMove.addToDisplay(new TextSprite({
 		countForward: true,
-		msg: "move with the arrow keys",
-		wrap: 24,
+		msg: Strings.INST_MOVE_KEYS,
 		track: lettersTrack,
 		lead: lettersLead,
 		x: 64 * 0.5,
 		y: 64 * 1.5,
 		letters: sprites.letters,
+		wrap: 22,
 	}));
 
 	instMove.addToDisplay(new Sprite(64 * 0.5, 64 * 2.5, sprites.keyboard_arrows));
 
 	const xBtn = instMove.addToDisplay(new TextSprite({
-		msg: "x",
+		msg: Strings.X_BTN,
 		x: 64 * 0.5,
 		y: 64 * 5.5,
 		letters: sprites.letters_keyboard,
 		isActive: false,
 	}));
+	instWeb.addToDisplay(xBtn);
 
 	const xToContinue = instMove.addToDisplay(new TextSprite({
-		msg: "continue",
+		msg: Strings.CONTINUE,
 		wrap: 24,
 		track: lettersTrack,
 		lead: lettersLead,
@@ -295,30 +303,31 @@ function instructionsSetup() {
 		isActive: false,
 	}));
 
-	let arrowsPressed = { up: false, left: false, right: false };
+	let arrowsPressed = [false, false, false]; // up, left, right
 	const nextInstructionDelay = new Counter(60, () => {
 		xToContinue.isActive = true;
 		xBtn.isActive = true;
-		instMove.xReady = true;
+		// xBtn.setPosition(64 * 1, 64 * 1);
 	});
 
 	instMove.updateFunc = () => {
-		let allArrowsPressed = true;
-		for (const dir in arrowsPressed) {
-			if (player.input[dir]) arrowsPressed[dir] = true;
-			if (!arrowsPressed[dir]) allArrowsPressed = false;
+		if (player.input['up']) arrowsPressed[0] = true;
+		if (player.input['left']) arrowsPressed[1] = true;
+		if (player.input['right']) arrowsPressed[2] = true;
+
+		if (arrowsPressed.every(a => a)) {
+			nextInstructionDelay.update();
 		}
-		if (allArrowsPressed) nextInstructionDelay.update();
 	};
 
 	// instructionsWeb
-	instWeb.addToDisplay(new TextSprite({
+	const webInstructions = instWeb.addToDisplay(new TextSprite({
 		countForward: true,
-		msg: "press x over a tree to connect a web, press z to release",
+		msg: Strings.INST_WEB_1,
 		wrap: 22,
 		track: lettersTrack,
 		lead: lettersLead,
-		x: 64 * 0.5,
+		x: 64 * 1.5,
 		y: 64 * 0.5,
 		letters: sprites.letters,
 	}));
@@ -335,18 +344,37 @@ function instructionsSetup() {
 		Cool.randomInt(25)
 	);
 
-	const xPressCounter = new Counter(2);
-	const webInstructionsDelay = new Counter(90, () => {
+	const webInstructionsDelay = new Counter(120, () => {
 		setupPractice();
 	});
+	const connections = [false, false, false];
 
 	instWeb.updateFunc = () => {
 		const madeConnection = webUpdate();
-		// if (madeConnection) xPressCounter.update();
+		if (madeConnection === 1) {
+			if (!connections[0] && !connections[1] && !connections[2]) {
+				connections[0] = true;
+				webInstructions.setMsg(Strings.INST_WEB_2);
+			}
+		}
 
-		// this didn't work
-		if (madeConnection > 0) xPressCounter.set(madeConnection); // 1 is first x, 2 is trees connected
-		if (xPressCounter.isDone()) webInstructionsDelay.update();
+		if (madeConnection === 2) {
+			if (connections[0] && !connections[2]) {
+				connections[1] = true;
+				xBtn.setMsg(Strings.Z_BTN);
+				webInstructions.setMsg(Strings.INST_WEB_3);
+			}
+		}
+
+		if (madeConnection >= 3) {
+			if (connections[0] && connections[1]) {
+				connections[2] = true;
+			}
+		}
+		
+		if (connections.every(c => c)) {
+			webInstructionsDelay.update();
+		}
 	};
 }
 
@@ -635,6 +663,7 @@ function webUpdate() {
 		}
 		if (web.isActive()) {
 			web.cancel();
+			return 4;
 		}
 	}
 
@@ -698,6 +727,8 @@ function startRockScene(scene) {
 	sfx.play('stone');
 	sfx.play('rock');
 
+	player.isActive = false;
+
 	scene.updateFunc = () => {
 		stone.position[0] += Cool.random(2, 1) * dir;
 		stone.position[1] += Cool.random(-1, 2);
@@ -709,6 +740,7 @@ function startRockScene(scene) {
 			dir === 1 && stone.position[0] > gme.width) {
 			stone.isActive = false;
 			stone.displayFunc = undefined;
+			player.isActive = true;
 			onRockRolled();
 		}
 
@@ -717,37 +749,19 @@ function startRockScene(scene) {
 			Cool.randomInt(-shakeAmount, shakeAmount)
 		];
 		trees.shake(shake);
-		player.shake(shake);
+		// player.shake(shake);
 	};
 
 	// trees and web start freaking out
-	let s = 1, j = 1;
-	let drawingLength = trees.animation.getCurrentDrawing().length;
+	let animator = new Animator(trees.animation, {
+		jiggleRange: [1, 1],
+		segmentNum: [2, 3],
+	});
 
-	let si = 0, ei = drawingLength;
 	trees.animation.onDraw = () => {
-
-		s = Math.max(1, s + Cool.random(-0.0005, 0.001));
-		j = Math.max(1, j + Cool.random(-0.0005, 0.001));
-
-		si = Math.max(1, si + Cool.random(-0.015, 0.02));
-		ei = Math.max(1, Math.min(drawingLength, ei + Cool.random(-0.02, 0.015)));
-
-		// trees.animation.overrideProperty('segmentNum', Math.round(s));
-		// trees.animation.overrideProperty('jiggleRange', Math.round(j));
-		// trees.animation.overrideProperty('startIndex', Math.round(si));
-		// trees.animation.overrideProperty('endIndex', Math.round(ei));
-
-		// trees.animation.overrideProperty('segmentNum', Cool.randomInt(1, 5));
-		// trees.animation.overrideProperty('jiggleRange', Cool.randomInt(1, 10));
-		
-		trees.animation.overrideProperty('startIndex', Cool.randomInt(0, drawingLength));
-		trees.animation.overrideProperty('endIndex', Cool.randomInt(0, drawingLength));
+		animator.update();
 	}
 	web.startOverride();
-
-	// gme.scenes.addScene(scene, sceneName);
-	// gme.scenes.current = sceneName;
 }
 
 function onRockRolled() {
@@ -1004,9 +1018,7 @@ gme.keyDown = function(key) {
 		case 'down':
 			player.inputKey('down', true);
 		break;
-
 		case 'x':
-
 			if (gme.scenes.isCurrent('debug')) {
 				return debugStart();
 			}
@@ -1014,10 +1026,9 @@ gme.keyDown = function(key) {
 			// suspend player movement ?
 			if (gme.scenes.isCurrent('splash')) {
 				return startGame(true);
-			} else if (gme.scenes.isCurrent('instructionsMovement') && 
-				gme.scenes.instructionsMovement.xReady) {
-				gme.scenes.current = 'instructionsWeb';
-				sfx.play('next_button');
+			} else if (gme.scenes.isCurrent('instructionsMovement')) {
+				// gotta be a better way to do this ... 
+				gme.scenes.instructionsMovement.onXPress();
 				return;
 			}
 
