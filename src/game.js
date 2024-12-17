@@ -1,6 +1,6 @@
 import * as Cool from '../cool/cool.js';
 import { Doodoo } from '../doodoo/src/Doodoo.js';
-import { Game, Sprite, TextButton, TextSprite, Button, SoundProvider, Counter, Texture, Scene, ColliderEmpty } from '../lines/src/GameEngine.js';
+import { Game, Sprite, TextButton, TextSprite, Button, SoundProvider, Counter, Texture, Scene, ColliderEmpty, ColliderSprite } from '../lines/src/GameEngine.js';
 import { Web } from './Web.js';
 import { Narration } from './Narration.js';
 import { SymbolMatch } from './SymbolMatch.js';
@@ -53,10 +53,9 @@ const gme = new Game({
 	}
 });
 
-
 /* debugging */
 const debug = true; // glob debug val
-const debugScene = "instructionsSymbol";
+const debugScene = "rock";
 if (debug) console.log('gme', gme);
 let mapAlpha = 0;
 let mapCellSize = 24;
@@ -87,7 +86,7 @@ let sun, moon, selectSprite, stone, scoreDisplay;
 let sunCounter = new Counter(sunInterval);
 let sunAnimation = new Counter(sunInterval);
 let points = { rock: 0, spider: 0 };
-let lastPoint;
+let lastPointWinner;
 
 let web = Web();
 let symbolMatch, symbolMatch2;
@@ -100,57 +99,73 @@ let levelCount = 0; // counts levels, also used to advance narrative
 let nextLevel; // save value of next level following dialog
 
 function debugStart() {
-	setupSound();
+	soundSetup();
 	if (debugScene === 'instructionsSymbol') {
 		setupPractice();
-	}
-	if (debugScene === 'game') {
+	} else if (debugScene === 'game') {
 		const letter = Cool.random('abcd'.split(''));
-		console.log('debug level symbol', letter);
 		gme.scenes.current = setupLevel(letter);
-		return;
+	} else if (debugScene === 'rock') {
+		const letter = Cool.random('abcd'.split(''));
+		lastPointWinner = 'rock';
+		const sceneName = setupLevel(letter);
+		gme.scenes.current = sceneName;
+		startRockScene(gme.scenes[sceneName]);
+	} else {
+		gme.scenes.current = debugScene;
 	}
-	// gme.scenes.current = debugScene;
 }
 
 function splashSetup() {
 	const { sprites } = gme.anims;
-	const title = new TextSprite({
-		center: true,
+	const splash = gme.scenes.splash;
+
+	splash.addToDisplay(new TextSprite({
 		countForward: true,
 		msg: "all spiders go to hell",
 		wrap: 20,
 		track: lettersTrack,
 		lead: lettersLead,
-		x: gme.halfWidth,
-		y: gme.halfHeight - 64 * 2,
-		letters: sprites.letters,
-	});
-	gme.scenes.splash.addToDisplay(title);
+		x: 64 * 3,
+		y: 64 * 1,
+		letters: sprites.letters_white,
+	}));
 
-	const startSound = new TextSprite({
-		msg: "x to start with sound",
+	splash.addToDisplay(new TextSprite({
+		msg: "x",
+		x: 64 * 2,
+		y: 64 * 3,
+		letters: sprites.letters_keyboard,
+	}));
+
+	splash.addToDisplay(new TextSprite({
+		msg: "start with sound",
 		countForward: true,
 		wrap: 24,
 		track: lettersTrack,
 		lead: lettersLead,
-		x: 32 * 4,
-		y: gme.halfHeight,
+		x: 64 * 3,
+		y: 64 * 3,
 		letters: sprites.letters,
-	});
-	gme.scenes.splash.addToDisplay(startSound);
+	}));
 
-	const startSilent = new TextSprite({
-		msg: "z to start silent",
+	splash.addToDisplay(new TextSprite({
+		msg: "z",
+		x: 64 * 2,
+		y: 64 * 4.5,
+		letters: sprites.letters_keyboard,
+	}));
+
+	splash.addToDisplay(new TextSprite({
+		msg: "start silent",
 		countForward: true,
 		wrap: 14,
 		track: lettersTrack,
 		lead: lettersLead,
-		x: 32 * 6,
-		y: gme.halfHeight + 64,
+		x: 64 * 3,
+		y: 64 * 4.5,
 		letters: sprites.letters,
-	});
-	gme.scenes.splash.addToDisplay(startSilent);
+	}));
 }
 
 function spritesSetup() {
@@ -184,7 +199,7 @@ function spritesSetup() {
 
 function startGame(withSound) {
 	if (withSound) {
-		setupSound();
+		soundSetup();
 	} else {
 		sfx = SoundProvider(); // empty sound provider plays nothing
 		web.addSFX(sfx); // error w no sfx
@@ -193,11 +208,12 @@ function startGame(withSound) {
 	if (playedInstructions) {
 		chooseInstructions();
 	} else {
+		sfx.play("level_start", true);
 		gme.scenes.current = 'instructionsMovement';
 	}
 }
 
-function setupSound() {
+function soundSetup() {
 
 	// start doodoo
 	// doodoo = new Doodoo({
@@ -219,6 +235,7 @@ function setupSound() {
 			{ key: 'stone',  sequence: [1, 9] },
 			{ key: 'rock',  sequence: [1, 9] },
 			{ key: 'match', sequence: [1, 7] },
+			{ key: 'level_start', sequence: [1, 3] },
 		]
 	}, soundFiles => {
 		web.addSFX(sfx);
@@ -228,12 +245,14 @@ function setupSound() {
 
 function instructionsSetup() {
 	const { sprites } = gme.anims;
+	const instMove = gme.scenes.instructionsMovement;
+	const instWeb = gme.scenes.instructionsWeb;
 
 	// movement instructions
 
-	player.spawn([64 * 10, 64 * 1])
+	player.spawn([64 * 10, 64 * 1]);
 
-	gme.scenes.instructionsMovement.addToDisplay(new TextSprite({
+	instMove.addToDisplay(new TextSprite({
 		countForward: true,
 		msg: "you are the spider",
 		wrap: 14,
@@ -244,7 +263,7 @@ function instructionsSetup() {
 		letters: sprites.letters,
 	}));
 
-	gme.scenes.instructionsMovement.addToDisplay(new TextSprite({
+	instMove.addToDisplay(new TextSprite({
 		countForward: true,
 		msg: "move with the arrow keys",
 		wrap: 24,
@@ -255,24 +274,35 @@ function instructionsSetup() {
 		letters: sprites.letters,
 	}));
 
-	const xToContinue = gme.scenes.instructionsMovement.addToDisplay(new TextSprite({
-		msg: "x to continue",
+	instMove.addToDisplay(new Sprite(64 * 0.5, 64 * 2.5, sprites.keyboard_arrows));
+
+	const xBtn = instMove.addToDisplay(new TextSprite({
+		msg: "x",
+		x: 64 * 0.5,
+		y: 64 * 5.5,
+		letters: sprites.letters_keyboard,
+		isActive: false,
+	}));
+
+	const xToContinue = instMove.addToDisplay(new TextSprite({
+		msg: "continue",
 		wrap: 24,
 		track: lettersTrack,
 		lead: lettersLead,
-		x: 64 * 0.5,
+		x: 64 * 1.5,
 		y: 64 * 5.5,
 		letters: sprites.letters,
+		isActive: false,
 	}));
-	xToContinue.isActive = false;
 
 	let arrowsPressed = { up: false, left: false, right: false };
 	const nextInstructionDelay = new Counter(60, () => {
 		xToContinue.isActive = true;
-		gme.scenes.instructionsMovement.xReady = true;
+		xBtn.isActive = true;
+		instMove.xReady = true;
 	});
 
-	gme.scenes.instructionsMovement.updateFunc = () => {
+	instMove.updateFunc = () => {
 		let allArrowsPressed = true;
 		for (const dir in arrowsPressed) {
 			if (player.input[dir]) arrowsPressed[dir] = true;
@@ -282,7 +312,7 @@ function instructionsSetup() {
 	};
 
 	// instructionsWeb
-	gme.scenes.instructionsWeb.addToDisplay(new TextSprite({
+	instWeb.addToDisplay(new TextSprite({
 		countForward: true,
 		msg: "press x over a tree to connect a web, press z to release",
 		wrap: 22,
@@ -310,7 +340,7 @@ function instructionsSetup() {
 		setupPractice();
 	});
 
-	gme.scenes.instructionsWeb.updateFunc = () => {
+	instWeb.updateFunc = () => {
 		const madeConnection = webUpdate();
 		// if (madeConnection) xPressCounter.update();
 
@@ -342,28 +372,8 @@ function chooseInstructions() {
 	};
 }
 
-function startAfterPractice() {
-	// play quick web scene and then load first level
-	gme.scenes.current = 'webs';
-	const webSprite = Cool.random(gme.scenes.webs.displaySprites.sprites);
-	// console.log(webSprite);
-	webSprite.animation.currentFrame = 0;
-	webSprite.animation.play();
-	webSprite.animation.onPlayedOnce = () => {
-		web.clear();
-		trees.clear();
-		narration.cancelSymbols();
-		const nextSymbolString = getNextSymbolString();
-		narration.addSymbols(nextSymbolString);
-		narration.add(["The premise", edwardsQuote[0], edwardsQuote[1]]);
-		gme.scenes.current = 'narration';
-		nextLevel = setupLevel(nextSymbolString);
-		localStorage.setItem('spider-instructions-complete', true);
-	};
-}
-
 function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
-	const practiceSymbol = practiceSymbolPrevious ?? Cool.random('abcd'.split(''));
+	const practiceSymbol = 'd'; // practiceSymbolPrevious ?? Cool.random('abcd'.split(''));
 	if (practiceAttemptCount === 0) {
 		narration.add([
 			'practice drawing a symbol with your web',
@@ -380,6 +390,7 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 	// console.log('practiceSymbol', practiceSymbol)
 	narration.addSymbols(practiceSymbol);
 	gme.scenes.current = 'narration';
+	web.end();
 	web.clear();
 	setupLevel(getNextSymbolString(2));
 	nextLevel = 'instructionsSymbol';
@@ -390,26 +401,26 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 
 	// set up for instructions symbol
 	trees.clear();
-	for (let x = 4 * 64; x <= 10 * 64; x += 64) {
+	for (let x = 1 * 64; x <= 7 * 64; x += 64) {
 		for (let y = 1 * 64; y <= 3 * 64; y += 64) {
 			// if ((x + y) % 128) continue; // every other tree
-			if (x === 64 * 7) continue;
+			if (x === 64 * 4) continue;
 			trees.addLocation(x, y, Cool.randomInt(25));
 		}
 	}
 
 	const symbolSprite = new TextSprite({
 		msg: practiceSymbol,
-		x: 64,
-		y: 32,
+		x: 64 * 11,
+		y: 64 * 0.5,
 		wrap: 6,
-		letters: gme.anims.sprites.symbols,
+		letters: gme.anims.sprites.symbols_big,
 		track: 64,
 		lead: 72,
 		letterIndexString: things,
 	});
 	gme.scenes.instructionsSymbol.addToDisplay(symbolSprite);
-	player.spawn([128, 196]);
+	player.spawn([64 * 4.5, 64 * 5]);
 
 	let gotSymbol = false; // so they can't fuck it up after
 	let attemptCount = 0;
@@ -450,8 +461,32 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 	}
 }
 
+function startAfterPractice() {
+	// play quick web scene and then load first level
+	gme.scenes.current = 'webs';
+	const webSprite = Cool.random(gme.scenes.webs.displaySprites.sprites);
+	// console.log(webSprite);
+	webSprite.animation.currentFrame = 0;
+	webSprite.animation.play();
+	webSprite.animation.onPlayedOnce = () => {
+		web.clear();
+		trees.clear();
+		narration.cancelSymbols();
+		const nextSymbolString = getNextSymbolString();
+		narration.addSymbols(nextSymbolString);
+		narration.add([edwardsQuote[0], edwardsQuote[1]]);
+		sfx.play('level_start', true);
+		gme.scenes.current = 'narration';
+		nextLevel = setupLevel(nextSymbolString);
+		localStorage.setItem('spider-instructions-complete', true);
+	};
+}
+
 function getNextSymbolString(len) {
-	// console.log(levelCount, points);
+	return 'abcefim'.split('')[levelCount];
+
+	// old way 
+
 	len = len ?? Math.min(3, Math.max(1, levelCount - points.rock));
 	let str = '';
 	for (let i = 0; i < len; i++) {
@@ -483,9 +518,6 @@ function setupLevel(symbolString) {
 	// text generator?
 	const levelName = 'level-' + levelCount;
 	
-	// Cool.random ground texture
-	const groundTexture = Cool.choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
-
 	// min room size is size of room, 3+ is easiest/guaranteed
 	let minNodeRoomSize = symbolString.length > 2 ? 2 : 1;
 	// make at least one with 3 for each 3 symbol
@@ -497,12 +529,15 @@ function setupLevel(symbolString) {
 	const maxNodes = Math.min(24, levelCount + 3 + (points.spider - points.rock));
 	// console.log('room', minNodeRoomSize, 'nodes', maxNodes, 16, levelCount, points.rock - points.spider);
 	if (levelCount === 0) minNodeRoomSize = 3;
+	const groundTexture = Cool.choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
 	const level = new Level(minNodeRoomSize, maxNodes, gme.anims.sprites[groundTexture]);
 	// console.log('level', levelName, symbolString);
 
 	let symbolsMatched = [];
 	trees.locations = [];
 	level.locations.forEach(loc => trees.addLocation(...loc));
+
+	// no spawn on edge
 	player.spawn(Cool.choice(level.walls));
 	
 	const scene = new Scene();
@@ -512,14 +547,17 @@ function setupLevel(symbolString) {
 	function updateScore() {
 		let point = prevMatched === finishString ? 1 : 0;
 		// console.log(symbolString, symbolsMatched, point);
-		lastPoint = point === 1 ? 'spider' : 'rock'; // save who got this point
-		points[lastPoint]++;
+		lastPointWinner = point === 1 ? 'spider' : 'rock'; // save who got this point
+		points[lastPointWinner]++;
 		// score.points.push(point);
 		scoreDisplay.addLocation(gme.width - 64 * 1.125, 64 * 0.125 + (64 * (points.spider + points.rock - 1)),  point);
-		return lastPoint;
+		return lastPointWinner;
 	}
 
 	sunCounter.set(sunInterval);
+	sunAnimation.set(sunInterval);
+	sunCounter.setDuration(sunInterval);
+	sunAnimation.setDuration(sunInterval);
 	sunCounter.reset();
 	sunAnimation.reset();
 	
@@ -664,8 +702,8 @@ function startRockScene(scene) {
 		stone.position[0] += Cool.random(2, 1) * dir;
 		stone.position[1] += Cool.random(-1, 2);
 
-		sfx.keepPlaying('stone');
-		sfx.keepPlaying('rock');
+		sfx.loop('stone');
+		sfx.loop('rock');
 
 		if ((dir === -1 && stone.position[0] < -stone.width) || 
 			dir === 1 && stone.position[0] > gme.width) {
@@ -695,10 +733,16 @@ function startRockScene(scene) {
 		si = Math.max(1, si + Cool.random(-0.015, 0.02));
 		ei = Math.max(1, Math.min(drawingLength, ei + Cool.random(-0.02, 0.015)));
 
-		trees.animation.overrideProperty('segmentNum', Math.round(s));
-		trees.animation.overrideProperty('jiggleRange', Math.round(j));
-		trees.animation.overrideProperty('startIndex', Math.round(si));
-		trees.animation.overrideProperty('endIndex', Math.round(ei));
+		// trees.animation.overrideProperty('segmentNum', Math.round(s));
+		// trees.animation.overrideProperty('jiggleRange', Math.round(j));
+		// trees.animation.overrideProperty('startIndex', Math.round(si));
+		// trees.animation.overrideProperty('endIndex', Math.round(ei));
+
+		// trees.animation.overrideProperty('segmentNum', Cool.randomInt(1, 5));
+		// trees.animation.overrideProperty('jiggleRange', Cool.randomInt(1, 10));
+		
+		trees.animation.overrideProperty('startIndex', Cool.randomInt(0, drawingLength));
+		trees.animation.overrideProperty('endIndex', Cool.randomInt(0, drawingLength));
 	}
 	web.startOverride();
 
@@ -712,29 +756,43 @@ function onRockRolled() {
 	trees.animation.onDraw = undefined;
 	web.clear();
 	web.cancelOverride();
-	
+
 	const nextSymbolString = getNextSymbolString();
 	narration.addSymbols(nextSymbolString);
-	// const lastPoint = score.points.slice(-1)[0] === 0 ? 'rock' : 'spider';
-	let nextNarration = narrative[lastPoint][levelCount];
-	// let intro = 'The tale of the ' + lastPoint;
-	let intro = `The ${lastPoint === 'spider' ? 'tale' : 'story'} of the ${lastPoint}`;
+	let nextNarration = narrative[lastPointWinner][levelCount];
+	levelCount++;
 
+	if (levelCount < 7) {
+		nextLevel = setupWalkLevel(nextSymbolString);
+	} else {
+		nextLevel = 'end';
+		narration.cancelSymbols();
+	}
+
+	narration.add([nextNarration]);
+	sfx.play('level_start', true);
+	gme.scenes.current = 'narration';
+		
 	
+	return;
+		
+	// old crap 
+	// let intro = `The ${lastPointWinner === 'spider' ? 'tale' : 'story'} of the ${lastPointWinner}`;
 	if (!nextNarration) {
 		// end of game/round
 		// const winner = score.points.filter(p => p === 1).length > score.points.filter(p => p === 0).length ? 'spider' : 'rock';
 		const winner = points.spider > points.rock ? 'a' : 'b';
-		nextNarration = narrative.end[lastPoint][winner];
+		nextNarration = narrative.end[lastPointWinner][winner];
 		nextLevel = 'end';
 		narration.cancelSymbols();
 	} else {
 		// nextLevel = setupLevel(nextSymbolString);
 		nextLevel = setupWalkLevel(nextSymbolString);
 	}
-	levelCount++;
+	
 	narration.add([intro, nextNarration]);
 	gme.scenes.current = 'narration';
+	sfx.play('level_start', true);
 }
 
 function setupWalkLevel(symbolString) {
@@ -842,7 +900,10 @@ function setupWalkLevel(symbolString) {
 	let moonAnim = new Counter(moonInterval);
 
 	const end = levelData.end;
-	const ender = new ColliderEmpty(end[0] * 64, end[1] * 64, 64, 64);
+	// const ender = new ColliderEmpty(end[0] * 64, end[1] * 64, 64, 64);
+
+	const ender = new ColliderSprite(end[0] * 64, end[1] * 64, gme.anims.sprites.end_web);
+	scene.add(ender);
 
 	scene.updateFunc = () => {
 		for (let i = 0; i < colliders.length; i++) {
@@ -852,7 +913,8 @@ function setupWalkLevel(symbolString) {
 		// ender.drawDebug();
 		
 		if (player.collide(ender)) {
-			gme.scenes.current = setupLevel(symbolString)
+			sfx.play('level_start', true);
+			gme.scenes.current = setupLevel(symbolString);
 		}
 
 		moonAnim.update();
@@ -866,6 +928,7 @@ function setupWalkLevel(symbolString) {
 
 function onNarrationFinished() {
 	// gme.scenes.current = 'game';
+	sfx.play('level_start', true);
 	gme.scenes.current = nextLevel;
 }
 

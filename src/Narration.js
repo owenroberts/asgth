@@ -14,7 +14,7 @@ export function Narration(gme, onFinshed) {
 	let text = new TextSprite({
 		x: 32,
 		y: 32,
-		wrap: 23,
+		wrap: 20,
 		letters: sprites.letters,
 		track: lettersTrack,
 		lead: lettersLead,
@@ -22,20 +22,27 @@ export function Narration(gme, onFinshed) {
 	});
 
 	let symbols = new TextSprite({
-		x: 32,// gme.width - (64 * 3),
-		y: 32,
+		x: 64 * 11,
+		y: 64 * 0.5,
 		wrap: 6,
-		letters: sprites.symbols,
+		letters: sprites.symbols_big,
 		track: 64,
 		lead: 72,
 		letterIndexString: 'abcdefghijklmnopqrstuvwxyz',
 	});
 	symbols.isActive = false;
 
-	let xForNext = new TextSprite({
+	const xBtn = new TextSprite({
+		msg: "x",
 		x: 64 * 0.5,
 		y: 64 * 5.5,
-		msg: 'x to continue',
+		letters: sprites.letters_keyboard,
+	});
+
+	let xContinue = new TextSprite({
+		x: 64 * 1.5,
+		y: 64 * 5.5,
+		msg: 'continue',
 		track: lettersTrack,
 		letters: sprites.letters,
 	});
@@ -48,14 +55,14 @@ export function Narration(gme, onFinshed) {
 			dialogList.push(list[i]);
 		}
 
-		symbols.y = text.breaks.length * 64 + 64 + 32;
+		// symbols.y = text.breaks.length * 64 + 64 + 32;
 	}
 
 	function addSymbols(str) {
 		symbols.setMsg(str);
 		symbols.setBreaks(true); // break with out spaces
 		symbols.isActive = true;
-		symbols.y = text.breaks.length * 64 + 64 + 32;
+		// symbols.y = text.breaks.length * 64 + 64 + 32;
 	}
 
 	function cancelSymbols() {
@@ -83,7 +90,8 @@ export function Narration(gme, onFinshed) {
 			return;
 		}
 
-		xForNext.display();
+		xBtn.display();
+		xContinue.display();
 
 		if (goNext) {
 			goNext = false;
@@ -91,7 +99,7 @@ export function Narration(gme, onFinshed) {
 				onFinshed();
 			} else {
 				text.setMsg(dialogList.shift());
-				symbols.y = text.breaks.length * 64 + 64 + 32;
+				// symbols.y = text.breaks.length * 64 + 64 + 32;
 			}
 		}
 	}

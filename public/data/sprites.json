@@ -1,6 +1,11 @@
 {
 	"letters": { "src": "lines/drawings/letters.json" },
-	"symbols": { "src": "lines/drawings/symbols_big.json" },
+	"letters_white": { "src": "lines/drawings/letters_white.json" },
+	"letters_keyboard": { "src": "lines/drawings/letters_keyboard.json" },
+	"keyboard_arrows": { "src": "lines/drawings/keyboard_arrows.json" },
+
+	"symbols_big": { "src": "lines/drawings/symbols_big.json" },
+	"symbols_small": { "src": "lines/drawings/symbols.json" },
 
 	"tiles_grass": { "src": "lines/drawings/tiles_grass.json" },
 	"tiles_dirt": { "src": "lines/drawings/tiles_dirt.json" },
@@ -20,6 +25,7 @@
 	"silk": { "src": "lines/drawings/silk.json" },
 	"stone": { "src": "lines/drawings/ston_2.json" },
 	"score": { "src": "lines/drawings/score.json" },
-	"ending": { "src": "lines/drawings/ending.json" }
+	"ending": { "src": "lines/drawings/ending.json" },
+	"end_web": { "src": "lines/drawings/end_web.json" }
 
 }
