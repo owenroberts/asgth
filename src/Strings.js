@@ -11,6 +11,10 @@ const Strings = {
 	Z_BTN: "z",
 	CONTINUE: "continue",
 
+	EDWARDS_QUOTE_1: "... and all your righteousness, would have no more influence to uphold you, and keep you out of hell ...",
+	EDWARDS_QUOTE_2: "... than a spider's web would have to stop a falling rock.",
+
+	INST_DRAW: "draw the symbol to defeat the rock",
 };
 
 export { Strings };

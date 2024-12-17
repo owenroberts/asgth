@@ -14,6 +14,8 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 
 import { sunFinish, shakeAmount, sunInterval, moonInterval, edwardsQuote, narrative, cellSize, lettersTrack, lettersLead, things } from './Utils.js';
 import { Strings } from './Strings.js';
+import { Consts } from './Consts.js';
+
 
 // loading animation pre lines render
 const title = document.getElementById('title');
@@ -55,7 +57,7 @@ const gme = new Game({
 });
 
 /* debugging */
-const debug = true; // glob debug val
+const debug = false; // glob debug val
 const debugScene = "instructionsSymbol";
 if (debug) console.log('gme', gme);
 let mapAlpha = 0;
@@ -88,7 +90,7 @@ gme.load({
 let player;
 let continuousWeb = true;
 let checkUnfinishedConnection = true;
-let sun, moon, selectSprite, stone, scoreDisplay;
+let sun, moon, selectSprite, stone, scoreDisplay, levelDisplay;
 let sunCounter = new Counter(sunInterval);
 let sunAnimation = new Counter(sunInterval);
 let points = { rock: 0, spider: 0 };
@@ -196,6 +198,9 @@ function spritesSetup() {
 	scoreDisplay = new Texture({ animation: sprites.score });
 	gme.scenes.narration.addToDisplay(scoreDisplay);
 
+	levelDisplay = new Texture({ animation: sprites.symbols_small });
+	gme.scenes.narration.addToDisplay(levelDisplay);
+
 	gme.scenes.webs.addToDisplay(new Sprite(0, 0, sprites.webs_1));
 	const ending = new Sprite(0, 0, sprites.ending, animation => {
 		animation.play();
@@ -222,12 +227,12 @@ function startGame(withSound) {
 function soundSetup() {
 
 	// start doodoo
-	// doodoo = new Doodoo({
-	// 	...themeFile,
-	// 	samplesURL: './doodoo/samples/',
-	// 	volume: -12,
-	// 	autoStart: !debug
-	// });
+	doodoo = new Doodoo({
+		...themeFile,
+		samplesURL: './doodoo/samples/',
+		volume: -12,
+		autoStart: !debug
+	});
 
 	// start sfx
 	sfx = SoundProvider({
@@ -434,17 +439,24 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 
 	// set up for instructions symbol
 	trees.clear();
-	for (let x = 1 * 64; x <= 7 * 64; x += 64) {
-		for (let y = 1 * 64; y <= 3 * 64; y += 64) {
+	const ground = new Texture({ animation: gme.anims.sprites.tiles_dirt });
+	gme.scenes.instructionsSymbol.addToDisplay(ground);
+	
+	for (let x = 0; x <= 8; x += 1) {
+		for (let y = 0; y <= 4; y += 1) {
 			// if ((x + y) % 128) continue; // every other tree
-			if (x === 64 * 4) continue;
-			trees.addLocation(x, y, Cool.randomInt(25));
+			if (x === 0 || y === 0 || x === 4 || y === 4 || x === 8) {
+				ground.addLocation(64 + x * 64, 64 + y * 64, 21);
+				continue;
+			}
+
+			trees.addLocation(64 + x * 64, 64 + y * 64, Cool.randomInt(25));
 		}
 	}
 
 	const symbolSprite = new TextSprite({
 		msg: practiceSymbol,
-		x: 64 * 11,
+		x: 64 * 10,
 		y: 64 * 0.5,
 		wrap: 6,
 		letters: gme.anims.sprites.symbols_big,
@@ -453,7 +465,7 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 		letterIndexString: things,
 	});
 	gme.scenes.instructionsSymbol.addToDisplay(symbolSprite);
-	player.spawn([64 * 4.5, 64 * 5]);
+	player.spawn([64 * 5.5, 64 * 5.5]);
 
 	let gotSymbol = false; // so they can't fuck it up after
 	let attemptCount = 0;
@@ -469,7 +481,6 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 				}
 			}
 
-
 			const symbolMatches = symbolMatch.getMatch(points, 64, 32);
 			const symbolMatches2 = symbolMatch2.getMatch(points, 64, 32);
 			// console.log('symbol matches', symbolMatches.flatMap(m => m).map(m => m.symbol), symbolMatches2.flatMap(m => m));
@@ -477,7 +488,6 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 			if (symbolMatches.flatMap(m => m).map(m => m.symbol).includes(practiceSymbol)) gotSymbol = true;
 			if (symbolMatches2.flatMap(m => m).includes(practiceSymbol)) gotSymbol = true;
 
-			console.log('got symbol', gotSymbol);
 
 			if (gotSymbol) {
 				if (madeConnection === 2) {
@@ -521,7 +531,7 @@ function startAfterPractice() {
 		narration.cancelSymbols();
 		const nextSymbolString = getNextSymbolString();
 		narration.addSymbols(nextSymbolString);
-		narration.add([edwardsQuote[0], edwardsQuote[1]]);
+		narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2, Strings.INST_DRAW]);
 		sfx.play('level_start', true);
 		gme.scenes.current = 'narration';
 		nextLevel = setupLevel(nextSymbolString);
@@ -530,7 +540,7 @@ function startAfterPractice() {
 }
 
 function getNextSymbolString(len) {
-	return 'abcefim'.split('')[levelCount];
+	return Consts.LEVEL_ORDER.split('')[levelCount];
 
 	// old way 
 
@@ -583,6 +593,17 @@ function setupLevel(symbolString) {
 	let symbolsMatched = [];
 	trees.locations = [];
 	level.locations.forEach(loc => trees.addLocation(...loc));
+	
+	trees.animation.layers.forEach(layer => {
+		layer.tweens = [];
+		layer.segmentNum = 2;
+		layer.jiggleRange = 1;
+		layer.wiggleRange = 1;
+		layer.wiggleSpee = 0.1;
+		layer.linesInterval = 5;
+		layer.startIndex = 0;
+		// endIndex: "end", need to test this
+	});
 
 	// no spawn on edge
 	player.spawn(Cool.choice(level.walls));
@@ -597,7 +618,10 @@ function setupLevel(symbolString) {
 		lastPointWinner = point === 1 ? 'spider' : 'rock'; // save who got this point
 		points[lastPointWinner]++;
 		// score.points.push(point);
-		scoreDisplay.addLocation(gme.width - 64 * 1.125, 64 * 0.125 + (64 * (points.spider + points.rock - 1)),  point);
+		let scoreX = gme.width - 64 * 1.125;
+		let scoreY = 64 * 0.125 + (64 * (points.spider + points.rock - 1));
+		scoreDisplay.addLocation(scoreX, scoreY,  point);
+		levelDisplay.addLocation(scoreX - 64, scoreY, levelCount);
 		return lastPointWinner;
 	}
 
@@ -645,6 +669,7 @@ function setupLevel(symbolString) {
 			matched = matched.filter(s => finishString.includes(s));
 
 			if (matched.length > prevMatched.length) {
+				if (madeConnection === 2) web.cancel();
 				sfx.play('match', true, 0.9, 1.1);
 			}
 			prevMatched = matched.sort().join('');
@@ -800,10 +825,10 @@ function onRockRolled() {
 	web.clear();
 	web.cancelOverride();
 
-	const nextSymbolString = getNextSymbolString();
-	narration.addSymbols(nextSymbolString);
 	let nextNarration = narrative[lastPointWinner][levelCount];
 	levelCount++;
+	const nextSymbolString = getNextSymbolString();
+	narration.addSymbols(nextSymbolString);
 
 	if (levelCount < 7) {
 		nextLevel = setupWalkLevel(nextSymbolString);
@@ -812,7 +837,7 @@ function onRockRolled() {
 		narration.cancelSymbols();
 	}
 
-	narration.add([nextNarration]);
+	narration.add([nextNarration, Strings.INST_DRAW]);
 	sfx.play('level_start', true);
 	gme.scenes.current = 'narration';
 		

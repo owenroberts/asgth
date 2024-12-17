@@ -22,7 +22,7 @@ export function Narration(gme, onFinshed) {
 	});
 
 	let symbols = new TextSprite({
-		x: 64 * 11,
+		x: 64 * 10,
 		y: 64 * 0.5,
 		wrap: 6,
 		letters: sprites.symbols_big,
