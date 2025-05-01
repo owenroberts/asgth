@@ -1,4 +1,4 @@
-import { ColliderSprite} from '../../lines/src/GameEngine.js';
+import { ColliderSprite} from '../../lines/src/Engine.js';
 
 export class Player extends ColliderSprite {
 	constructor(x, y, states, debug) {

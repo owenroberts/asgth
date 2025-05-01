@@ -4,6 +4,7 @@ import vitePluginString from 'vite-plugin-string';
 import { resolve } from 'path';
 
 export default defineConfig({
+	base: '',
 	server: { port: 8888 },
 	appType: 'mpa',
 	plugins: [

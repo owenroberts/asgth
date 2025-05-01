@@ -1,5 +1,5 @@
 import * as Cool from '../../cool/cool.js';
-import { Texture } from '../../lines/src/GameEngine.js';
+import { Texture } from '../../lines/src/Engine.js';
 import { BSPMap } from "../../hellmaps/src/Map.js";
 import { cellSize } from '../Utils.js';
 

@@ -33,9 +33,9 @@
 	</canvas>
 	<div id="splash">
 		<noscript>
-  			<div class="nojava">
-    			This site requires JavaScript.
-  			</div>
+			<div class="nojava">
+				This site requires JavaScript.
+			</div>
 		</noscript>
 		<div id="inner-splash">
 			<p id="title"> loading game </p>
@@ -43,6 +43,11 @@
 	</div>
 
 	<script src="./src/game.js" type="module"></script>
+	<script>
+		// itch embed fix
+		window.onload = function () { window.focus(); }
+		window.onclick = function () { window.focus(); }
+	</script>
 	
 </body>
 </html>

@@ -2,7 +2,7 @@
 	this is the spider's web?
 */
 
-import { GameAnim } from '../lines/src/GameEngine.js';
+import { GameAnim } from '../lines/src/Engine.js';
 import { Drawing, Layer } from '../lines/src/Lines.js';
 
 export function Web() {

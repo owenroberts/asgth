@@ -1,5 +1,5 @@
 import { Player } from './classes/Player.js';
-import { Counter} from '../lines/src/GameEngine.js';
+import { Counter} from '../lines/src/Engine.js';
 
 export class Spider extends Player {
 	constructor(x, y, states, bounds, debug) {

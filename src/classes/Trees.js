@@ -1,4 +1,4 @@
-import { Texture } from '../../lines/src/GameEngine.js';
+import { Texture } from '../../lines/src/Engine.js';
 
 export class Trees extends Texture {
 	update(player) {

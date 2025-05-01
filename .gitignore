@@ -11,3 +11,5 @@ buildTest
 reading/
 web/
 web.zip
+dist/
+dist.zip

@@ -2,7 +2,7 @@
 	handles displaying narration
 */
 
-import { TextSprite } from '../lines/src/GameEngine.js';
+import { TextSprite } from '../lines/src/Engine.js';
 import { cellSize, lettersTrack, lettersLead } from './Utils.js';
 
 export function Narration(gme, onFinshed) {
@@ -10,6 +10,7 @@ export function Narration(gme, onFinshed) {
 	const { sprites } = gme.anims;
 	let sfx;
 	let dialogList, goNext = false;
+	let sequenceCallback = undefined;
 
 	let text = new TextSprite({
 		x: 32,
@@ -58,6 +59,11 @@ export function Narration(gme, onFinshed) {
 		// symbols.y = text.breaks.length * 64 + 64 + 32;
 	}
 
+	function addSequence(list, callback) {
+		add(list);
+		sequenceCallback = callback;
+	}
+
 	function addSymbols(str) {
 		symbols.setMsg(str);
 		symbols.setBreaks(true); // break with out spaces
@@ -66,6 +72,7 @@ export function Narration(gme, onFinshed) {
 	}
 
 	function cancelSymbols() {
+		symbols.setMsg("");
 		symbols.isActive = false;
 	}
 
@@ -83,7 +90,7 @@ export function Narration(gme, onFinshed) {
 
 		let isDone = text.display();
 		// console.log(dialogList)
-		if (dialogList.length === 0) symbols.display();
+		if (symbols.isActive) symbols.display();
 
 		if (!isDone) {
 			goNext = false;
@@ -96,7 +103,12 @@ export function Narration(gme, onFinshed) {
 		if (goNext) {
 			goNext = false;
 			if (dialogList.length === 0) {
-				onFinshed();
+				if (sequenceCallback) {
+					sequenceCallback();
+					sequenceCallback = undefined;
+				} else {
+					onFinshed();
+				}
 			} else {
 				text.setMsg(dialogList.shift());
 				// symbols.y = text.breaks.length * 64 + 64 + 32;
@@ -108,6 +120,6 @@ export function Narration(gme, onFinshed) {
 		sfx = _sfx;
 	}
 
-	return { add, addSymbols, cancelSymbols, next, display, addSFX };
+	return { add, addSymbols, cancelSymbols, next, display, addSFX, addSequence };
 
 }
