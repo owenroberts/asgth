@@ -3,16 +3,16 @@
 */
 
 import { GameAnim } from '../lines/src/Engine.js';
-import { Drawing, Layer } from '../lines/src/Lines.js';
+import { Drawing, Layer, Style } from '../lines/src/Lines.js';
 
 export function Web() {
 	
 	const animation = new GameAnim();
 	const drawing = new Drawing();
 	animation.drawings.push(drawing);
-	animation.layers.push(new Layer({ 
+	animation.layers.push(new Layer());
+	animation.styles.push(new Style({
 		color: '#FFFFFF', 
-		drawingIndex: 0,
 		segmentNum: 10,
 		wiggleRange: 4,
 		wiggleSegments: true,
