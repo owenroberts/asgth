@@ -390,7 +390,7 @@ function chooseInstructions() {
 }
 
 function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
-	
+	console.log('setup practice 2');
 	const practiceSymbol = 'd'; // practiceSymbolPrevious ?? Cool.random('abcd'.split(''));
 
 	// what to do after multiple attempts?
@@ -1135,7 +1135,7 @@ gme.keyUp = function(key) {
 				gme.scenes.current.onKeyUp[key]();
 				return;
 			}
-			player.inputKey(key, true);
+			player.inputKey(key, false);
 		break;
 
 		case 'z':

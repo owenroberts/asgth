@@ -7,7 +7,7 @@ export class Level {
 	constructor(minNodeRoomSize, maxNodes, groundTexture) {
 		
 		this.map = new BSPMap(13, 7, minNodeRoomSize, 6, minNodeRoomSize);
-		this.map.build({ w: 0, h: 0 }, { w: 0, h: 0 }, maxNodes, cellSize, false);
+		this.map.build({ w: 0, h: 0 }, { w: 0, h: 0 }, maxNodes, Consts.CELL_SIZE, false);
 		this.roomCount = this.map.nodes.filter(n => n.room).length;
 		this.cellCount = this.map.nodes
 			.filter(n => n.room)
