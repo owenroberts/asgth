@@ -1,7 +1,7 @@
 import * as Cool from '../../cool/cool.js';
 import { Texture } from '../../lines/src/Engine.js';
 import { BSPMap } from "../../hellmaps/src/Map.js";
-import { cellSize } from '../Utils.js';
+import { Consts } from '../Consts.js';
 
 export class Level {
 	constructor(minNodeRoomSize, maxNodes, groundTexture) {
@@ -27,7 +27,7 @@ export class Level {
 				for (let x = r.x; x < r.x + r.w; x++) {
 					for (let y = r.y; y < r.y + r.h; y++) {
 						let textureChoice = Cool.randomInt(i, i + 3);
-						this.locations.push([x * cellSize.w, y * cellSize.h, textureChoice]);
+						this.locations.push([x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, textureChoice]);
 					}
 				}
 			});
@@ -39,11 +39,11 @@ export class Level {
 			if (this.map.matrix[i] === 0) {
 				const x = i % this.map.cols;
 				const y = Math.floor(i / this.map.cols);
-				this.walls.push([x * cellSize.w , y * cellSize.h]);
+				this.walls.push([x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H]);
 				let mt = this.map.getMatrixCell(x, y, [0]);
 				let n = this.map.getWangBlobNum(mt);
 				let f = Cool.tileMap.indexOf(n);
-				this.ground.addLocation(x * cellSize.w , y * cellSize.h, f);
+				this.ground.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, f);
 			}
 		}
 	}

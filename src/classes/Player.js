@@ -1,4 +1,8 @@
-import { ColliderSprite} from '../../lines/src/Engine.js';
+/*
+	re-write as closure using ColliderSprite
+*/
+
+import { ColliderSprite } from '../../lines/src/Engine.js';
 
 export class Player extends ColliderSprite {
 	constructor(x, y, states, debug) {

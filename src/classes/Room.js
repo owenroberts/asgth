@@ -8,6 +8,16 @@ class Room extends Area {
 		}, false);
 		// this.addTextureAnimation();
 		this.takenCells = [];
+
+		// debug
+		this.mapAlpha = 0;
+		document.addEventListener('keydown', ev => {
+			if (ev.code === 'Equal') {
+				this.mapAlpha = Math.min(1, this.mapAlpha + 0.5);
+			} else if (ev.code === 'Minus') {
+				this.mapAlpha = Math.max(0, this.mapAlpha - 0.5);
+			}
+		});
 	}
 
 	addTextureAnimation(animation) {
@@ -92,8 +102,9 @@ class Room extends Area {
 	display() {
 		this.texture.display();
 		
-		if (mapAlpha > 0) {
-			gme.renderer.ctx.globalAlpha = mapAlpha / 2;
+		// no way this still works right?
+		if (this.mapAlpha > 0) {
+			gme.renderer.ctx.globalAlpha = this.mapAlpha / 2;
 			gme.renderer.ctx.fillStyle = this.c;
 			gme.renderer.ctx.fillRect(
 				(this.x - 1) * mapCellSize, 

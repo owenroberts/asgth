@@ -3,7 +3,7 @@
 */
 
 import { TextSprite } from '../lines/src/Engine.js';
-import { cellSize, lettersTrack, lettersLead } from './Utils.js';
+import { Consts } from './Consts.js';
 
 export function Narration(gme, onFinshed) {
 
@@ -17,8 +17,8 @@ export function Narration(gme, onFinshed) {
 		y: 32,
 		wrap: 20,
 		letters: sprites.letters,
-		track: lettersTrack,
-		lead: lettersLead,
+		track: Consts.LETTERS_TRACK,
+		lead: Consts.LETTERS_LEAD,
 		countForward: true,
 	});
 
@@ -44,7 +44,8 @@ export function Narration(gme, onFinshed) {
 		x: 64 * 1.5,
 		y: 64 * 5.5,
 		msg: 'continue',
-		track: lettersTrack,
+		track: Consts.LETTERS_TRACK,
+		lead: Consts.LETTERS_LEAD,
 		letters: sprites.letters,
 	});
 
@@ -106,12 +107,10 @@ export function Narration(gme, onFinshed) {
 				if (sequenceCallback) {
 					sequenceCallback();
 					sequenceCallback = undefined;
-				} else {
-					onFinshed();
+					sfx.play('level_start', true);
 				}
 			} else {
 				text.setMsg(dialogList.shift());
-				// symbols.y = text.breaks.length * 64 + 64 + 32;
 			}
 		}
 	}
@@ -121,5 +120,4 @@ export function Narration(gme, onFinshed) {
 	}
 
 	return { add, addSymbols, cancelSymbols, next, display, addSFX, addSequence };
-
 }
