@@ -329,6 +329,7 @@ function instWebSetup() {
 
 	// after connecting trees and releasing web, go to practice symbol
 	const connections = [false, false, false];
+	const setupPracticeCounter = new Counter(120, setupPractice);
 
 	instWeb.updateFunc = () => {
 		const madeConnection = webUpdate();
@@ -354,7 +355,7 @@ function instWebSetup() {
 		}
 		
 		if (connections.every(c => c)) {
-			setTimeout(setupPractice, 120 * 24);
+			setupPracticeCounter.update();
 		}
 	};
 }
@@ -390,7 +391,6 @@ function chooseInstructions() {
 }
 
 function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
-	console.log('setup practice 2');
 	const practiceSymbol = 'd'; // practiceSymbolPrevious ?? Cool.random('abcd'.split(''));
 
 	// what to do after multiple attempts?
@@ -401,7 +401,10 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 	web.clear();
 
 	if (practiceAttemptCount === 0) {
-		narration.addSequence([Strings.INST_WEB_4, Strings.INST_SUN]);
+		narration.addSequence(
+			[Strings.INST_WEB_4, Strings.INST_SUN],
+			() => { gme.scenes.current = 'inst_symbol' }
+		);
 	}
 
 	if (practiceAttemptCount > 0) {
@@ -412,8 +415,7 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 		]);
 	}
 
-	setupLevel(getNextSymbolString());
-	nextLevel = 'inst_symbol';
+	// setupLevel(getNextSymbolString());
 
 	// set up for instructions symbol
 	trees.clear();
@@ -1002,7 +1004,7 @@ gme.start = function() {
 	gme.scenes.addToDisplay(selectSprite, ['inst_web', 'game', 'inst_symbol']);
 
 	const sunSprite = new Sprite(12.85 * 64, 7 * 64, sprites.sun);
-	gme.scenes.addToDisplay(sun, ['inst_symbol']);
+	gme.scenes.inst_symbol.addToDisplay(sunSprite);
 	sun = new Sun(sunSprite, gme.height);
 	
 	moon = new Sprite(13 * 64, 7 * 64, sprites.moon);

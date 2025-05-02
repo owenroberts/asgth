@@ -46,7 +46,7 @@ export function Sun(sprite, height) {
 	}
 
 	return { 
-		reset, end, levelSetup,
+		update, reset, end, levelSetup,
 		getSprite: () => { return sprite; },
 	};
 }
