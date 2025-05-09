@@ -125,8 +125,8 @@ export class Player extends ColliderSprite {
 		if (this.input.down && this.input.right) state = this.states.down_right;
 
 
-		speed[0] *= time / 100;
-		speed[1] *= time / 100;
+		speed[0] *= time / 1000;
+		speed[1] *= time / 1000;
 
 		// this.mapPosition[0] += speed[0];
 		// this.mapPosition[1] += speed[1];
