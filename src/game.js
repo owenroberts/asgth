@@ -12,10 +12,13 @@ import { Spider } from './Spider.js';
 import { Trees } from './Trees.js';
 import { Level } from './classes/Level.js';
 
-import themeFile from '../doodoo/compositions/inf3_theme_v.json';
-
 import { Strings } from './Strings.js';
 import { Consts } from './Consts.js';
+
+import themeFile from '../doodoo/compositions/inf3_theme_v.json';
+import spritePaths from './data/sprites.json';
+import shape_profiles_2 from './data/shape_profiles_2.json';
+import level_bounds from './data/level_bounds.json';
 
 const debug = true; // glob debug val
 
@@ -41,8 +44,8 @@ const gm = new Game({
 	dps: 24,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
-	width: 64 * 14,
-	height: 64 * 7,
+	width: Consts.CELL_SIZE.W * Consts.WINDOW_COLUMNS,
+	height: Consts.CELL_SIZE.H * Consts.WINDOW_ROWS,
 	multiColor: true,
 	retina: true,
 	bgColor: '#aeaaa6', //'#4a4047',
@@ -60,14 +63,7 @@ const gm = new Game({
 	}
 });
 gm.load({
-	animations: {
-		sprites: './data/sprites.json',	
-	},
-	data: {
-		shape_profiles: './data/shape_profiles.json',
-		shape_profiles_2: './data/shape_profiles_2.json',
-		level_bounds: './data/level_bounds.json'
-	}
+	animations: { sprites: spritePaths },
 }, false);
 if (debug) console.log('game', gm);
 
@@ -711,8 +707,8 @@ function setupNarrativeScene() {
 }
 
 function setupWalkLevel(symbolString) {
-	// console.clear(); // debug
-	const { levels } = gm.data.data.level_bounds;
+	
+	const { levels } = level_bounds;
 	const levelIndex = levelCount < levels.length ? levelCount : randomInt(0, levels.length - 1);
 	const levelData = levels[levelIndex];
 	const levelName = 'walk-' + levelCount;
@@ -862,8 +858,8 @@ gm.start = function() {
 
 	const { sprites } = gm.anims;
 	
-	symbolMatch = SymbolMatch(gm.data.data.shape_profiles);
-	symbolMatch2 = SymbolMatch2(gm.data.data.shape_profiles_2);
+	symbolMatch = SymbolMatch();
+	symbolMatch2 = SymbolMatch2();
 
 	gm.setBounds('left', 0);
 	gm.setBounds('top', 0);

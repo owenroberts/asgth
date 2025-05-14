@@ -1,13 +1,15 @@
-/*
-	match all connected point directions
-	7 0 1
-	6 x 2
-	5 4 3
-*/
-
 import { POINTS } from '../lines/src/Lines.js';
+import symbolProfiles from './data/shape_profiles_2.json';
 
-export function SymbolMatch2(symbolProfiles) {
+/**
+ * matches connected point directions
+ * 7 0 1
+ * 6 x 2
+ * 5 4 3
+ * @param {JSON} symbolProfiles - direction matrix for symbols a - m
+ * @returns { getMatch() }
+ */
+export function SymbolMatch2() {
 
 	const vectorMap = {
 		"0-1": 0,

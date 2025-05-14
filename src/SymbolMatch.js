@@ -1,11 +1,13 @@
-/*
-	match normalized drawings to symbol data
-*/
-
 import { map } from '../cool/cool.js';
 import { POINTS } from '../lines/src/Lines.js';
+import symbolProfiles from './data/shape_profiles.json';
 
-export function SymbolMatch(symbolProfiles) {
+/**
+ * matches symbols using normalized grid 
+ * @param {JSON} symbolProfiles - grid data for symbols a - m
+ * @returns { getMatch() }
+ */
+export function SymbolMatch() {
 
 	const profiles = 'abcdefghijklm'.split('');
 
