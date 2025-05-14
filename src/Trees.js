@@ -1,3 +1,4 @@
+import { randomInt, Counter } from '../cool/cool.js';
 import { Texture } from '../lines/src/Engine.js';
 import { Animator } from '../lines/src/Lines.js';
 import { Consts } from './Consts.js';
@@ -9,12 +10,14 @@ import { Consts } from './Consts.js';
 export function Trees(animation) {
 
 	const texture = new Texture({ animation });
-	const animator = new Animator(texture.animation, {
+	const animator = Animator(texture.animation, {
 		jiggleRange: [1, 1],
 		segmentNum: [2, 3],
 	});
-	// animator.update();
-
+	// animator.set();
+	const animCounter = Counter(24, true, () => animator.set);
+	
+	
 	/**
 	 * Detect if player is colliding with a tree
 	 * @param  {Object}  player
@@ -41,27 +44,18 @@ export function Trees(animation) {
 	 * Animate trees shaking while rock is moving in scene.
 	 */
 	function shake() {
-		texture.offset[0] = Cool.randomInt(-Consts.ROCK_SHAKE_AMOUNT, Consts.ROCK_SHAKE_AMOUNT); 
-		texture.offset[1] = Cool.randomInt(-Consts.ROCK_SHAKE_AMOUNT, Consts.ROCK_SHAKE_AMOUNT);
-	}
-
-	function clearTweens() {
-		texture.animation.layers.forEach(l => { l.tweens = []; });
-	}
-
-	function reset() {
-		// texture.animation.cancelOverride();
-		// texture.animation.update(); // trees still on override ... 
-		// texture.animation.onDraw = undefined;
-		animator.update();
+		texture.offset[0] = randomInt(-Consts.ROCK_SHAKE_AMOUNT, Consts.ROCK_SHAKE_AMOUNT); 
+		texture.offset[1] = randomInt(-Consts.ROCK_SHAKE_AMOUNT, Consts.ROCK_SHAKE_AMOUNT);
+		animCounter.update();
 	}
 
 	return { 
-		isColliding, reset, shake, clearTweens,
+		isColliding, shake, 
 		getTexture: () => { return texture; },
 		addLocation: (x, y, frameIndex) => { texture.addLocation(x, y, frameIndex); },
 		clear: () => { texture.clear(); },
-		empty: () => { texture.locations = []; },
+		startAnimator: () => { animator.set(); },
+		endAnimator: () => { animator.clear(); },
 		// updateAnimator: () => { animator.update(); },
 	};
 

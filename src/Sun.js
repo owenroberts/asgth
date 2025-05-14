@@ -6,6 +6,11 @@ import * as Cool from '../cool/cool.js';
 import { Counter } from '../lines/src/Engine.js';
 import { Consts } from './Consts.js';
 
+/**
+ * Animate sun progress, reset
+ * @param {Sprite} sprite - the sun sprite
+ * @param {number} height - the height to animate sun
+ */
 export function Sun(sprite, height) {
 
 	const counter = new Counter(Consts.SUN_INTERVAL);
@@ -17,7 +22,7 @@ export function Sun(sprite, height) {
 		animation.reset();
 	}
 
-	function levelSetup() {
+	function setup() {
 		counter.set(Consts.SUN_INTERVAL);
 		animation.set(Consts.SUN_INTERVAL);
 		counter.setDuration(Consts.SUN_INTERVAL);
@@ -46,7 +51,8 @@ export function Sun(sprite, height) {
 	}
 
 	return { 
-		update, reset, end, levelSetup,
+		update, reset, end, setup,
+		isDone: () => { return counter.isDone(); },
 		getSprite: () => { return sprite; },
 	};
 }

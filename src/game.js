@@ -2,7 +2,7 @@
 import { Sequencer, random, choice, randomInt, tileMap } from '../cool/cool.js';
 import { Doodoo } from '../doodoo/src/Doodoo.js';
 import { Game, Sprite, TextButton, TextSprite, Button, SoundProvider, Counter, Texture, Scene, ColliderEmpty, ColliderSprite } from '../lines/src/Engine.js';
-import { Animator } from '../lines/src/Lines.js';
+import { Animator, POINTS } from '../lines/src/Lines.js';
 import { Web } from './Web.js';
 import { Sun } from './Sun.js';
 import { Narration } from './Narration.js';
@@ -17,13 +17,7 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import { Strings } from './Strings.js';
 import { Consts } from './Consts.js';
 
-/* debugging */
-const debug = false; // glob debug val
-const debugScene = "end";
-if (debug) {
-	console.log('gme', gme);
-	scenes.push('debug');
-}
+const debug = true; // glob debug val
 
 /* testing (still?) continuous web vs segmented */
 let continuousWeb = true;
@@ -40,13 +34,10 @@ document.addEventListener('keydown', ev => {
 	// else if (ev.code == 'Enter') ui.message.continue.onClick(); // to move message without mouse
 });
 
-const playedInstructions = false;
-// localStorage.getItem('spider-instructions-complete');
-
 /* this is the game part */
 const scenes = ['game', 'splash', 'loading', 'narration', 'inst_move', 'inst_web', 'inst_sun', 'inst_symbol', 'webs', 'end', 'inst_choose'];
 
-const gme = new Game({
+const gm = new Game({
 	dps: 24,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
@@ -68,7 +59,7 @@ const gme = new Game({
 		bottom: 1024,
 	}
 });
-gme.load({
+gm.load({
 	animations: {
 		sprites: './data/sprites.json',	
 	},
@@ -78,11 +69,12 @@ gme.load({
 		level_bounds: './data/level_bounds.json'
 	}
 }, false);
+if (debug) console.log('game', gm);
 
 let player;
 let levelCount = 0; // counts levels, also used to advance narrative
 let seq = Sequencer();
-let points = { rock: 0, spider: 0 };
+let points = { ROCK: 0, SPIDER: 0 };
 let lastPointWinner;
 
 let sun;
@@ -95,79 +87,9 @@ let playerOnTreeLoc = [], prevTreeLoc = [], allTrees = [];
 let narration; // handles text scenes
 let doodoo, sfx;
 
-function debugStart() {
-	soundSetup();
-	if (debugScene === 'inst_symbol') {
-		setupPractice();
-	} else if (debugScene === 'game') {
-		const letter = random('abcd'.split(''));
-		gme.scenes.current = setupLevel(letter);
-	} else if (debugScene === 'rock') {
-		const letter = random('abcd'.split(''));
-		lastPointWinner = 'ROCK';
-		const sceneName = setupLevel(letter);
-		gme.scenes.current = sceneName;
-		startRockScene(gme.scenes[sceneName]);
-	} else {
-		gme.scenes.current = debugScene;
-	}
-}
-
-function startGame(withSound) {
-	if (withSound) {
-		doodoo = new Doodoo({
-			...themeFile,
-			samplesURL: './doodoo/samples/',
-			volume: -12,
-			autoStart: !debug
-		});
-
-		sfx = SoundProvider({
-			audioFiles: [
-				{ key: 'web', url: 'zip_lock.wav', },
-				{ key: 'connect', sequence: [1, 6] },
-				{ key: 'cancel', url: 'cancel.wav', },
-				// { key: 'button', sequence: [1, 3] },
-				{ key: 'skip_button', url: 'button_2.wav' },
-				{ key: 'next_button', url: 'button_3.wav' },
-				{ key: 'stone',  sequence: [1, 9] },
-				{ key: 'rock',  sequence: [1, 9] },
-				{ key: 'match', sequence: [1, 7] },
-				{ key: 'level_start', sequence: [1, 3] },
-			]
-		}, soundFiles => {
-			web.addSFX(sfx);
-			narration.addSFX(sfx);
-			afterSetupOrSound();
-		});
-	} else {
-		sfx = SoundProvider(); // empty sound provider plays nothing
-		web.addSFX(sfx); // error w no sfx
-		narration.addSFX(sfx);
-		afterSetupOrSound();
-	}
-}
-
-function afterSetupOrSound() {
-	if (playedInstructions) {
-		chooseInstructions();
-	} else {
-		sfx.play("level_start", true);
-		gme.scenes.setCurrent('inst_move');
-	}
-}
-
 function splashSetup() {
-	const { sprites } = gme.anims;
-	const splash = gme.scenes.splash;
-
-	splash.onKeyDown['x'] = function() {
-		startGame(true);
-	};
-
-	splash.onKeyUp['z']= function() {
-		startGame(false);
-	};
+	const { sprites } = gm.anims;
+	const splash = gm.scenes.splash;
 
 	splash.addToDisplay(new TextSprite({
 		countForward: true,
@@ -217,18 +139,45 @@ function splashSetup() {
 	}));
 }
 
-function instMoveSetup() {
-	const { sprites } = gme.anims;
-	const instMove = gme.scenes.inst_move;
-	
-	instMove.onKeyDown['x'] = function() {
-		if (!arrowsPressed.every(a => a)) return;
-		gme.scenes.current = 'inst_web';
-		sfx.play('next_button');
-		xBtn.setPosition(64 * 0.5, 64 * 0.5);
-	};
+function soundSetup(withSound) {
+	if (withSound) {
+		doodoo = new Doodoo({
+			...themeFile,
+			samplesURL: './doodoo/samples/',
+			volume: -12,
+			autoStart: !debug
+		});
 
-	// movement instructions
+		sfx = SoundProvider({
+			audioFiles: [
+				{ key: 'web', url: 'zip_lock.wav', },
+				{ key: 'connect', sequence: [1, 6] },
+				{ key: 'cancel', url: 'cancel.wav', },
+				// { key: 'button', sequence: [1, 3] },
+				{ key: 'skip_button', url: 'button_2.wav' },
+				{ key: 'next_button', url: 'button_3.wav' },
+				{ key: 'stone',  sequence: [1, 9] },
+				{ key: 'rock',  sequence: [1, 9] },
+				{ key: 'match', sequence: [1, 7] },
+				{ key: 'level_start', sequence: [1, 3] },
+			]
+		}, soundFiles => {
+			web.addSFX(sfx);
+			narration.addSFX(sfx);
+			seq.next(); // afterSetupOrSound();
+		});
+	} else {
+		sfx = SoundProvider(); // empty sound provider plays nothing
+		web.addSFX(sfx); // error w no sfx
+		narration.addSFX(sfx);
+		seq.next(); // afterSetupOrSound();
+	}
+}
+
+function instMoveSetup() {
+	const { sprites } = gm.anims;
+	const instMove = gm.scenes.inst_move;
+	
 	player.spawn([64 * 10, 64 * 1]);
 
 	instMove.addToDisplay(new TextSprite({
@@ -274,11 +223,16 @@ function instMoveSetup() {
 		isActive: false,
 	}));
 
+	// after player presses all three arrow buttons, next
 	let arrowsPressed = [false, false, false]; // up, left, right
 	const nextInstructionDelay = new Counter(60, () => {
 		xToContinue.isActive = true;
 		xBtn.isActive = true;
 	});
+
+	instMove.check = function() {
+		return arrowsPressed.every(a => a);
+	};
 
 	instMove.onUpdate = () => {
 		if (player.input['up']) arrowsPressed[0] = true;
@@ -292,8 +246,8 @@ function instMoveSetup() {
 }
 
 function instWebSetup() {
-	const { sprites } = gme.anims;
-	const instWeb = gme.scenes.inst_web;
+	const { sprites } = gm.anims;
+	const instWeb = gm.scenes.inst_web;
 
 	const webInstructions = instWeb.addToDisplay(new TextSprite({
 		countForward: true,
@@ -327,7 +281,9 @@ function instWebSetup() {
 
 	// after connecting trees and releasing web, go to practice symbol
 	const connections = [false, false, false];
-	const setupPracticeCounter = new Counter(120, setupPractice);
+	const setupPracticeCounter = new Counter(120, () => {
+		seq.next();
+	});
 
 	instWeb.onUpdate = () => {
 		const madeConnection = webUpdate();
@@ -358,12 +314,11 @@ function instWebSetup() {
 	};
 }
 
-function chooseInstructions() {
-	const { sprites } = gme.anims;
-	const instChoose = gme.scenes.inst_choose;
-	gme.scenes.current = 'inst_choose';
+function instChooseSetup() {
+	const { sprites } = gm.anims;
+	const instChoose = gm.scenes.inst_choose;
 	
-	instChoose.needsUpdate = true;
+	// instChoose.needsUpdate = true;
 	instChoose.addToDisplay(new TextSprite({
 		countForward: true,
 		msg: "press z to review instructions, press x to continue",
@@ -374,36 +329,9 @@ function chooseInstructions() {
 		y: 64 * 2,
 		letters: sprites.letters,
 	}));
-
-	// go to move instructions
-	instChoose.onKeyDown['z'] = () => {
-		gme.scenes.current = 'inst_move';
-		player.resetInput();
-	};
-
-	// skip to game
-	instChoose.onKeyDown['x'] = () => {
-		setupPremise();
-		player.resetInput();
-	};
 }
 
-function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
-	const practiceSymbol = 'd'; // practiceSymbolPrevious ?? random('abcd'.split(''));
-
-	// what to do after multiple attempts?
-	// console.log('practiceSymbol', practiceSymbol)
-	narration.addSymbols(practiceSymbol);
-	gme.scenes.current = 'narration';
-	web.end();
-	web.clear();
-
-	if (practiceAttemptCount === 0) {
-		narration.addSequence(
-			[Strings.INST_WEB_4, Strings.INST_SUN],
-			() => { gme.scenes.current = 'inst_symbol'; },
-		);
-	}
+function instSymbolSetup(practiceAttemptCount=0) {
 
 	if (practiceAttemptCount > 0) {
 		narration.add([
@@ -411,14 +339,17 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 			Strings.INST_WEB_6,
 			Strings.INST_WEB_7,
 		]);
+		narration.addCallback(() => {
+			gme.scenes.setCurrent("inst_symbol");
+		});
+		gm.scenes.setCurrent("narration");
 	}
 
-	// setupLevel(getNextSymbolString());
-
-	// set up for instructions symbol
+	web.end();
+	web.clear();
 	trees.clear();
-	const ground = new Texture({ animation: gme.anims.sprites.tiles_dirt });
-	gme.scenes.inst_symbol.addToDisplay(ground);
+	const ground = new Texture({ animation: gm.anims.sprites.tiles_dirt });
+	gm.scenes.inst_symbol.addToDisplay(ground);
 	
 	for (let x = 0; x <= 4; x += 1) {
 		for (let y = 0; y <= 4; y += 1) {
@@ -431,38 +362,42 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 	}
 
 	const symbolSprite = new TextSprite({
-		msg: practiceSymbol,
+		msg: Consts.PRACTICE_SYMBOL,
 		x: 64 * 10,
 		y: 64 * 0.5,
 		wrap: 6,
-		letters: gme.anims.sprites.symbols_big,
+		letters: gm.anims.sprites.symbols_big,
 		track: 64,
 		lead: 72,
 		letterIndexString: Consts.SYMBOL_INDEX_STRING,
 	});
-	gme.scenes.inst_symbol.addToDisplay(symbolSprite);
+	gm.scenes.inst_symbol.addToDisplay(symbolSprite);
 	player.spawn([64 * 5.5, 64 * 5.5]);
 
 	let gotSymbol = false; // so they can't fuck it up after
 	let attemptCount = 0;
 
-	gme.scenes.inst_symbol.onUpdate = () => {
-		const madeConnection = webUpdate();
+	gm.scenes.inst_symbol.onUpdate = () => {
+		const madeConnection = webUpdate(); // use enum here
 		if ((madeConnection === 2 && checkUnfinishedConnection) || madeConnection === 3) {
 
 			const points = structuredClone(web.getPoints());
 			if (madeConnection === 2) {
-				while (points.slice(-1)[0] !== 'end' && points.length > 0) {
+				while (points.slice(-1)[0] !== POINTS.END && points.length > 0) {
 					points.pop();
 				}
 			}
 
-			const symbolMatches = symbolMatch.getMatch(points, 64, 32);
-			const symbolMatches2 = symbolMatch2.getMatch(points, 64, 32);
-			// console.log('symbol matches', symbolMatches.flatMap(m => m).map(m => m.symbol), symbolMatches2.flatMap(m => m));
+			const symbolMatches = symbolMatch.getMatch(points, 64, 32).flatMap(m => m).map(m => m.symbol);
+			const symbolMatches2 = symbolMatch2.getMatch(points, 64, 32).flatMap(m => m);
 
-			if (symbolMatches.flatMap(m => m).map(m => m.symbol).includes(practiceSymbol)) gotSymbol = true;
-			if (symbolMatches2.flatMap(m => m).includes(practiceSymbol)) gotSymbol = true;
+			if (symbolMatches.includes(Consts.PRACTICE_SYMBOL)) {
+				gotSymbol = true;
+			}
+
+			if (symbolMatches2.includes(Consts.PRACTICE_SYMBOL)) {
+				gotSymbol = true;
+			}
 
 
 			if (gotSymbol) {
@@ -476,16 +411,16 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 			attemptCount++;
 			// console.log(attemptCount);
 			if (attemptCount >= 12) {
-				setupPractice(practiceAttemptCount + 1, practiceSymbol);
+				instSymbolSetup(practiceAttemptCount + 1, practiceSymbol);
 			}
 		}
 
 		const isDone = sun.update();
 		if (isDone) {
 			if (gotSymbol) {
-				setupWebsScene("premise");
+				seq.next();
 			} else {
-				setupPractice(practiceAttemptCount + 1, practiceSymbol);
+				instSymbolSetup(practiceAttemptCount + 1, practiceSymbol);
 			}
 		}
 	}
@@ -493,37 +428,18 @@ function setupPractice(practiceAttemptCount=0, practiceSymbolPrevious) {
 
 function setupWebsScene(nextScene) {
 	web.clear();
-	gme.scenes.setCurrent('webs');
+	web.end();
 	webs.animation.currentFrame = randomInt(0, 6);
 	websCounter.reset();
-	websAnimator.update();
-	gme.scenes.webs.onUpdate = function() {
+	websAnimator.set();
+	gm.scenes.webs.onUpdate = function() {
 		websCounter.update();
 		if (websCounter.isDone()) {
-			if (nextScene === "premise") setupPremise();
-			if (nextScene === "onRockRolled") onRockRolled();
+			seq.next();
+			// if (nextScene === "premise") setupPremise();
+			// if (nextScene === "onRockRolled") onRockRolled();
 		}
 	};
-}
-
-function setupPremise() {
-	// between intro/tutorial and game
-	web.clear();
-	trees.clear();
-	narration.cancelSymbols();
-	localStorage.setItem('spider-instructions-complete', true);
-
-	const nextSymbolString = getNextSymbolString();
-	gme.scenes.current = 'narration';
-	nextLevel = setupLevel(nextSymbolString);
-
-	// use Sequencer here? 
-	narration.addSequence(
-		[Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2],
-		() => {
-			narration.addSymbols(nextSymbolString);
-			narration.add([Strings.INST_DRAW]);
-	});
 }
 
 function getNextSymbolString(len) {
@@ -557,16 +473,15 @@ function setupLevel(symbolString) {
 	// console.log('room', minNodeRoomSize, 'nodes', maxNodes, 16, levelCount, points.rock - points.spider);
 	if (levelCount === 0) minNodeRoomSize = 3;
 	const groundTexture = choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
-	const level = new Level(minNodeRoomSize, maxNodes, gme.anims.sprites[groundTexture]);
+	const level = new Level(minNodeRoomSize, maxNodes, gm.anims.sprites[groundTexture]);
 	// console.log('level', levelName, symbolString);
 
 	let symbolsMatched = [];
-	trees.empty();
-	trees.clearTweens();
+	trees.clear();
+	trees.endAnimator();
 	level.locations.forEach(loc => trees.addLocation(...loc));
 
-	// no spawn on edge
-	player.spawn(choice(level.walls));
+	player.spawn(choice(level.walls)); // no spawn on edge
 	
 	const scene = new Scene();
 	scene.addSprite([level, player, trees.getTexture(), selectSprite, sun.getSprite(), scoreDisplay]);
@@ -577,14 +492,14 @@ function setupLevel(symbolString) {
 		lastPointWinner = point === 1 ? 'SPIDER' : 'ROCK'; // save who got this point
 		points[lastPointWinner]++;
 		// score.points.push(point);
-		let scoreX = gme.width - 64 * 1.125;
-		let scoreY = 64 * 0.125 + (64 * (points.spider + points.rock - 1));
+		let scoreX = gm.width - 64 * 1.125;
+		let scoreY = 64 * 0.125 + (64 * (points.SPIDER + points.ROCK - 1));
 		scoreDisplay.addLocation(scoreX, scoreY,  point);
 		levelDisplay.addLocation(scoreX - 64, scoreY, levelCount);
 		return lastPointWinner;
 	}
 
-	sun.levelSetup();
+	sun.setup();
 	
 	let prevMatched = '';
 	const finishString = symbolString.split('').sort().join('');
@@ -595,13 +510,13 @@ function setupLevel(symbolString) {
 		if ((madeConnection === 2 && checkUnfinishedConnection) || madeConnection === 3) {
 
 			const points = structuredClone(web.getPoints());
+			// what is made connection 2? cutting til we get to end ... 
 			if (madeConnection === 2) {
-				while (points.slice(-1)[0] !== 'end' && points.length > 0) {
+				while (points.slice(-1)[0] !== POINTS.END && points.length > 0) {
 					points.pop();
 				}
 			}
 			
-			// const matched = [];
 			const symbolMatches = symbolMatch.getMatch(points, 64, 32);
 
 			// only adds if the first one didn't get it
@@ -630,7 +545,8 @@ function setupLevel(symbolString) {
 
 			if (prevMatched === finishString) {
 				// spider got it
-				sun.end();			}
+				sun.end();
+			}
 		}
 
 		if (web.isActive() && player.isMoving()) {
@@ -639,17 +555,14 @@ function setupLevel(symbolString) {
 			sfx.pause('web');
 		}
 
-		if (sun.update()) {
-			let whoScored = updateScore();
-			if (whoScored === 'spider') {
-				setupWebsScene("onRockRolled");
-			} else {
-				startRockScene(scene);
-			}
+		sun.update();
+		if (sun.isDone()) {
+			updateScore();
+			seq.next(); 
 		}
 	};
 
-	gme.scenes.addScene(scene, levelName);
+	gm.scenes.addScene(scene, levelName);
 	return levelName;
 }
 
@@ -713,18 +626,18 @@ function webUpdate() {
 	return madeConnection;
 }
 
-function startRockScene(scene) {
+function setupRockScene(scene) {
 	
-	// unset web scene
-	web.end();
+	web.end(); // unset web scene
 	sfx.pause('web');
 	selectSprite.isActive = false;
+	trees.startAnimator();
 
 	scene.addToDisplay(stone);
 
 	// rock starts animating
 	const dir = choice(-1, 1);
-	stone.position[0] = dir === 1 ? -stone.halfWidth : gme.width;
+	stone.position[0] = dir === 1 ? -stone.halfWidth : gm.width;
 	stone.position[1] = -stone.halfHeight;
 	stone.isActive = true;
 
@@ -741,11 +654,11 @@ function startRockScene(scene) {
 		sfx.loop('rock');
 
 		if ((dir === -1 && stone.position[0] < -stone.width) || 
-			dir === 1 && stone.position[0] > gme.width) {
+			dir === 1 && stone.position[0] > gm.width) {
 			stone.isActive = false;
 			stone.displayFunc = undefined;
 			player.isActive = true;
-			onRockRolled();
+			seq.next();
 		}
 		trees.shake();
 	};
@@ -753,25 +666,20 @@ function startRockScene(scene) {
 	web.startOverride();
 }
 
-function onRockRolled() {
+function setupNarrativeScene() {
 	// this is more like next narrative or something ... 
-	
-	trees.reset();
-	web.clear();
-	web.cancelOverride();
-	narration.cancelSymbols();
+
 	scoreDisplay.isActive = true; // separate scene?
 	levelDisplay.isActive = true;
 
 	let nextNarration = Strings.NARRATIVE[lastPointWinner][levelCount];
-	levelCount++;
+	
 	const nextSymbolString = getNextSymbolString();
 
 	if (levelCount < 7) {
 		nextLevel = setupWalkLevel(nextSymbolString);
 	} else {
 		nextLevel = 'end';
-		
 	}
 
 	narration.addSequence([nextNarration], () => {
@@ -780,9 +688,7 @@ function onRockRolled() {
 		scoreDisplay.isActive = false;
 		levelDisplay.isActive = false;
 	});
-	sfx.play('level_start', true);
-	gme.scenes.current = 'narration';
-		
+	
 	return;
 		
 	// old crap 
@@ -800,20 +706,20 @@ function onRockRolled() {
 	}
 	
 	narration.add([intro, nextNarration]);
-	gme.scenes.current = 'narration';
+	gm.scenes.current = 'narration';
 	sfx.play('level_start', true);
 }
 
 function setupWalkLevel(symbolString) {
 	// console.clear(); // debug
-	const { levels } = gme.data.data.level_bounds;
+	const { levels } = gm.data.data.level_bounds;
 	const levelIndex = levelCount < levels.length ? levelCount : randomInt(0, levels.length - 1);
 	const levelData = levels[levelIndex];
 	const levelName = 'walk-' + levelCount;
 
 	const scene = new Scene();
 	scene.needsUpdate = true;
-	const bg = new Sprite(0, 0, gme.anims.sprites.levels);
+	const bg = new Sprite(0, 0, gm.anims.sprites.levels);
 	bg.animation.frame = levelIndex;
 	scene.addToDisplay(bg);
 	scene.addSprite(player);
@@ -821,7 +727,7 @@ function setupWalkLevel(symbolString) {
 	// scene.addToDisplay(score);
 
 	const groundTexture = choice('tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
-	const ground = new Texture({ animation: gme.anims.sprites[groundTexture] });
+	const ground = new Texture({ animation: gm.anims.sprites[groundTexture] });
 	scene.addToDisplay(ground);
 	const matrix = [];
 	for (let x = 0; x < 13; x++) {
@@ -911,7 +817,7 @@ function setupWalkLevel(symbolString) {
 	const end = levelData.end;
 	// const ender = new ColliderEmpty(end[0] * 64, end[1] * 64, 64, 64);
 
-	const ender = new ColliderSprite(end[0] * 64, end[1] * 64, gme.anims.sprites.end_web);
+	const ender = new ColliderSprite(end[0] * 64, end[1] * 64, gm.anims.sprites.end_web);
 	scene.add(ender);
 
 	scene.onUpdate = () => {
@@ -923,21 +829,21 @@ function setupWalkLevel(symbolString) {
 		
 		if (player.collide(ender)) {
 			sfx.play('level_start', true);
-			gme.scenes.current = setupLevel(symbolString);
+			gm.scenes.current = setupLevel(symbolString);
 		}
 
 		moonAnim.update();
-		moon.position[1] = map(Math.sin(moonAnim.getRatio() * Math.PI), 0, 1, gme.height - 64, 0, true);
+		moon.position[1] = map(Math.sin(moonAnim.getRatio() * Math.PI), 0, 1, gm.height - 64, 0, true);
 	};
 
 	player.spawn([levelData.start[0] * 64 + 32, levelData.start[1] * 64 + 32]);
-	gme.scenes.addScene(scene, levelName);
+	gm.scenes.addScene(scene, levelName);
 	return levelName;
 }
 
 function resetGame() {
 	levelCount = 0;
-	gme.scenes.current = "splash";
+	gm.scenes.current = "splash";
 	lastPointWinner = undefined;
 	nextLevel = undefined;
 	if (doodoo) {
@@ -946,47 +852,53 @@ function resetGame() {
 	}
 }
 
-gme.start = function() {
+function clearStuff() {
+	web.clear();
+	trees.clear();
+	narration.cancelSymbols();
+}
 
-	const { sprites } = gme.anims;
-	
-	symbolMatch = SymbolMatch(gme.data.data.shape_profiles);
-	symbolMatch2 = SymbolMatch2(gme.data.data.shape_profiles_2);
+gm.start = function() {
 
-	gme.setBounds('left', 0);
-	gme.setBounds('top', 0);
-	gme.setBounds('right', 13 * Consts.CELL_SIZE.W);
-	gme.setBounds('bottom', 7 * Consts.CELL_SIZE.H);
+	const { sprites } = gm.anims;
 	
-	player = new Spider(gme.halfWidth + 64 * 3, gme.halfHeight, {
+	symbolMatch = SymbolMatch(gm.data.data.shape_profiles);
+	symbolMatch2 = SymbolMatch2(gm.data.data.shape_profiles_2);
+
+	gm.setBounds('left', 0);
+	gm.setBounds('top', 0);
+	gm.setBounds('right', 13 * Consts.CELL_SIZE.W);
+	gm.setBounds('bottom', 7 * Consts.CELL_SIZE.H);
+	
+	player = new Spider(gm.halfWidth + 64 * 3, gm.halfHeight, {
 		up_left: 'up_left', 
 		up_right: 'up_right', 
 		down_left: 'down_left', 
 		down_right: 'down_right',
-	}, gme.bounds);
+	}, gm.bounds);
 	// player.debug = true;
-	player.setAnimation(gme.anims.sprites.spider);
-	gme.scenes.add(player, ['inst_move', 'inst_web', 'inst_symbol', 'inst_symbol', 'game']);
+	player.setAnimation(gm.anims.sprites.spider);
+	gm.scenes.add(player, ['inst_move', 'inst_web', 'inst_symbol', 'inst_symbol', 'game']);
 	// gme.scenes.inst_move.needsUpdate = true;
 	// gme.scenes.inst_web.needsUpdate = true;
 	// gme.scenes.inst_symbol.needsUpdate = true;
 	// gme.scenes.game.needsUpdate = true;
 
 	trees = new Trees(sprites.trees);
-	gme.scenes.add(trees.getTexture(), ['inst_web', 'inst_web', 'inst_symbol', 'game']);
+	gm.scenes.add(trees.getTexture(), ['inst_web', 'inst_web', 'inst_symbol', 'game']);
 
 	// go in web?
 	selectSprite = new Sprite(0, 0, sprites.select);
 	selectSprite.isActive = false;
-	selectSprite.animation.isPlaying = true;
-	gme.scenes.addToDisplay(selectSprite, ['inst_web', 'game', 'inst_symbol']);
+	selectSprite.animation.play();
+	gm.scenes.addToDisplay(selectSprite, ['inst_web', 'game', 'inst_symbol']);
 
 	const sunSprite = new Sprite(12.85 * 64, 7 * 64, sprites.sun);
-	gme.scenes.inst_symbol.addToDisplay(sunSprite);
-	sun = new Sun(sunSprite, gme.height);
+	gm.scenes.inst_symbol.addToDisplay(sunSprite);
+	sun = new Sun(sunSprite, gm.height);
 	
 	moon = new Sprite(13 * 64, 7 * 64, sprites.moon);
-	stone = new Sprite(gme.width, -sprites.stone.height, sprites.stone);
+	stone = new Sprite(gm.width, -sprites.stone.height, sprites.stone);
 	stone.isActive = false;
 	stone.animation.isPlaying = true;
 
@@ -997,30 +909,31 @@ gme.start = function() {
 		jiggleRange: [1, 2],
 	});
 	websCounter = new Counter(Consts.WEBS_INTERVAL);
-	gme.scenes.webs.addToDisplay(webs);
+	gm.scenes.webs.addToDisplay(webs);
 	// gme.scenes.webs.needsUpdate = true;
 
 	// need these? 
 	scoreDisplay = new Texture({ animation: sprites.score });
-	gme.scenes.narration.addToDisplay(scoreDisplay);
+	gm.scenes.narration.addToDisplay(scoreDisplay);
 
 	levelDisplay = new Texture({ animation: sprites.symbols_small });
-	gme.scenes.narration.addToDisplay(levelDisplay);
+	gm.scenes.narration.addToDisplay(levelDisplay);
 
-	splashSetup();
-	instMoveSetup();
-	instWebSetup();
-	
-	narration = Narration(gme);
-	gme.scenes.narration.addToDisplay(narration);
-	gme.scenes.narration.onKeyUp['x'] = function() {
-		narration.next();
-		player.resetInput();
+	narration = Narration(gm.anims.sprites);
+	gm.scenes.narration.addToDisplay(narration);
+	gm.scenes.narration.onKeyUp['x'] = function() {
+		if (narration.isDone()) {
+			sfx.play('next_button', true);
+			seq.next();
+		} else {
+			narration.next();
+		}
+		player.resetInput(); // need this? 
 	};
 
 	const ending = new Sprite(0, 0, sprites.ending);
-	gme.scenes.end.addToDisplay(ending);
-	gme.scenes.end.onKeyUp[Strings.RESET_BTN] = function() {
+	gm.scenes.end.addToDisplay(ending);
+	gm.scenes.end.onKeyUp[Strings.RESET_BTN] = function() {
 		sfx.play('next_button');
 		resetGame();
 	};
@@ -1029,14 +942,14 @@ gme.start = function() {
 		ending.animation.onPlayedOnce = undefined;
 		ending.animation.state = "still_frame";
 		
-		gme.scenes.end.addToDisplay(new TextSprite({
+		gm.scenes.end.addToDisplay(new TextSprite({
 			msg: Strings.RESET_BTN,
 			x: 64 * 2,
 			y: 64 * 5.5,
 			letters: sprites.letters_keyboard,
 		}));
 		
-		gme.scenes.end.addToDisplay(new TextSprite({
+		gm.scenes.end.addToDisplay(new TextSprite({
 			msg: Strings.INST_RESTART,
 			wrap: 24,
 			track: Consts.LETTERS_TRACK,
@@ -1047,43 +960,218 @@ gme.start = function() {
 		}));
 	};
 
-	gme.scenes.current = debug ? 'debug' : 'splash';
+	const loadingSprite = new Sprite(gm.halfWidth, gm.halfHeight, sprites.loading_web);
+	loadingSprite.center = true;
+	gm.scenes.loading.addToDisplay(loadingSprite);
+	loadingSprite.animation.play();
 
 	if (debug) {
-		gme.scenes.debug.add(new TextSprite({
+		gm.scenes.debug = new Scene();
+		gm.scenes.debug.add(new TextSprite({
 			msg: "x to start debug",
 			x: 64,
 			y: 64,
-			letters: gme.anims.sprites.letters,
+			letters: gm.anims.sprites.letters,
 			letterIndexString: Consts.SYMBOL_INDEX_STRING,
 		}));
-
-		gme.scenes.debug.onXPress = function() {
-			debugStart();
-		};
 	}
+
+	// game sequence
+	const hasCompletedInstructions = false; // localStorage.getItem('spider-instructions-complete');
+	const choseRepeatInstructions = false;
+	let nextSymbolString = ""; // maybe don't need this if not setting up rock thing
+	let useSound = false;
+
+	seq.add(() => { 
+		if (!debug) return seq.next();
+		gm.scenes.setCurrent("debug");
+		gm.scenes.debug.onKeyDown['x'] = () => {
+			seq.next();	
+		};
+	});
+
+	seq.add(() => {
+		if (!debug) return seq.next();
+		loadingSprite.animation.frame = 0;
+		gm.scenes.setCurrent("loading");
+		soundSetup(true);
+	});
+
+	seq.add(() => {
+		if (debug) return seq.next();
+		splashSetup();
+		gm.scenes.setCurrent("splash");
+		gm.scenes.splash.onKeyDown['x'] = function() {
+			useSound = true;
+			seq.next();
+		};
+
+		gm.scenes.splash.onKeyUp['z']= function() {
+			useSound = false;
+			seq.next();
+		};
+	});
+
+	seq.add(() => {
+		if (debug) return seq.next();
+		loadingSprite.animation.frame = 0;
+		gm.scenes.setCurrent("loading");
+		soundSetup(useSound);
+	});
+
+	seq.add(() => {
+		if (debug) return seq.next();
+		if (!hasCompletedInstructions) {
+			seq.next();
+			return;
+		}
+
+		instChooseSetup();
+		gm.scenes.setCurrent("inst_choose");
+
+		// skip instructions
+		gm.scenes.inst_choose.onKeyDown['x'] = () => {
+			seq.next();
+			player.resetInput();
+		};
+
+		// repeat instructions
+		gm.scenes.inst_choose.onKeyDown['z'] = () => {
+			choseRepeatInstructions = true;
+			seq.next();
+			player.resetInput(); // need this?
+		};
+	});
+
+	seq.add(() => {
+		if (debug) return seq.next();
+		if (hasCompletedInstructions && !choseRepeatInstructions) {
+			seq.next();
+			return;
+		}
+
+		sfx.play("level_start", true);
+		instMoveSetup();
+		gm.scenes.inst_move.onKeyDown['x'] = function() {
+			if (!gm.scenes.inst_move.check()) return;
+			sfx.play("next_button");
+			seq.next();
+		};
+
+		gm.scenes.setCurrent("inst_move");
+	});
+
+	seq.add(() => {
+		if (debug) return seq.next();
+		if (hasCompletedInstructions && !choseRepeatInstructions) {
+			seq.next();
+			return;
+		}
+		
+		instWebSetup();
+		gm.scenes.setCurrent("inst_web");
+	});
+
+	seq.add(() => {
+		if (debug) return seq.next();
+		if (hasCompletedInstructions && !choseRepeatInstructions) {
+			seq.next();
+			return;
+		}
+		narration.addSymbols(Consts.PRACTICE_SYMBOL);
+		gm.scenes.current = 'narration';
+		narration.add([Strings.INST_WEB_4, Strings.INST_SUN]);
+		narration.addCallback(seq.next);
+	});
+
+	seq.add(() => {
+		if (debug) return seq.next();
+		if (hasCompletedInstructions && !choseRepeatInstructions) {
+			seq.next();
+			return;
+		}
+		instSymbolSetup();
+		gm.scenes.setCurrent("inst_symbol");
+	});
+
+	seq.add(() => {
+		if (debug) return seq.next();
+		localStorage.setItem('spider-instructions-complete', true);
+		clearStuff();
+		narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
+		gm.scenes.setCurrent("narration");
+	});
+
+	seq.add(() => { gameLoop(); });
+
+	function gameLoop() {
+
+		nextSymbolString = getNextSymbolString();
+		narration.addSymbols(nextSymbolString);
+		narration.add([Strings.INST_DRAW]);
+		gm.scenes.setCurrent("narration");
+
+		scoreDisplay.isActive = false; // for after first loop
+		levelDisplay.isActive = false;
+
+		seq.add(() => {
+			let levelName = setupLevel(nextSymbolString);
+			gm.scenes.setCurrent(levelName);
+		});
+
+		seq.add(() => {
+			if (lastPointWinner == "SPIDER") {
+				setupWebsScene();
+				gm.scenes.setCurrent('webs');
+			} else {
+				setupRockScene(gm.scenes.current);
+			}
+		});
+
+		seq.add(() => {
+			clearStuff();
+			let nextNarration = Strings.NARRATIVE[lastPointWinner][levelCount];
+			levelCount++;
+			narration.add([nextNarration]);
+			scoreDisplay.isActive = true; // separate scene?
+			levelDisplay.isActive = true;
+			sfx.play('level_start', true);
+			gm.scenes.setCurrent("narration");
+			
+		});
+
+		seq.add(() => {
+			if (levelCount > Consts.NUM_LEVELS) {
+				gm.scenes.setCurrent("end");
+			} else {
+				gameLoop();
+			}
+		});
+	}
+
+	seq.next();
 };
 
-gme.update = function(timeElapsed) {
+gm.update = function(timeElapsed) {
 	player.update(timeElapsed, true);
 	// part of scene?
-	if (gme.scenes.current.onUpdate) {
-		gme.scenes.current.onUpdate();
+	if (gm.scenes.current.onUpdate) {
+		gm.scenes.current.onUpdate();
 	}
 };
 
-gme.draw = function() {
-	gme.scenes.current.display();
-	if (gme.scenes.current.onUpdate) web.display();
+gm.draw = function() {
+	gm.scenes.current.display();
+	if (gm.scenes.current.onUpdate) web.display();
 };
 
-gme.keyDown = function(key) {
+gm.keyDown = function(key) {
 	switch (key) {
 
 		case 'x':
 		case 'z':
-			if (gme.scenes.current.onKeyDown[key]) {
-				gme.scenes.current.onKeyDown[key]();
+			if (gm.scenes.current.onKeyDown[key]) {
+				gm.scenes.current.onKeyDown[key]();
 				return;
 			}
 			player.inputKey(key, true);
@@ -1103,14 +1191,14 @@ gme.keyDown = function(key) {
 	}
 };
 
-gme.keyUp = function(key) {
+gm.keyUp = function(key) {
 	switch (key) {
 
 		case Strings.RESET_BTN:
 		case 'x':
 		case 'z':
-			if (gme.scenes.current.onKeyUp[key]) {
-				gme.scenes.current.onKeyUp[key]();
+			if (gm.scenes.current.onKeyUp[key]) {
+				gm.scenes.current.onKeyUp[key]();
 				return;
 			}
 			player.inputKey(key, false);

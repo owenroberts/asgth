@@ -5,6 +5,8 @@
 	5 4 3
 */
 
+import { POINTS } from '../lines/src/Lines.js';
+
 export function SymbolMatch2(symbolProfiles) {
 
 	const vectorMap = {
@@ -52,7 +54,7 @@ export function SymbolMatch2(symbolProfiles) {
 
 		// get points on grid
 		const points = drawing
-			.filter((p) => typeof p !== "string")
+			.filter((p) => p !== POINTS.END)
 			.map((p) => p.map((c) => (c - offset) / unit));
 
 		const lines = [];

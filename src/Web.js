@@ -3,7 +3,7 @@
 */
 
 import { GameAnim } from '../lines/src/Engine.js';
-import { Drawing, Layer, Style } from '../lines/src/Lines.js';
+import { Drawing, Layer, Style, POINTS } from '../lines/src/Lines.js';
 
 export function Web() {
 	
@@ -36,7 +36,7 @@ export function Web() {
 	}
 
 	function insertEnd() {
-		drawing.points.splice(drawing.length - 1, 0, "end");
+		drawing.points.splice(drawing.length - 1, 0, POINTS.END);
 		drawing.offsets.splice(drawing.length - 1, 0, [[0,0],[0,0]]);
 	}
 
@@ -58,8 +58,8 @@ export function Web() {
 	function end() {
 		drawing.points.pop();
 		isActive = false;
-		if (drawing.points.slice(-1) !== "end") {
-			drawing.add("end");
+		if (drawing.points.slice(-1) !== POINTS.END) {
+			drawing.add(POINTS.END);
 		}
 	}
 
@@ -91,6 +91,10 @@ export function Web() {
 	function addSFX(_sfx) {
 		sfx = _sfx;
 		return;
+	}
+
+	function getPoints() {
+		
 	}
 
 	return { 

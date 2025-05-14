@@ -14,6 +14,8 @@ const Consts = {
 	LETTERS_TRACK: 24,
 	LETTERS_LEAD: 56,
 	SYMBOL_INDEX_STRING: "abcdefghijklmnopqrstuvwxyz",
+	PRACTICE_SYMBOL: 'd',
+	NUM_LEVELS: 7,
 };
 
 export { Consts };

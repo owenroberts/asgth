@@ -1,4 +1,5 @@
 {
+	"loading_web": { "src": "lines/drawings/loading_web.json" },
 	"letters": { "src": "lines/drawings/letters.json" },
 	"letters_white": { "src": "lines/drawings/letters_white.json" },
 	"letters_keyboard": { "src": "lines/drawings/letters_keyboard.json" },
@@ -15,7 +16,6 @@
 	
 	"webs_1": { "src": "lines/drawings/webs_1.json" },
 	"webs_2": { "src": "lines/drawings/webs_2.json" },
-
 
 	"spider": { "src": "lines/drawings/spider.json" },
 

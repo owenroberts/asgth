@@ -2,7 +2,8 @@
 	match normalized drawings to symbol data
 */
 
-import * as Cool from '../cool/cool.js';
+import { map } from '../cool/cool.js';
+import { POINTS } from '../lines/src/Lines.js';
 
 export function SymbolMatch(symbolProfiles) {
 
@@ -54,7 +55,7 @@ export function SymbolMatch(symbolProfiles) {
 
 		// get points on grid
 		const points = drawing
-			.filter(p => typeof p !== "string")
+			.filter(p => p !== POINTS.END)
 			.map(p => p.map((c) => (c - offset) / unit));
 
 		const lines = [];
@@ -194,7 +195,7 @@ export function SymbolMatch(symbolProfiles) {
 			}
 			
 			// add up scores and divide by number of points
-			similarity += Cool.map(distance, 0, far, 1, 0);
+			similarity += map(distance, 0, far, 1, 0);
 		}
 		
 		return { similarity, usedPointIndexes };

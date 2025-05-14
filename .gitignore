@@ -13,3 +13,5 @@ web/
 web.zip
 dist/
 dist.zip
+.tern-project
+.tern-port

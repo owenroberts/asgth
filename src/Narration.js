@@ -5,12 +5,12 @@
 import { TextSprite } from '../lines/src/Engine.js';
 import { Consts } from './Consts.js';
 
-export function Narration(gme, onFinshed) {
+export function Narration(sprites) {
 
-	const { sprites } = gme.anims;
 	let sfx;
 	let dialogList, goNext = false;
-	let sequenceCallback = undefined;
+	// let callback = undefined;
+	let isDone = true;
 
 	let text = new TextSprite({
 		x: 32,
@@ -56,13 +56,8 @@ export function Narration(gme, onFinshed) {
 		for (let i = 1; i < list.length; i++) {
 			dialogList.push(list[i]);
 		}
-
+		isDone = false;
 		// symbols.y = text.breaks.length * 64 + 64 + 32;
-	}
-
-	function addSequence(list, callback) {
-		add(list);
-		sequenceCallback = callback;
 	}
 
 	function addSymbols(str) {
@@ -81,6 +76,9 @@ export function Narration(gme, onFinshed) {
 		if (!text.isDone()) {
 			text.skip();
 			sfx.play('skip_button', true);
+			if (dialogList.length === 0) {
+				isDone = true;
+			}
 		} else {
 			goNext = true;
 			sfx.play('next_button', true);
@@ -88,12 +86,10 @@ export function Narration(gme, onFinshed) {
 	}
 
 	function display() {
-
-		let isDone = text.display();
-		// console.log(dialogList)
+		let lineIsDone = text.display();
 		if (symbols.isActive) symbols.display();
 
-		if (!isDone) {
+		if (!lineIsDone) {
 			goNext = false;
 			return;
 		}
@@ -104,11 +100,8 @@ export function Narration(gme, onFinshed) {
 		if (goNext) {
 			goNext = false;
 			if (dialogList.length === 0) {
-				if (sequenceCallback) {
-					sequenceCallback();
-					sequenceCallback = undefined;
-					sfx.play('level_start', true);
-				}
+				isDone = true;
+				// sfx.play('level_start', true); // should sfx be here? and is it working??
 			} else {
 				text.setMsg(dialogList.shift());
 			}
@@ -119,5 +112,8 @@ export function Narration(gme, onFinshed) {
 		sfx = _sfx;
 	}
 
-	return { add, addSymbols, cancelSymbols, next, display, addSFX, addSequence };
+	return { 
+		add, addSymbols, cancelSymbols, next, display, addSFX,
+		isDone: () => { return isDone; },
+	};
 }
