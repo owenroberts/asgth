@@ -1,5 +1,5 @@
 import { Player } from './classes/Player.js';
-import { Counter} from '../lines/src/Engine.js';
+import { Counter } from '../cool/cool.js';
 
 export class Spider extends Player {
 	constructor(x, y, states, bounds, debug) {
@@ -86,10 +86,5 @@ export class Spider extends Player {
 
 	back() {
 		this.position = [...this.prevPosition];
-	}
-
-	shake(position) {
-		this.position[0] +=	position[0];
-		this.position[1] +=	position[1];
 	}
 }

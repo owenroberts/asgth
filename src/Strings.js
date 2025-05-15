@@ -1,4 +1,10 @@
+/**
+ * all the strings for the game
+ * @type {Object}
+ */
 const Strings = {
+
+	TITLE: "all spiders go to hell",
 	
 	INST_MOVE_YOU: "you are the spider",
 	INST_MOVE_KEYS: "move with the arrow keys",
@@ -6,14 +12,17 @@ const Strings = {
 	INST_WEB_1: "connect your web to a tree",
 	INST_WEB_2: "connect the trees",
 	INST_WEB_3: "release the web",
-	INST_WEB_4: "practice drawing the symbol with your web",
-	INST_WEB_5: "try again to recreate the symbol",
-	INST_WEB_6: "create lines by connecting trees",
-	INST_WEB_7: "you can connect more than one line to a tree",
+
+	INST_SYMBOL_1: "practice drawing the symbol with your web",
+	INST_SYMBOL_2: "try again to recreate the symbol",
+	INST_SYMBOL_3: "create lines by connecting trees",
+	INST_SYMBOL_4: "you can connect more than one line to a tree",
 
 	INST_SUN: "finish before the sun sets",
 
-	X_BTN: "x",
+	INST_CHOOSE: "press z to review instructions, press x to continue",
+
+	X_BTN: "x", // primary and secondary button?
 	Z_BTN: "z",
 	RESET_BTN: "r",
 	CONTINUE: "continue",
@@ -64,7 +73,7 @@ const Strings = {
 				B: "Whatever I crushed beneath doesn't begin to scar my surface, only after thousands of rolls might a stick make a scratch, or blood a stain.", // spider lose
 			}
 		}
-	}
+	},
 };
 
 export { Strings };

@@ -1,5 +1,5 @@
 import { randomInt, Counter } from '../cool/cool.js';
-import { Texture } from '../lines/src/Engine.js';
+import { Texture, Sprite } from '../lines/src/Engine.js';
 import { Animator } from '../lines/src/Lines.js';
 import { Consts } from './Consts.js';
 
@@ -7,16 +7,18 @@ import { Consts } from './Consts.js';
  * Draw and manage trees for walk and draw levels
  * @param {Object} animation animation for tree texture
  */
-export function Trees(animation) {
+export function Trees(scene, sprites) {
 
-	const texture = new Texture({ animation });
+	const texture = scene.addSprite(new Texture({ animation: sprites.trees }));
 	const animator = Animator(texture.animation, {
 		jiggleRange: [1, 1],
 		segmentNum: [2, 3],
 	});
 	// animator.set();
 	const animCounter = Counter(24, true, () => animator.set);
-	
+	const select = scene.addSprite(new Sprite(0, 0, sprites.select));
+	select.isActive = false;
+	select.animation.play();
 	
 	/**
 	 * Detect if player is colliding with a tree
@@ -34,14 +36,17 @@ export function Trees(animation) {
 			}
 
 			if (player.tap(x + 32, y + 32)) {
+				select.position = [x, y];
+				select.isActive = true;
 				return [x, y];
 			}
 		}
+		select.isActive = false;
 		return false;
 	}
 
 	/**
-	 * Animate trees shaking while rock is moving in scene.
+	 * animate trees shaking while rock is moving in scene.
 	 */
 	function shake() {
 		texture.offset[0] = randomInt(-Consts.ROCK_SHAKE_AMOUNT, Consts.ROCK_SHAKE_AMOUNT); 
@@ -58,6 +63,4 @@ export function Trees(animation) {
 		endAnimator: () => { animator.clear(); },
 		// updateAnimator: () => { animator.update(); },
 	};
-
-
 }

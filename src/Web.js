@@ -1,10 +1,9 @@
-/*
-	this is the spider's web?
-*/
-
 import { GameAnim } from '../lines/src/Engine.js';
 import { Drawing, Layer, Style, POINTS } from '../lines/src/Lines.js';
 
+/**
+ * draw the spiders web
+ */
 export function Web() {
 	
 	const animation = new GameAnim();
@@ -94,7 +93,6 @@ export function Web() {
 	}
 
 	function getPoints() {
-		
 	}
 
 	return { 
@@ -104,7 +102,7 @@ export function Web() {
 		startOverride, cancelOverride, 
 		addSFX,
 		getPoints() { return drawing.points;  },
-		isActive() { return isActive; }
+		isActive() { return isActive; },
 	};
 
 }
