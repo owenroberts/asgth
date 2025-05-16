@@ -35,7 +35,8 @@ export function InstSymbol(gm, player, seq) {
 		player.spawn([Consts.CELL_SIZE.W * 5.5, Consts.CELL_SIZE.H * 5.5]);
 		scene.add(player);
 
-		trees = Trees(scene, gm.anims.sprites);
+		trees = Trees(gm.anims.sprites);
+		scene.addSprite(trees.getSprites());
 		web = Web();
 		scene.addSprite(web);
 		webUpdater = WebUpdater(_sfx);
@@ -136,9 +137,7 @@ export function InstSymbol(gm, player, seq) {
 
 		sun.update();
 		if (sun.isDone()) {
-			console.log({gotSymbol})
 			if (gotSymbol) {
-				console.log(seq.next);
 				seq.next();
 			} else {
 				moreInstructions();

@@ -1,5 +1,6 @@
 /*
 	re-write as closure using ColliderSprite
+	add to engine
 */
 
 import { ColliderSprite } from '../../lines/src/Engine.js';

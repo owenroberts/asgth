@@ -9,7 +9,7 @@ import { SymbolMatch } from './SymbolMatch.js';
 import { SymbolMatch2 } from './SymbolMatch2.js';
 import { Spider } from './Spider.js';
 import { Trees } from './Trees.js';
-import { Level } from './classes/Level.js';
+
 
 // scenes
 import { Splash } from './scenes/Splash.js';
@@ -17,6 +17,8 @@ import { InstMove } from './scenes/InstMove.js';
 import { InstChoose } from './scenes/InstChoose.js';
 import { InstWeb } from './scenes/InstWeb.js';
 import { InstSymbol } from './scenes/InstSymbol.js';
+import { InterWebs } from './scenes/InterWebs.js';
+import { RockLevel } from './scenes/RockLevel.js';
 
 import { Strings } from './Strings.js';
 import { Consts } from './Consts.js';
@@ -56,18 +58,12 @@ let seq = Sequencer();
 let points = { ROCK: 0, SPIDER: 0 };
 let lastPointWinner;
 
-let sun;
-let moon, stone, scoreDisplay, levelDisplay;
 let webs, websAnimator, websCounter;
-let web = Web();
-let symbolMatch, symbolMatch2;
-let trees;
-let playerOnTreeLoc = [], prevTreeLoc = [], allTrees = [];
+let moon, stone, scoreDisplay, levelDisplay;
 let narration; // handles text scenes
 let doodoo, sfx;
 
 function soundSetup(withSound) {
-	console.log({withSound})
 	if (withSound) {
 		doodoo = new Doodoo({
 			...themeFile,
@@ -100,22 +96,6 @@ function soundSetup(withSound) {
 	}
 }
 
-function setupWebsScene(nextScene) {
-	web.clear();
-	web.end();
-	webs.animation.currentFrame = randomInt(0, 6);
-	websCounter.reset();
-	websAnimator.set();
-	gm.scenes.webs.onUpdate = function() {
-		websCounter.update();
-		if (websCounter.isDone()) {
-			seq.next();
-			// if (nextScene === "premise") setupPremise();
-			// if (nextScene === "onRockRolled") onRockRolled();
-		}
-	};
-}
-
 function getNextSymbolString(len) {
 	return Consts.LEVEL_ORDER.charAt(levelCount);
 
@@ -126,118 +106,6 @@ function getNextSymbolString(len) {
 	// 	str += random('abcdefghijklm'.split(''));
 	// }
 	// return str;
-}
-
-function setupLevel(symbolString) {
-	// console.clear(); // debug
-	// console.log('symbolString', symbolString);
-
-	// text generator?
-	const levelName = 'level-' + levelCount;
-	
-	// min room size is size of room, 3+ is easiest/guaranteed
-	let minNodeRoomSize = symbolString.length > 2 ? 2 : 1;
-	// make at least one with 3 for each 3 symbol
-	// or something more complex to make sure there are 3x3 grids for each symbol ... 
-
-	// set max nodes based on level -- fewer nodes means bigger rooms
-	// max 1x1 nodes 13x7 = 91, use 1/3 ish of that
-	// const maxNodes = 16 - levelCount + (points.rock - points.spider);
-	const maxNodes = Math.min(24, levelCount + 3 + (points.spider - points.rock));
-	// console.log('room', minNodeRoomSize, 'nodes', maxNodes, 16, levelCount, points.rock - points.spider);
-	if (levelCount === 0) minNodeRoomSize = 3;
-	const groundTexture = choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
-	const level = new Level(minNodeRoomSize, maxNodes, gm.anims.sprites[groundTexture]);
-	// console.log('level', levelName, symbolString);
-
-	let symbolsMatched = [];
-	trees.clear();
-	trees.endAnimator();
-	level.locations.forEach(loc => trees.addLocation(...loc));
-
-	player.spawn(choice(level.walls)); // no spawn on edge
-	
-	const scene = new Scene();
-	scene.addSprite([level, player, trees.getTexture(), sun.getSprite(), scoreDisplay]);
-
-	function updateScore() {
-		let point = prevMatched === finishString ? 1 : 0;
-		// console.log(symbolString, symbolsMatched, point);
-		lastPointWinner = point === 1 ? 'SPIDER' : 'ROCK'; // save who got this point
-		points[lastPointWinner]++;
-		// score.points.push(point);
-		let scoreX = gm.width - 64 * 1.125;
-		let scoreY = 64 * 0.125 + (64 * (points.SPIDER + points.ROCK - 1));
-		scoreDisplay.addLocation(scoreX, scoreY,  point);
-		levelDisplay.addLocation(scoreX - 64, scoreY, levelCount);
-		return lastPointWinner;
-	}
-
-	sun.setup();
-	
-	let prevMatched = '';
-	const finishString = symbolString.split('').sort().join('');
-
-	scene.onUpdate = () => {
-
-		const madeConnection = webUpdate();
-		if ((madeConnection === 2 && checkUnfinishedConnection) || madeConnection === 3) {
-
-			const points = structuredClone(web.getPoints());
-			// what is made connection 2? cutting til we get to end ... 
-			if (madeConnection === 2) {
-				while (points.slice(-1)[0] !== POINTS.END && points.length > 0) {
-					points.pop();
-				}
-			}
-			
-			const symbolMatches = symbolMatch.getMatch(points, 64, 32);
-
-			// only adds if the first one didn't get it
-			const symbolMatches2 = symbolMatch2.getMatch(points, 64, 32);
-			
-			let matched = [...symbolMatches];
-			const used = [...symbolMatches];
-			
-			symbolMatches2.forEach(s => {
-				if (!matched.includes(s)) {
-					matched.push(s);
-				} else if (!used.includes(s)) {
-					matched.push(s);
-				} else {
-					used.splice(used.indexOf(s), 1);
-				}
-			});
-
-			matched = matched.filter(s => finishString.includes(s));
-
-			if (matched.length > prevMatched.length) {
-				if (madeConnection === 2) web.cancel();
-				sfx.play('match', true, 0.9, 1.1);
-			}
-			prevMatched = matched.sort().join('');
-
-			if (prevMatched === finishString) {
-				// spider got it
-				sun.end();
-			}
-		}
-
-		if (web.isActive() && player.isMoving()) {
-			sfx.play('web');
-		} else {
-			sfx.pause('web');
-		}
-
-		sun.update();
-		if (sun.isDone()) {
-			updateScore();
-			seq.next(); 
-		}
-	};
-
-	gm.scenes.addScene(scene, levelName);
-	return levelName;
 }
 
 function setupRockScene(scene) {
@@ -475,9 +343,6 @@ function clearStuff() {
 gm.start = function() {
 
 	const { sprites } = gm.anims;
-	
-	symbolMatch = SymbolMatch();
-	symbolMatch2 = SymbolMatch2();
 
 	gm.setBounds('left', 0);
 	gm.setBounds('top', 0);
@@ -497,21 +362,12 @@ gm.start = function() {
 	gm.scenes.inst_choose = InstChoose(gm.anims.sprites);
 	gm.scenes.inst_web = InstWeb(gm.anims.sprites, player, seq);
 	gm.scenes.inst_symbol = InstSymbol(gm, player, seq);
+	gm.scenes.inter_webs = InterWebs(gm, seq);
 
 	moon = new Sprite(13 * 64, 7 * 64, sprites.moon);
 	stone = new Sprite(gm.width, -sprites.stone.height, sprites.stone);
 	stone.isActive = false;
 	stone.animation.isPlaying = true;
-
-	// in web? 
-	webs = new Sprite(0, 0, sprites.webs_2);
-	websAnimator = new Animator(webs.animation, {
-		segmentNum: [1, 3],
-		jiggleRange: [1, 2],
-	});
-	websCounter = new Counter(Consts.WEBS_INTERVAL);
-	gm.scenes.webs.addToDisplay(webs);
-	// gme.scenes.webs.needsUpdate = true;
 
 	// need these? 
 	scoreDisplay = new Texture({ animation: sprites.score });
@@ -520,6 +376,7 @@ gm.start = function() {
 	levelDisplay = new Texture({ animation: sprites.symbols_small });
 	gm.scenes.narration.addToDisplay(levelDisplay);
 
+	// make this a scene -- later
 	narration = Narration(gm.anims.sprites);
 	gm.scenes.narration.addToDisplay(narration);
 	gm.scenes.narration.onKeyUp['x'] = function() {
@@ -683,7 +540,7 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		// if (debug) return seq.next();
+		if (debug) return seq.next();
 		if (hasCompletedInstructions && !choseRepeatInstructions) {
 			seq.next();
 			return;
@@ -693,9 +550,9 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		if (debug) return seq.next();
+		// if (debug) return seq.next();
 		localStorage.setItem('spider-instructions-complete', true);
-		clearStuff();
+		// clearStuff();
 		narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
 		gm.scenes.setCurrent("narration");
 	});
@@ -712,17 +569,20 @@ gm.start = function() {
 		scoreDisplay.isActive = false; // for after first loop
 		levelDisplay.isActive = false;
 
+		const levelName = `level-${levelCount}`;
+
 		seq.add(() => {
-			let levelName = setupLevel(nextSymbolString);
+			gm.scenes[levelName] = RockLevel(gm, player, seq, sfx, nextSymbolString, levelCount, points);
 			gm.scenes.setCurrent(levelName);
 		});
 
 		seq.add(() => {
 			if (lastPointWinner == "SPIDER") {
-				setupWebsScene();
-				gm.scenes.setCurrent('webs');
+				gm.scenes.inter_webs.setup();
+				gm.scenes.setCurrent("inter_webs");
 			} else {
-				setupRockScene(gm.scenes.current);
+				// setupRockScene(gm.scenes.current);
+				gm.scenes[levelName].rock();
 			}
 		});
 
@@ -760,7 +620,6 @@ gm.update = function(timeElapsed) {
 
 gm.draw = function() {
 	gm.scenes.current.display();
-	if (gm.scenes.current.onUpdate) web.display();
 };
 
 gm.keyDown = function(key) {

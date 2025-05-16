@@ -3,7 +3,6 @@ import { Scene, Sprite, TextSprite } from '../../lines/src/Engine.js';
 import { Strings } from '../Strings.js';
 import { Consts } from '../Consts.js';
 
-
 export function InstMove(sprites, player, ) {
 
 	const scene = new Scene();
