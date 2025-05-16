@@ -51,7 +51,6 @@ export function Web() {
 		drawing.points.pop();
 		drawing.points.pop();
 		isActive = false;
-		sfx.play('cancel'); 
 	}
 
 	function end() {
@@ -87,21 +86,22 @@ export function Web() {
 		animation.onDraw = undefined;
 	}
 
-	function addSFX(_sfx) {
-		sfx = _sfx;
-		return;
-	}
+	function getPoints({trimmed=false}) {
+		const points = structuredClone(drawing.points)
+		if (trimmed) {
+			while (points.slice(-1)[0] !== POINTS.END && points.length > 0) {
+				points.pop();
+			}
 
-	function getPoints() {
+		}
+		return points;
 	}
 
 	return { 
 		display, 
-		addPoint, insertPoint, insertEnd, popPoint,
+		getPoints, addPoint, insertPoint, insertEnd, popPoint,
 		start, end, clear, cancel,
 		startOverride, cancelOverride, 
-		addSFX,
-		getPoints() { return drawing.points;  },
 		isActive() { return isActive; },
 	};
 

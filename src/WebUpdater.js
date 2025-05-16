@@ -6,22 +6,18 @@ import { Consts } from './Consts.js';
  */
 export function WebUpdater(sfx) {
 
+	console.log(sfx);
+
 	let treeList = [];
 	let treeLocation, prevTreeLocation; // location of tree under player
 
 	/* testing (still?) continuous web vs segmented */
 	let continuousWeb = true;
-	let checkUnfinishedConnection = true;
 	document.addEventListener('keydown', ev => {
 		if (ev.code === 'KeyT') {
 			continuousWeb = !continuousWeb;
 			console.log('Continuous web toggled', continuousWeb);
 		}
-		if (ev.code === 'KeyY') {
-			checkUnfinishedConnection = !checkUnfinishedConnection;
-			console.log('Check unfinished toggled', checkUnfinishedConnection);
-		}
-		// else if (ev.code == 'Enter') ui.message.continue.onClick(); // to move message without mouse
 	});
 
 	/**
@@ -41,11 +37,11 @@ export function WebUpdater(sfx) {
 				web.end();
 				treeList = [];
 				sfx.play('cancel');
-				return Consts.WEB_CONNECTIONS.RELEASE;
+				return Consts.WEB_CONNECTIONS.RELEASED;
 			}
 			if (web.isActive()) {
 				web.cancel();
-				return 4;
+				return Consts.WEB_CONNECTIONS.CANCELED;
 			}
 		}
 
@@ -53,9 +49,7 @@ export function WebUpdater(sfx) {
 		treeLocation = trees.isColliding(player); // player colliding with tree
 
 		if (treeLocation) {
-			// selectSprite.position = treeLocation; // move to trees? 
-			// selectSprite.isActive = true;
-
+			
 			if (player.input.x) {
 				player.resetInput();
 				if (!web.isActive()) {
@@ -85,7 +79,7 @@ export function WebUpdater(sfx) {
 					
 					if (!continuousWeb) {
 						web.end();
-						connection = Consts.WEB_CONNECTIONS.RELEASE;
+						connection = Consts.WEB_CONNECTIONS.RELEASED;
 					} else {
 						web.insertEnd();
 						web.insertPoint([treeLocation[0] + 32, treeLocation[1] + 32]); 
@@ -98,8 +92,6 @@ export function WebUpdater(sfx) {
 					sfx.play('cancel');
 				}
 			}
-		} else {
-			// selectSprite.isActive = false;
 		}
 
 		return connection;

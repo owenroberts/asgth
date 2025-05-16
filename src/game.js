@@ -16,6 +16,7 @@ import { Splash } from './scenes/Splash.js';
 import { InstMove } from './scenes/InstMove.js';
 import { InstChoose } from './scenes/InstChoose.js';
 import { InstWeb } from './scenes/InstWeb.js';
+import { InstSymbol } from './scenes/InstSymbol.js';
 
 import { Strings } from './Strings.js';
 import { Consts } from './Consts.js';
@@ -66,6 +67,7 @@ let narration; // handles text scenes
 let doodoo, sfx;
 
 function soundSetup(withSound) {
+	console.log({withSound})
 	if (withSound) {
 		doodoo = new Doodoo({
 			...themeFile,
@@ -88,110 +90,13 @@ function soundSetup(withSound) {
 				{ key: 'level_start', sequence: [1, 3] },
 			]
 		}, soundFiles => {
-			web.addSFX(sfx);
 			narration.addSFX(sfx);
 			seq.next(); // afterSetupOrSound();
 		});
 	} else {
 		sfx = SoundProvider(); // empty sound provider plays nothing
-		web.addSFX(sfx); // error w no sfx
 		narration.addSFX(sfx);
 		seq.next(); // afterSetupOrSound();
-	}
-}
-
-function instSymbolSetup(practiceAttemptCount=0) {
-
-	if (practiceAttemptCount > 0) {
-		narration.add([
-			Strings.INST_WEB_5,
-			Strings.INST_WEB_6,
-			Strings.INST_WEB_7,
-		]);
-		narration.addCallback(() => {
-			gme.scenes.setCurrent("inst_symbol");
-		});
-		gm.scenes.setCurrent("narration");
-	}
-
-	web.end();
-	web.clear();
-	trees.clear();
-	const ground = new Texture({ animation: gm.anims.sprites.tiles_dirt });
-	gm.scenes.inst_symbol.addToDisplay(ground);
-	
-	for (let x = 0; x <= 4; x += 1) {
-		for (let y = 0; y <= 4; y += 1) {
-			if (x === 0 || y === 0 || x === 4 || y === 4) {
-				ground.addLocation(64 + x * 64, 64 + y * 64, 21);
-				continue;
-			}
-			trees.addLocation(64 + x * 64, 64 + y * 64, randomInt(25));
-		}
-	}
-
-	const symbolSprite = new TextSprite({
-		msg: Consts.PRACTICE_SYMBOL,
-		x: 64 * 10,
-		y: 64 * 0.5,
-		wrap: 6,
-		letters: gm.anims.sprites.symbols_big,
-		track: 64,
-		lead: 72,
-		letterIndexString: Consts.SYMBOL_INDEX_STRING,
-	});
-	gm.scenes.inst_symbol.addToDisplay(symbolSprite);
-	player.spawn([64 * 5.5, 64 * 5.5]);
-
-	let gotSymbol = false; // so they can't fuck it up after
-	let attemptCount = 0;
-
-	gm.scenes.inst_symbol.onUpdate = () => {
-		const madeConnection = webUpdate(); // use enum here
-		if ((madeConnection === 2 && checkUnfinishedConnection) || madeConnection === 3) {
-
-			const points = structuredClone(web.getPoints());
-			if (madeConnection === 2) {
-				while (points.slice(-1)[0] !== POINTS.END && points.length > 0) {
-					points.pop();
-				}
-			}
-
-			const symbolMatches = symbolMatch.getMatch(points, 64, 32).flatMap(m => m).map(m => m.symbol);
-			const symbolMatches2 = symbolMatch2.getMatch(points, 64, 32).flatMap(m => m);
-
-			if (symbolMatches.includes(Consts.PRACTICE_SYMBOL)) {
-				gotSymbol = true;
-			}
-
-			if (symbolMatches2.includes(Consts.PRACTICE_SYMBOL)) {
-				gotSymbol = true;
-			}
-
-
-			if (gotSymbol) {
-				if (madeConnection === 2) {
-					web.cancel();
-				}
-				sfx.play('match', true, 0.9, 1.1);
-				sun.end();
-			}
-
-			attemptCount++;
-			// console.log(attemptCount);
-			if (attemptCount >= 12) {
-				instSymbolSetup(practiceAttemptCount + 1, practiceSymbol);
-			}
-		}
-
-		const isDone = sun.update();
-		if (isDone) {
-			if (gotSymbol) {
-				seq.next();
-			} else {
-				instSymbolSetup(practiceAttemptCount + 1, practiceSymbol);
-			}
-		}
 	}
 }
 
@@ -591,14 +496,8 @@ gm.start = function() {
 	gm.scenes.inst_move = InstMove(gm.anims.sprites, player);
 	gm.scenes.inst_choose = InstChoose(gm.anims.sprites);
 	gm.scenes.inst_web = InstWeb(gm.anims.sprites, player, seq);
+	gm.scenes.inst_symbol = InstSymbol(gm, player, seq);
 
-	// gm.scenes.add(player, ['inst_symbol', 'inst_symbol', 'game']);
-	// gm.scenes.add(trees.getTexture(), ['inst_web', 'inst_web', 'inst_symbol', 'game']);
-
-	const sunSprite = new Sprite(12.85 * 64, 7 * 64, sprites.sun);
-	gm.scenes.inst_symbol.addToDisplay(sunSprite);
-	sun = new Sun(sunSprite, gm.height);
-	
 	moon = new Sprite(13 * 64, 7 * 64, sprites.moon);
 	stone = new Sprite(gm.width, -sprites.stone.height, sprites.stone);
 	stone.isActive = false;
@@ -762,7 +661,7 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		// if (debug) return seq.next();
+		if (debug) return seq.next();
 		if (hasCompletedInstructions && !choseRepeatInstructions) {
 			seq.next();
 			return;
@@ -784,12 +683,12 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		if (debug) return seq.next();
+		// if (debug) return seq.next();
 		if (hasCompletedInstructions && !choseRepeatInstructions) {
 			seq.next();
 			return;
 		}
-		instSymbolSetup();
+		gm.scenes.inst_symbol.setup(sfx);
 		gm.scenes.setCurrent("inst_symbol");
 	});
 

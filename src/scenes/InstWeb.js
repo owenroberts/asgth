@@ -13,9 +13,6 @@ import { WebUpdater } from '../WebUpdater.js';
  */
 export function InstWeb(sprites, player, seq) {
 
-	// console.log(this);
-	// console.log(InstWeb);
-
 	const scene = new Scene();
 	let xBtn, instText;
 	let trees, web, webUpdater;
@@ -26,7 +23,7 @@ export function InstWeb(sprites, player, seq) {
 		web = Web();
 		webUpdater = WebUpdater(sfx);
 
-		scene.addSprite([player, web, trees.getTexture()]);
+		scene.addSprite([player, web]);
 		
 		instText = scene.addToDisplay(new TextSprite({
 			countForward: true,

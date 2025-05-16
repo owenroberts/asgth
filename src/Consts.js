@@ -23,12 +23,15 @@ export const Consts = {
 	LETTERS_LEAD: 56,
 	TEXT_WRAP: 20,
 
+	SYMBOLS_TRACK: 64,
+	SYMBOLS_LEAD: 72,
+
 	WEB_CONNECTIONS: {
 		NONE: 0,
 		STARTED: 1,
 		COMPLETED: 2,
-		RELEASE: 3,
-
+		RELEASED: 3,
+		CANCELED: 4,
 	}
 
 };
