@@ -101,7 +101,7 @@ export function Web() {
 		display, 
 		getPoints, addPoint, insertPoint, insertEnd, popPoint,
 		start, end, clear, cancel,
-		startOverride, cancelOverride, 
+		startOverride, cancelOverride, // need cancel?
 		isActive() { return isActive; },
 	};
 

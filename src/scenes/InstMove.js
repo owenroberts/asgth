@@ -3,7 +3,7 @@ import { Scene, Sprite, TextSprite } from '../../lines/src/Engine.js';
 import { Strings } from '../Strings.js';
 import { Consts } from '../Consts.js';
 
-export function InstMove(sprites, player, ) {
+export function InstMove(gm, player) {
 
 	const scene = new Scene();
 	let xBtn, xToContinue;
@@ -20,7 +20,7 @@ export function InstMove(sprites, player, ) {
 			lead: Consts.LETTERS_LEAD,
 			x: Consts.CELL_SIZE.W * 0.5,
 			y: Consts.CELL_SIZE.H * 0.5,
-			letters: sprites.letters,
+			letters: gm.anims.sprites.letters,
 			wrap: 14,
 		}));
 
@@ -31,18 +31,18 @@ export function InstMove(sprites, player, ) {
 			lead: Consts.LETTERS_LEAD,
 			x: Consts.CELL_SIZE.W * 0.5,
 			y: Consts.CELL_SIZE.H * 1.5,
-			letters: sprites.letters,
+			letters: gm.anims.sprites.letters,
 			wrap: 22,
 		}));
 
-		const keyboardArrows = new Sprite(Consts.CELL_SIZE.W * 0.5, Consts.CELL_SIZE.H * 2.5, sprites.keyboard_arrows); 
+		const keyboardArrows = new Sprite(Consts.CELL_SIZE.W * 0.5, Consts.CELL_SIZE.H * 2.5, gm.anims.sprites.keyboard_arrows); 
 		scene.addToDisplay(keyboardArrows);
 
 		xBtn = scene.addToDisplay(new TextSprite({
 			msg: Strings.X_BTN,
 			x: Consts.CELL_SIZE.W * 0.5,
 			y: Consts.CELL_SIZE.H * 5.5,
-			letters: sprites.letters_keyboard,
+			letters: gm.anims.sprites.letters_keyboard,
 			isActive: false,
 		}));
 
@@ -53,7 +53,7 @@ export function InstMove(sprites, player, ) {
 			lead: Consts.LETTERS_LEAD,
 			x: Consts.CELL_SIZE.W  * 1.5,
 			y: Consts.CELL_SIZE.H  * 5.5,
-			letters: sprites.letters,
+			letters: gm.anims.sprites.letters,
 			isActive: false,
 		}));
 	};

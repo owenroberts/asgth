@@ -1,5 +1,5 @@
-import { choice } from '../../cool/cool.js';
-import { Scene } from '../../lines/src/Engine.js';
+import { choice, random } from '../../cool/cool.js';
+import { Scene, Sprite } from '../../lines/src/Engine.js';
 import { Level } from '../classes/Level.js';
 import { Trees } from '../Trees.js';
 import { Web } from '../Web.js';
@@ -9,7 +9,7 @@ import { Consts } from '../Consts.js';
 import { SymbolMatch } from '../SymbolMatch.js';
 import { SymbolMatch2 } from '../SymbolMatch2.js';
 
-export function RockLevel(gm, player, seq, sfx, symbolString, levelCount, points) {
+export function RockLevel(gm, player, seq, sfx) {
 	
 	const scene = new Scene();
 
@@ -18,16 +18,16 @@ export function RockLevel(gm, player, seq, sfx, symbolString, levelCount, points
 
 	// rn all symbols are 1
 	// min room size is size of room, 3+ is easiest/guaranteed
-	let minNodeRoomSize = symbolString.length > 2 ? 2 : 1;
+	let minNodeRoomSize = gm.props.nextSymbolString.length > 2 ? 2 : 1;
 	// make at least one with 3 for each 3 symbol
 	// or something more complex to make sure there are 3x3 grids for each symbol ... 
-	if (levelCount === 0) minNodeRoomSize = 3;
+	if (gm.props.levelCount === 0) minNodeRoomSize = 3;
 	
 	// maybe gonna change this a lot ... 
 	// set max nodes based on level -- fewer nodes means bigger rooms
 	// max 1x1 nodes 13x7 = 91, use 1/3 ish of that
 	// const maxNodes = 16 - levelCount + (points.rock - points.spider);
-	const maxNodes = Math.min(24, levelCount + 3 + (points.SPIDER - points.ROCK));
+	const maxNodes = Math.min(24, gm.props.levelCount + 3 + (gm.props.points.SPIDER - gm.props.points.ROCK));
 
 	const groundTexture = choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
 	const level = new Level(minNodeRoomSize, maxNodes, gm.anims.sprites[groundTexture]);
@@ -36,7 +36,8 @@ export function RockLevel(gm, player, seq, sfx, symbolString, levelCount, points
 	const trees = Trees(gm.anims.sprites);
 	scene.addSprite(trees.getSprites());
 	level.locations.forEach(loc => trees.addLocation(...loc));
-
+	trees.clearAnimator();
+	
 	player.spawn(choice(level.walls)); // no spawn on edge
 	scene.addSprite(player);
 
@@ -44,27 +45,28 @@ export function RockLevel(gm, player, seq, sfx, symbolString, levelCount, points
 	scene.add(sun.getSprite());
 	sun.setup();
 
+	const rock = scene.addSprite(new Sprite(gm.width, -gm.anims.sprites.rock.height, gm.anims.sprites.rock));
+	rock.isActive = false;
+	rock.animation.play();
+	const dir = choice(-1, 1); // rock starts animating
+	let rockRolled = false;
+
+
 	const web = Web();
 	scene.addSprite(web);
 	const webUpdater = WebUpdater(sfx);
-
 	
 	let symbolsMatched = [];
 	let prevMatched = '';
-	const finishString = symbolString.split('').sort().join('');
+	const finishString = gm.props.nextSymbolString.split('').sort().join('');
 
 	function updateScore() {
 		let point = prevMatched === finishString ? 1 : 0;
-		lastPointWinner = point === 1 ? 'SPIDER' : 'ROCK'; // save who got this point
-		points[lastPointWinner]++;
-		let scoreX = gm.width - 64 * 1.125;
-		let scoreY = 64 * 0.125 + (64 * (points.SPIDER + points.ROCK - 1));
-		scoreDisplay.addLocation(scoreX, scoreY,  point);
-		levelDisplay.addLocation(scoreX - 64, scoreY, levelCount);
-		return lastPointWinner;
+		gm.props.lastPointWinner = point === 1 ? 'SPIDER' : 'ROCK'; // save who got this point
+		gm.props.points[gm.props.lastPointWinner]++;
 	}
 
-	/* finish for them */
+	/* release web when a shape is made */
 	let checkUnfinished = true;
 	document.addEventListener('keydown', ev => {
 		if (ev.code === 'KeyY') {
@@ -75,7 +77,11 @@ export function RockLevel(gm, player, seq, sfx, symbolString, levelCount, points
 
 	// dont kys on this, going to remove probably ... but also use in another scene ... 
 	scene.onUpdate = () => {
+		if (rockRolled) rockUpdate();
+		else webUpdate();
+	};
 
+	function webUpdate() {
 		const connection = webUpdater.update(player, web, trees);
 		if ((connection === Consts.WEB_CONNECTIONS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTIONS.RELEASED) {
 
@@ -124,9 +130,45 @@ export function RockLevel(gm, player, seq, sfx, symbolString, levelCount, points
 		sun.update();
 		if (sun.isDone()) {
 			updateScore();
-			seq.next(); 
+			seq.next();
 		}
+	}
+
+	scene.rock = function() {
+		
+		web.end(); // unset web scene
+		sfx.pause('web');
+		trees.startRock();
+		sun.getSprite().isActive = false;
+		
+		rock.position[0] = dir === 1 ? -rock.halfWidth : gm.width;
+		rock.position[1] = -rock.halfHeight;
+		rock.isActive = true;
+
+		sfx.play('stone');
+		sfx.play('rock');
+
+		player.isActive = false;
+		web.startOverride();
+		rockRolled = true;
 	};
+
+	function rockUpdate() {
+		rock.position[0] += random(2, 1) * dir * Consts.ROCK_SPEED;
+		rock.position[1] += random(-1, 2) * Consts.ROCK_SPEED;
+
+		sfx.loop('stone');
+		sfx.loop('rock');
+
+		if ((dir === -1 && rock.position[0] < -rock.width) || 
+			dir === 1 && rock.position[0] > gm.width) {
+			rock.isActive = false;
+			rock.displayFunc = undefined;
+			player.isActive = true;
+			seq.next();
+		}
+		trees.shake();
+	}
 
 	return scene;
 }

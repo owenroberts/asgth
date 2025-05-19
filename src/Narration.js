@@ -1,52 +1,55 @@
-/*
-	handles displaying narration
-*/
-
-import { TextSprite } from '../lines/src/Engine.js';
+import { Texture, TextSprite } from '../lines/src/Engine.js';
 import { Consts } from './Consts.js';
+import { Strings } from './Strings.js';
 
-export function Narration(sprites) {
+/**
+ * handles displaying narration
+ * @param {Game} gm - game engine object
+ */
+export function Narration(gm) {
 
 	let sfx;
 	let dialogList, goNext = false;
-	// let callback = undefined;
 	let isDone = true;
 
-	let text = new TextSprite({
-		x: 32,
-		y: 32,
+	const scoreDisplay = new Texture({ animation: gm.anims.sprites.score });
+	scoreDisplay.isActive = false;
+
+	const text = new TextSprite({
+		x: Consts.CELL_SIZE.W / 2,
+		y: Consts.CELL_SIZE.H / 2,
 		wrap: 20,
-		letters: sprites.letters,
+		letters: gm.anims.sprites.letters,
 		track: Consts.LETTERS_TRACK,
 		lead: Consts.LETTERS_LEAD,
 		countForward: true,
 	});
 
-	let symbols = new TextSprite({
-		x: 64 * 10,
-		y: 64 * 0.5,
+	const symbols = new TextSprite({
+		x: Consts.CELL_SIZE.W * 10,
+		y: Consts.CELL_SIZE.H * 0.5,
 		wrap: 6,
-		letters: sprites.symbols_big,
-		track: 64,
-		lead: 72,
-		letterIndexString: 'abcdefghijklmnopqrstuvwxyz',
+		letters: gm.anims.sprites.symbols_big,
+		track: Consts.SYMBOLS_TRACK,
+		lead: Consts.SYMBOLS_LEAD,
+		letterIndexString: Consts.SYMBOL_INDEX_STRING,
 	});
 	symbols.isActive = false;
 
 	const xBtn = new TextSprite({
 		msg: "x",
-		x: 64 * 0.5,
-		y: 64 * 5.5,
-		letters: sprites.letters_keyboard,
+		x: Consts.CELL_SIZE.W * 0.5,
+		y: Consts.CELL_SIZE.H * 5.5,
+		letters: gm.anims.sprites.letters_keyboard,
 	});
 
 	let xContinue = new TextSprite({
-		x: 64 * 1.5,
-		y: 64 * 5.5,
-		msg: 'continue',
+		x: Consts.CELL_SIZE.W * 1.5,
+		y: Consts.CELL_SIZE.H * 5.5,
+		msg: Strings.CONTINUE,
 		track: Consts.LETTERS_TRACK,
 		lead: Consts.LETTERS_LEAD,
-		letters: sprites.letters,
+		letters: gm.anims.sprites.letters,
 	});
 
 	function add(list) {
@@ -88,6 +91,7 @@ export function Narration(sprites) {
 	function display() {
 		let lineIsDone = text.display();
 		if (symbols.isActive) symbols.display();
+		if (scoreDisplay.isActive) scoreDisplay.display();
 
 		if (!lineIsDone) {
 			goNext = false;
@@ -112,8 +116,22 @@ export function Narration(sprites) {
 		sfx = _sfx;
 	}
 
+	function setScore() {
+		scoreDisplay.isActive = true;
+
+		let scoreX = gm.width - Consts.CELL_SIZE.W * 1.25;
+		let scoreY = Consts.CELL_SIZE.H * 0.25 + (Consts.CELL_SIZE.H * (gm.props.points.SPIDER + gm.props.points.ROCK - 1));
+		let point = gm.props.lastPointWinner === 'SPIDER' ? 1 : 0;
+		scoreDisplay.addLocation(scoreX, scoreY,  point);
+	}
+
+	function hideScore() {
+		scoreDisplay.isActive = false;
+	}
+
 	return { 
 		add, addSymbols, cancelSymbols, next, display, addSFX,
+		setScore, hideScore,
 		isDone: () => { return isDone; },
 	};
 }

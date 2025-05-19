@@ -16,7 +16,8 @@ export function Trees(sprites) {
 		segmentNum: [2, 3],
 	});
 	// animator.set();
-	const animCounter = Counter(24, true, () => animator.set);
+	const animCounter = Counter(24, () => { animator.set(); });
+	animCounter.setLoop(true);
 	const select = new Sprite(0, 0, sprites.select);
 	select.isActive = false;
 	select.animation.play();
@@ -55,14 +56,17 @@ export function Trees(sprites) {
 		animCounter.update();
 	}
 
+	function startRock() {
+		select.isActive = false;
+		animator.set(); 
+	}
+
 	return { 
-		isColliding, shake,
+		isColliding, shake, startRock,
 		getSprites: () => { return [texture, select]; },
 		getTexture: () => { return texture; },
 		addLocation: (x, y, frameIndex) => { texture.addLocation(x, y, frameIndex); },
 		clear: () => { texture.clear(); },
-		startAnimator: () => { animator.set(); },
-		endAnimator: () => { animator.clear(); },
-		// updateAnimator: () => { animator.update(); },
+		clearAnimator: () => { animator.clear(); },
 	};
 }

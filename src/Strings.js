@@ -5,6 +5,9 @@
 const Strings = {
 
 	TITLE: "all spiders go to hell",
+
+	DEBUG_START: "x to start debug",
+	LOCAL_STORAGE: "spider-instructions-complete",
 	
 	INST_MOVE_YOU: "you are the spider",
 	INST_MOVE_KEYS: "move with the arrow keys",

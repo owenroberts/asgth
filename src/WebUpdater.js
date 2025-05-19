@@ -6,8 +6,6 @@ import { Consts } from './Consts.js';
  */
 export function WebUpdater(sfx) {
 
-	console.log(sfx);
-
 	let treeList = [];
 	let treeLocation, prevTreeLocation; // location of tree under player
 
@@ -62,6 +60,7 @@ export function WebUpdater(sfx) {
 						treeLocation[0] + Consts.CELL_SIZE.W / 2, 
 						treeLocation[1] + Consts.CELL_SIZE.H / 2
 					]);
+					
 					web.addPoint(player.position);
 					
 					treeList.push(structuredClone(treeLocation));
