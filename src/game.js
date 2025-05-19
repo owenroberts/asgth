@@ -1,7 +1,6 @@
 import { Sequencer } from '../cool/cool.js';
 import { Doodoo } from '../doodoo/src/Doodoo.js';
 import { Game, Sprite, TextSprite, SoundProvider, Scene } from '../lines/src/Engine.js';
-import { Narration } from './Narration.js';
 
 // scenes
 import { Splash } from './scenes/Splash.js';
@@ -13,6 +12,7 @@ import { InstSymbol } from './scenes/InstSymbol.js';
 import { InterWebs } from './scenes/InterWebs.js';
 import { RockLevel } from './scenes/RockLevel.js';
 import { WalkLevel } from './scenes/WalkLevel.js';
+import { Narration } from './scenes/Narration.js';
 
 import { Strings } from './Strings.js';
 import { Consts } from './Consts.js';
@@ -35,7 +35,7 @@ const gm = new Game({
 	stats: true,
 	suspend: true,
 	events: ['keyboard'],
-	scenes: ["narration", "end", "loading"],
+	scenes: ["end", "loading"],
 	// testPerformance: true,
 });
 gm.load({ animations: { sprites: spritePaths }, }, false);
@@ -55,7 +55,6 @@ gm.props = {
 
 let player;
 let seq = Sequencer();
-let narration; // handles text scenes
 let doodoo, sfx;
 
 /* debug */
@@ -86,12 +85,12 @@ function soundSetup(withSound) {
 				{ key: 'level_start', sequence: [1, 3] },
 			]
 		}, soundFiles => {
-			narration.addSFX(sfx);
+			gm.scenes.narration.addSFX(sfx);
 			seq.next(); // afterSetupOrSound();
 		});
 	} else {
 		sfx = SoundProvider(); // empty sound provider plays nothing
-		narration.addSFX(sfx);
+		gm.scenes.narration.addSFX(sfx);
 		seq.next(); // afterSetupOrSound();
 	}
 }
@@ -128,14 +127,14 @@ gm.start = function() {
 	gm.scenes.inter_webs = InterWebs(gm, seq);
 
 	// make this a scene -- later
-	narration = Narration(gm);
-	gm.scenes.narration.addToDisplay(narration);
+	// gm.scenes.narration.addToDisplay(narration);
+	gm.scenes.narration = Narration(gm);
 	gm.scenes.narration.onKeyUp['x'] = function() {
-		if (narration.isDone()) {
+		if (gm.scenes.narration.isDone()) {
 			sfx.play('next_button', true);
 			seq.next();
 		} else {
-			narration.next();
+			gm.scenes.narration.next();
 		}
 		player.resetInput(); // need this? 
 	};
@@ -174,7 +173,8 @@ gm.start = function() {
 	gm.scenes.loading.addToDisplay(loadingSprite);
 	loadingSprite.animation.play();
 
-	if (debug) {
+	seq.add(() => { 
+		if (!debug) return seq.next();
 		gm.scenes.debug = new Scene();
 		gm.scenes.debug.add(new TextSprite({
 			msg: Strings.DEBUG_START,
@@ -183,10 +183,6 @@ gm.start = function() {
 			letters: gm.anims.sprites.letters,
 			letterIndexString: Consts.SYMBOL_INDEX_STRING,
 		}));
-	}
-
-	seq.add(() => { 
-		if (!debug) return seq.next();
 		gm.scenes.setCurrent("debug");
 		gm.scenes.debug.onKeyDown['x'] = () => {
 			seq.next();	
@@ -245,7 +241,7 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		// if (debug) return seq.next();
+		if (debug) return seq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			seq.next();
 			return;
@@ -278,9 +274,9 @@ gm.start = function() {
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return seq.next();
 		}
-		narration.addSymbols(Consts.PRACTICE_SYMBOL);
+		gm.scenes.narration.addSymbols(Consts.PRACTICE_SYMBOL);
+		gm.scenes.narration.add([Strings.INST_WEB_4, Strings.INST_SUN]);
 		gm.scenes.setCurrent("narration");
-		narration.add([Strings.INST_WEB_4, Strings.INST_SUN]);
 	});
 
 	seq.add(() => {
@@ -295,13 +291,11 @@ gm.start = function() {
 	seq.add(() => {
 		if (debug) return seq.next();
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
-		narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
+		gm.scenes.narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
 		gm.scenes.setCurrent("narration");
 	});
 
-	seq.add(() => { 
-		gameLoop();
-	});
+	seq.add(() => { gameLoop(); });
 
 	function gameLoop() {
 
@@ -310,8 +304,8 @@ gm.start = function() {
 
 		seq.add(() => {
 			if (debug) return seq.next();
-			narration.addSymbols(gm.props.nextSymbolString);
-			narration.add([Strings.INST_DRAW]);
+			gm.scenes.narration.addSymbols(gm.props.nextSymbolString);
+			gm.scenes.narration.add([Strings.INST_DRAW]);
 			gm.scenes.setCurrent("narration");
 		});
 
@@ -332,8 +326,8 @@ gm.start = function() {
 
 		seq.add(() => {
 			gm.props.levelCount++;
-			narration.add(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
-			narration.setScore();
+			gm.scenes.narration.add(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
+			gm.scenes.narration.setScore();
 			sfx.play('level_start', true);
 			gm.scenes.setCurrent("narration");
 		});
@@ -347,7 +341,7 @@ gm.start = function() {
 
 		seq.add(() => {
 			sfx.play('level_start', true);
-			narration.hideScore();
+			gm.scenes.narration.hideScore();
 			if (gm.props.levelCount > Consts.NUM_LEVELS) {
 				gm.scenes.setCurrent("end");
 			} else {

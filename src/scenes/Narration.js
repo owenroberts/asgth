@@ -1,6 +1,6 @@
-import { Texture, TextSprite } from '../lines/src/Engine.js';
-import { Consts } from './Consts.js';
-import { Strings } from './Strings.js';
+import { Scene, Texture, TextSprite } from '../../lines/src/Engine.js';
+import { Consts } from '../Consts.js';
+import { Strings } from '../Strings.js';
 
 /**
  * handles displaying narration
@@ -8,14 +8,16 @@ import { Strings } from './Strings.js';
  */
 export function Narration(gm) {
 
+	const scene = new Scene();
+
 	let sfx;
 	let dialogList, goNext = false;
 	let isDone = true;
 
-	const scoreDisplay = new Texture({ animation: gm.anims.sprites.score });
+	const scoreDisplay = scene.addSprite(new Texture({ animation: gm.anims.sprites.score }));
 	scoreDisplay.isActive = false;
 
-	const text = new TextSprite({
+	const text = scene.addSprite(new TextSprite({
 		x: Consts.CELL_SIZE.W / 2,
 		y: Consts.CELL_SIZE.H / 2,
 		wrap: 20,
@@ -23,9 +25,9 @@ export function Narration(gm) {
 		track: Consts.LETTERS_TRACK,
 		lead: Consts.LETTERS_LEAD,
 		countForward: true,
-	});
+	}));
 
-	const symbols = new TextSprite({
+	const symbols = scene.addSprite(new TextSprite({
 		x: Consts.CELL_SIZE.W * 10,
 		y: Consts.CELL_SIZE.H * 0.5,
 		wrap: 6,
@@ -33,26 +35,28 @@ export function Narration(gm) {
 		track: Consts.SYMBOLS_TRACK,
 		lead: Consts.SYMBOLS_LEAD,
 		letterIndexString: Consts.SYMBOL_INDEX_STRING,
-	});
-	symbols.isActive = false;
+		isActive: false,
+	}));
 
-	const xBtn = new TextSprite({
+	const xBtn = scene.addSprite(new TextSprite({
 		msg: "x",
 		x: Consts.CELL_SIZE.W * 0.5,
 		y: Consts.CELL_SIZE.H * 5.5,
 		letters: gm.anims.sprites.letters_keyboard,
-	});
+		isActive: false,
+	}));
 
-	let xContinue = new TextSprite({
+	let xContinue = scene.addSprite(new TextSprite({
 		x: Consts.CELL_SIZE.W * 1.5,
 		y: Consts.CELL_SIZE.H * 5.5,
 		msg: Strings.CONTINUE,
 		track: Consts.LETTERS_TRACK,
 		lead: Consts.LETTERS_LEAD,
 		letters: gm.anims.sprites.letters,
-	});
+		isActive: false,
+	}));
 
-	function add(list) {
+	scene.add = function(list) {
 		if (!Array.isArray(list)) list = [list];
 		text.setMsg(list[0]);
 		dialogList = [];
@@ -60,22 +64,20 @@ export function Narration(gm) {
 			dialogList.push(list[i]);
 		}
 		isDone = false;
-		// symbols.y = text.breaks.length * 64 + 64 + 32;
-	}
+	};
 
-	function addSymbols(str) {
+	scene.addSymbols = function(str) {
 		symbols.setMsg(str);
 		symbols.setBreaks(true); // break with out spaces
 		symbols.isActive = true;
-		// symbols.y = text.breaks.length * 64 + 64 + 32;
-	}
+	};
 
-	function cancelSymbols() {
+	scene.cancelSymbols = function() {
 		symbols.setMsg("");
 		symbols.isActive = false;
-	}
+	};
 
-	function next() {
+	scene.next = function() {
 		if (!text.isDone()) {
 			text.skip();
 			sfx.play('skip_button', true);
@@ -86,22 +88,21 @@ export function Narration(gm) {
 			goNext = true;
 			sfx.play('next_button', true);
 		}
-	}
+	};
 
-	function display() {
-		let lineIsDone = text.display();
-		if (symbols.isActive) symbols.display();
-		if (scoreDisplay.isActive) scoreDisplay.display();
+	scene.onUpdate = function() {
 
-		if (!lineIsDone) {
+		if (!text.isDone()) {
 			goNext = false;
 			return;
+		} else {
+			xBtn.isActive = true;
+			xContinue.isActive = true;
 		}
 
-		xBtn.display();
-		xContinue.display();
-
 		if (goNext) {
+			xBtn.isActive = false;
+			xContinue.isActive = false;
 			goNext = false;
 			if (dialogList.length === 0) {
 				isDone = true;
@@ -110,28 +111,28 @@ export function Narration(gm) {
 				text.setMsg(dialogList.shift());
 			}
 		}
-	}
+	};
 
-	function addSFX(_sfx) {
+	scene.addSFX = function(_sfx) {
 		sfx = _sfx;
-	}
+	};
 
-	function setScore() {
+	scene.setScore = function() {
 		scoreDisplay.isActive = true;
 
 		let scoreX = gm.width - Consts.CELL_SIZE.W * 1.25;
 		let scoreY = Consts.CELL_SIZE.H * 0.25 + (Consts.CELL_SIZE.H * (gm.props.points.SPIDER + gm.props.points.ROCK - 1));
 		let point = gm.props.lastPointWinner === 'SPIDER' ? 1 : 0;
 		scoreDisplay.addLocation(scoreX, scoreY,  point);
-	}
-
-	function hideScore() {
-		scoreDisplay.isActive = false;
-	}
-
-	return { 
-		add, addSymbols, cancelSymbols, next, display, addSFX,
-		setScore, hideScore,
-		isDone: () => { return isDone; },
 	};
+
+	scene.hideScore = function() {
+		scoreDisplay.isActive = false;
+	};
+
+	scene.isDone = function() {
+		return isDone;
+	};
+
+	return scene;
 }

@@ -51,7 +51,6 @@ export function RockLevel(gm, player, seq, sfx) {
 	const dir = choice(-1, 1); // rock starts animating
 	let rockRolled = false;
 
-
 	const web = Web();
 	scene.addSprite(web);
 	const webUpdater = WebUpdater(sfx);
