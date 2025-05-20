@@ -51,13 +51,12 @@ gm.props = {
 	choseRepeatInstructions: false,
 };
 
-let player; // can this be a component ... 
-let seq = Sequencer();
-let doodoo, sfx;
+let player; // can this be a component ... only if input moves to gm
+let doodoo, sfx; // add sfx to gm
 
 /* debug */
 document.addEventListener('keydown', ev => {
-	if (ev.code === 'KeyN' && gm.debug) seq.next();
+	if (ev.code === 'KeyN' && gm.debug) gm.seq.next();
 });
 
 function soundSetup(withSound) {
@@ -84,12 +83,12 @@ function soundSetup(withSound) {
 			]
 		}, soundFiles => {
 			gm.scenes.narration.addSFX(sfx);
-			seq.next(); // afterSetupOrSound();
+			gm.seq.next(); // afterSetupOrSound();
 		});
 	} else {
 		sfx = SoundProvider(); // empty sound provider plays nothing
 		gm.scenes.narration.addSFX(sfx);
-		seq.next(); // afterSetupOrSound();
+		gm.seq.next(); // afterSetupOrSound();
 	}
 }
 
@@ -116,20 +115,21 @@ gm.start = function() {
 	gm.setBounds('bottom', Consts.GRID_ROWS * Consts.CELL_SIZE.H);
 	
 	player = Spider(gm);
+	gm.seq = Sequencer();
 	
 	gm.scenes.splash = Splash(gm);
 	gm.scenes.inst_move = InstMove(gm, player);
 	gm.scenes.inst_choose = InstChoose(gm);
-	gm.scenes.inst_web = InstWeb(gm, player, seq);
-	gm.scenes.inst_symbol = InstSymbol(gm, player, seq);
-	gm.scenes.inter_webs = InterWebs(gm, seq);
+	gm.scenes.inst_web = InstWeb(gm, player);
+	gm.scenes.inst_symbol = InstSymbol(gm, player);
+	gm.scenes.inter_webs = InterWebs(gm);
 	gm.scenes.end = End(gm);
 
 	gm.scenes.narration = Narration(gm);
 	gm.scenes.narration.onKeyUp['x'] = function() {
 		if (gm.scenes.narration.isDone()) {
 			sfx.play('next_button', true);
-			seq.next();
+			gm.seq.next();
 		} else {
 			gm.scenes.narration.next();
 		}
@@ -140,8 +140,8 @@ gm.start = function() {
 	loadingSprite.center = true;
 	loadingSprite.animation.play();
 
-	seq.add(() => { 
-		if (!gm.debug) return seq.next();
+	gm.seq.add(() => { 
+		if (!gm.debug) return gm.seq.next();
 		gm.scenes.debug = new Scene();
 		gm.scenes.debug.add(new TextSprite({
 			msg: Strings.DEBUG_START,
@@ -152,66 +152,66 @@ gm.start = function() {
 		}));
 		gm.scenes.setCurrent("debug");
 		gm.scenes.debug.onKeyDown['x'] = () => {
-			seq.next();	
+			gm.seq.next();	
 		};
 	});
 
-	seq.add(() => {
-		if (!gm.debug) return seq.next();
+	gm.seq.add(() => {
+		if (!gm.debug) return gm.seq.next();
 		loadingSprite.animation.frame = 0;
 		gm.scenes.setCurrent("loading");
 		soundSetup(true);
 	});
 
-	seq.add(() => {
-		if (gm.debug) return seq.next();
+	gm.seq.add(() => {
+		if (gm.debug) return gm.seq.next();
 
 		gm.scenes.splash.setup();
 		gm.scenes.splash.onKeyDown['x'] = function() {
 			gm.useSound = true;
-			seq.next();
+			gm.seq.next();
 		};
 		gm.scenes.splash.onKeyUp['z']= function() {
 			gm.props.useSound = false;
-			seq.next();
+			gm.seq.next();
 		};
 		gm.scenes.setCurrent("splash");
 	});
 
-	seq.add(() => {
-		if (gm.debug) return seq.next();
+	gm.seq.add(() => {
+		if (gm.debug) return gm.seq.next();
 		loadingSprite.animation.frame = 0;
 		gm.scenes.setCurrent("loading");
 		soundSetup(gm.props.useSound);
 	});
 
 	// test instructions thing
-	seq.add(() => {
-		if (gm.debug) return seq.next();
-		if (!gm.props.hasCompletedInstructions) return seq.next();
+	gm.seq.add(() => {
+		if (gm.debug) return gm.seq.next();
+		if (!gm.props.hasCompletedInstructions) return gm.seq.next();
 
 		gm.scenes.inst_choose.setup();
 
 		// skip instructions
 		gm.scenes.inst_choose.onKeyDown['x'] = () => {
-			seq.next();
+			gm.seq.next();
 			player.resetInput();
 		};
 
 		// repeat instructions
 		gm.scenes.inst_choose.onKeyDown['z'] = () => {
 			gm.props.choseRepeatInstructions = true;
-			seq.next();
+			gm.seq.next();
 			player.resetInput(); // need this?
 		};
 
 		gm.scenes.setCurrent("inst_choose");
 	});
 
-	seq.add(() => {
-		if (gm.debug) return seq.next();
+	gm.seq.add(() => {
+		if (gm.debug) return gm.seq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return seq.next();
+			return gm.seq.next();
 		}
 
 		sfx.play("level_start", true);
@@ -219,67 +219,67 @@ gm.start = function() {
 		gm.scenes.inst_move.onKeyDown['x'] = function() {
 			if (!gm.scenes.inst_move.check()) return;
 			sfx.play("next_button");
-			seq.next();
+			gm.seq.next();
 		};
 
 		gm.scenes.setCurrent("inst_move");
 	});
 
-	seq.add(() => {
-		if (gm.debug) return seq.next();
+	gm.seq.add(() => {
+		if (gm.debug) return gm.seq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return seq.next();
+			return gm.seq.next();
 		}
 		
 		gm.scenes.inst_web.setup(sfx);
 		gm.scenes.setCurrent("inst_web");
 	});
 
-	seq.add(() => {
-		if (gm.debug) return seq.next();
+	gm.seq.add(() => {
+		if (gm.debug) return gm.seq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return seq.next();
+			return gm.seq.next();
 		}
 		gm.scenes.narration.addSymbols(Consts.PRACTICE_SYMBOL);
 		gm.scenes.narration.add([Strings.INST_WEB_4, Strings.INST_SUN]);
 		gm.scenes.setCurrent("narration");
 	});
 
-	seq.add(() => {
-		if (gm.debug) return seq.next();
+	gm.seq.add(() => {
+		if (gm.debug) return gm.seq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return seq.next();
+			return gm.seq.next();
 		}
 		gm.scenes.inst_symbol.setup(sfx);
 		gm.scenes.setCurrent("inst_symbol");
 	});
 
-	seq.add(() => {
-		if (gm.debug) return seq.next();
+	gm.seq.add(() => {
+		if (gm.debug) return gm.seq.next();
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
 		gm.scenes.narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
 		gm.scenes.setCurrent("narration");
 	});
 
-	seq.add(() => { gameLoop(); });
+	gm.seq.add(() => { gameLoop(); });
 
 	function gameLoop() {
 
 		const levelName = `level-${gm.props.levelCount}`;
 		gm.props.nextSymbolString = getNextSymbolString();
 
-		seq.add(() => {
-			if (gm.debug) return seq.next();
+		gm.seq.add(() => {
+			if (gm.debug) return gm.seq.next();
 			gm.scenes.narration.addSymbols(gm.props.nextSymbolString);
 			gm.scenes.narration.add([Strings.INST_DRAW]);
 			gm.scenes.setCurrent("narration");
 		});
-		seq.add(() => {
-			gm.scenes[levelName] = RockLevel(gm, player, seq, sfx);
+		gm.seq.add(() => {
+			gm.scenes[levelName] = RockLevel(gm, player, sfx);
 			gm.scenes.setCurrent(levelName);
 		});
 
-		seq.add(() => {
+		gm.seq.add(() => {
 			if (gm.props.lastPointWinner === "SPIDER") {
 				gm.scenes.inter_webs.setup();
 				gm.scenes.setCurrent("inter_webs");
@@ -288,7 +288,7 @@ gm.start = function() {
 			}
 		});
 
-		seq.add(() => {
+		gm.seq.add(() => {
 			gm.props.levelCount++;
 			gm.scenes.narration.add(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
 			gm.scenes.narration.setScore();
@@ -296,15 +296,15 @@ gm.start = function() {
 			gm.scenes.setCurrent("narration");
 		});
 
-		seq.add(() => {
-			if (gm.props.levelCount > Consts.NUM_LEVELS) return seq.next();
+		gm.seq.add(() => {
+			if (gm.props.levelCount > Consts.NUM_LEVELS) return gm.seq.next();
 
 			const walkLevelName = 'walk-' + gm.props.levelCount;
-			gm.scenes[walkLevelName] = WalkLevel(gm, player, seq);
+			gm.scenes[walkLevelName] = WalkLevel(gm, player);
 			gm.scenes.setCurrent(walkLevelName);
 		});
 
-		seq.add(() => {
+		gm.seq.add(() => {
 			sfx.play('level_start', true);
 			gm.scenes.narration.hideScore();
 			if (gm.props.levelCount > Consts.NUM_LEVELS) {
@@ -318,18 +318,15 @@ gm.start = function() {
 			}
 		});
 
-		seq.next();
+		gm.seq.next();
 	}
 
-	seq.next();
+	gm.seq.next();
 };
 
 gm.update = function(timeElapsed) {
 	player.update(timeElapsed, true);
-	// part of scene?
-	if (gm.scenes.current.onUpdate) {
-		gm.scenes.current.onUpdate();
-	}
+	gm.scenes.current.update();
 };
 
 gm.draw = function() {

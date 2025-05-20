@@ -10,13 +10,14 @@ import { WebUpdater } from '../WebUpdater.js';
 import { SymbolMatch } from '../SymbolMatch.js';
 import { SymbolMatch2 } from '../SymbolMatch2.js';
 
-export function InstSymbol(gm, player, seq) {
+export function InstSymbol(gm, player) {
 	
 	const scene = new Scene();
 	
 	const symbolMatch = SymbolMatch();
 	const symbolMatch2 = SymbolMatch2();
 
+	// why ground a let?
 	let ground, trees, sun, web, webUpdater;
 	let attemptCount = 0, webCount = 0;
 	let gotSymbol = false; // so they can't fuck it up after
@@ -140,7 +141,7 @@ export function InstSymbol(gm, player, seq) {
 		sun.update();
 		if (sun.isDone()) {
 			if (gotSymbol) {
-				seq.next();
+				gm.seq.next();
 			} else {
 				moreInstructions();
 				setupScene();

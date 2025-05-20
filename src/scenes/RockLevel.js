@@ -12,12 +12,14 @@ import { WebUpdater } from '../WebUpdater.js';
 import { SymbolMatch } from '../SymbolMatch.js';
 import { SymbolMatch2 } from '../SymbolMatch2.js';
 
-export function RockLevel(gm, player, seq, sfx) {
+export function RockLevel(gm, player, sfx) {
 	
 	const scene = new Scene();
 
 	const symbolMatch = SymbolMatch();
 	const symbolMatch2 = SymbolMatch2();
+
+	// setup func ... 
 
 	// rn all symbols are 1
 	// min room size is size of room, 3+ is easiest/guaranteed
@@ -33,6 +35,8 @@ export function RockLevel(gm, player, seq, sfx) {
 	const maxNodes = Math.min(24, gm.props.levelCount + 3 + (gm.props.points.SPIDER - gm.props.points.ROCK));
 
 	const groundTexture = choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
+
+	// turn this into map generator, no reason to keep in tree structure ... 
 	const level = new Level(minNodeRoomSize, maxNodes, gm.anims.sprites[groundTexture]);
 	scene.addSprite(level);
 
@@ -132,7 +136,7 @@ export function RockLevel(gm, player, seq, sfx) {
 		sun.update();
 		if (sun.isDone()) {
 			updateScore();
-			seq.next();
+			gm.seq.next();
 		}
 	}
 
@@ -167,7 +171,7 @@ export function RockLevel(gm, player, seq, sfx) {
 			rock.isActive = false;
 			rock.displayFunc = undefined;
 			player.isActive = true;
-			seq.next();
+			gm.seq.next();
 		}
 		trees.shake();
 	}

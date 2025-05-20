@@ -13,7 +13,7 @@ import { WebUpdater } from '../WebUpdater.js';
  * @param {Object} sprites - game sprites
  * @param {Spider} player - the player
  */
-export function InstWeb(sprites, player, seq) {
+export function InstWeb(sprites, player) {
 
 	const scene = new Scene();
 	let xBtn, instText;
@@ -62,7 +62,7 @@ export function InstWeb(sprites, player, seq) {
 	// [connect 1 tree, connect 2 tree, release web]
 	const connections = [false, false, false];
 	const delay = new Counter(120, () => {
-		seq.next();
+		gm.seq.next();
 	});
 
 	scene.onUpdate = () => {

@@ -98,7 +98,7 @@ export function Web() {
 	}
 
 	return { 
-		display, 
+		display,
 		getPoints, addPoint, insertPoint, insertEnd, popPoint,
 		start, end, clear, cancel,
 		startOverride, cancelOverride, // need cancel?
