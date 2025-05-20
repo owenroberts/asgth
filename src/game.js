@@ -2,9 +2,9 @@ import { Sequencer } from '../cool/cool.js';
 import { Doodoo } from '../doodoo/src/Doodoo.js';
 import { Game, Sprite, TextSprite, SoundProvider, Scene } from '../lines/src/Engine.js';
 
-// scenes
+import { Spider } from './components/Spider.js'; // not a scene?
+
 import { Splash } from './scenes/Splash.js';
-import { Spider } from './scenes/Spider.js'; // not a scene?
 import { InstMove } from './scenes/InstMove.js';
 import { InstChoose } from './scenes/InstChoose.js';
 import { InstWeb } from './scenes/InstWeb.js';
@@ -21,10 +21,8 @@ import { Consts } from './Consts.js';
 import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
-const debug = true; // global debug
-
 const gm = new Game({
-	// debug: true,
+	debug: true,
 	dps: 24,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
@@ -36,11 +34,11 @@ const gm = new Game({
 	stats: true,
 	suspend: true,
 	events: ['keyboard'],
-	scenes: ["end", "loading"],
+	scenes: ["loading"],
 	// testPerformance: true,
 });
 gm.load({ animations: { sprites: spritePaths }, }, false);
-if (debug) console.log('game', gm);
+if (gm.debug) console.log('game', gm);
 
 // props that need to be tracked
 gm.props = {
@@ -48,19 +46,18 @@ gm.props = {
 	points: { ROCK: 0, SPIDER: 0 },
 	lastPointWinner: '',
 	nextSymbolString: "", // maybe don't need this if not setting up rock thing
-	
 	useSound: false,
 	hasCompletedInstructions: false, // localStorage.getItem('spider-instructions-complete');
 	choseRepeatInstructions: false,
 };
 
-let player;
+let player; // can this be a component ... 
 let seq = Sequencer();
 let doodoo, sfx;
 
 /* debug */
 document.addEventListener('keydown', ev => {
-	if (ev.code === 'KeyN' && debug) seq.next();
+	if (ev.code === 'KeyN' && gm.debug) seq.next();
 });
 
 function soundSetup(withSound) {
@@ -126,9 +123,8 @@ gm.start = function() {
 	gm.scenes.inst_web = InstWeb(gm, player, seq);
 	gm.scenes.inst_symbol = InstSymbol(gm, player, seq);
 	gm.scenes.inter_webs = InterWebs(gm, seq);
+	gm.scenes.end = End(gm);
 
-	// make this a scene -- later
-	// gm.scenes.narration.addToDisplay(narration);
 	gm.scenes.narration = Narration(gm);
 	gm.scenes.narration.onKeyUp['x'] = function() {
 		if (gm.scenes.narration.isDone()) {
@@ -139,17 +135,13 @@ gm.start = function() {
 		}
 		player.resetInput(); // need this? 
 	};
-
-	gm.scenes.end = End(gm);
 	
-
-	const loadingSprite = new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web);
+	const loadingSprite = gm.scenes.loading.addSprite(new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web));
 	loadingSprite.center = true;
-	gm.scenes.loading.addToDisplay(loadingSprite);
 	loadingSprite.animation.play();
 
 	seq.add(() => { 
-		if (!debug) return seq.next();
+		if (!gm.debug) return seq.next();
 		gm.scenes.debug = new Scene();
 		gm.scenes.debug.add(new TextSprite({
 			msg: Strings.DEBUG_START,
@@ -165,14 +157,14 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		if (!debug) return seq.next();
+		if (!gm.debug) return seq.next();
 		loadingSprite.animation.frame = 0;
 		gm.scenes.setCurrent("loading");
 		soundSetup(true);
 	});
 
 	seq.add(() => {
-		if (debug) return seq.next();
+		if (gm.debug) return seq.next();
 
 		gm.scenes.splash.setup();
 		gm.scenes.splash.onKeyDown['x'] = function() {
@@ -187,14 +179,15 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		if (debug) return seq.next();
+		if (gm.debug) return seq.next();
 		loadingSprite.animation.frame = 0;
 		gm.scenes.setCurrent("loading");
 		soundSetup(gm.props.useSound);
 	});
 
+	// test instructions thing
 	seq.add(() => {
-		if (debug) return seq.next();
+		if (gm.debug) return seq.next();
 		if (!gm.props.hasCompletedInstructions) return seq.next();
 
 		gm.scenes.inst_choose.setup();
@@ -216,10 +209,9 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		if (debug) return seq.next();
+		if (gm.debug) return seq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			seq.next();
-			return;
+			return seq.next();
 		}
 
 		sfx.play("level_start", true);
@@ -234,10 +226,9 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		if (debug) return seq.next();
+		if (gm.debug) return seq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			seq.next();
-			return;
+			return seq.next();
 		}
 		
 		gm.scenes.inst_web.setup(sfx);
@@ -245,7 +236,7 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		if (debug) return seq.next();
+		if (gm.debug) return seq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return seq.next();
 		}
@@ -255,7 +246,7 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		if (debug) return seq.next();
+		if (gm.debug) return seq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return seq.next();
 		}
@@ -264,7 +255,7 @@ gm.start = function() {
 	});
 
 	seq.add(() => {
-		if (debug) return seq.next();
+		if (gm.debug) return seq.next();
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
 		gm.scenes.narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
 		gm.scenes.setCurrent("narration");
@@ -278,7 +269,7 @@ gm.start = function() {
 		gm.props.nextSymbolString = getNextSymbolString();
 
 		seq.add(() => {
-			if (debug) return seq.next();
+			if (gm.debug) return seq.next();
 			gm.scenes.narration.addSymbols(gm.props.nextSymbolString);
 			gm.scenes.narration.add([Strings.INST_DRAW]);
 			gm.scenes.setCurrent("narration");

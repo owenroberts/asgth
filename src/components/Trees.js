@@ -1,7 +1,7 @@
-import { randomInt, Counter } from '../cool/cool.js';
-import { Texture, Sprite } from '../lines/src/Engine.js';
-import { Animator } from '../lines/src/Lines.js';
-import { Consts } from './Consts.js';
+import { randomInt, Counter } from '../../cool/cool.js';
+import { Texture, Sprite } from '../../lines/src/Engine.js';
+import { Animator } from '../../lines/src/Lines.js';
+import { Consts } from '../Consts.js';
 
 /**
  * Draw and manage trees for walk and draw levels

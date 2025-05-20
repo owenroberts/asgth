@@ -9,14 +9,14 @@ export const Consts = {
 	BG_COLOR: '#aeaaa6', //'#4a4047',
 	
 	LEVEL_ORDER: 'abcefglmn', // 'abcefglmn',
-	NUM_LEVELS: 0,
+	NUM_LEVELS: 7, // 7
 	SYMBOL_INDEX_STRING: "abcdefghijklmnopqrstuvwxyz",
 	PRACTICE_SYMBOL: 'd',
 	
 	WEBS_INTERVAL: 180,
 	ROCK_SHAKE_AMOUNT: 2,
 	SUN_FINISH_COUNT: 400,
-	SUN_INTERVAL: 300, // 1280 * 3,
+	SUN_INTERVAL: 1280 * 3,
 	MOON_INTERVAL: 1280,
 	ROCK_SPEED: 1.8,
 	

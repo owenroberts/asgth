@@ -1,5 +1,5 @@
-import { GameAnim } from '../lines/src/Engine.js';
-import { Drawing, Layer, Style, POINTS } from '../lines/src/Lines.js';
+import { GameAnim } from '../../lines/src/Engine.js';
+import { Drawing, Layer, Style, POINTS } from '../../lines/src/Lines.js';
 
 /**
  * draw the spiders web

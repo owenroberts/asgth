@@ -1,10 +1,12 @@
 import { randomInt } from '../../cool/cool.js';
 import { Scene, TextSprite, Texture } from '../../lines/src/Engine.js';
-import { Trees } from '../Trees.js';
-import { Web } from '../Web.js';
-import { Sun } from '../Sun.js';
-import { WebUpdater } from '../WebUpdater.js';
 import { Consts } from '../Consts.js';
+
+import { Trees } from '../components/Trees.js';
+import { Web } from '../components/Web.js';
+import { Sun } from '../components/Sun.js';
+
+import { WebUpdater } from '../WebUpdater.js';
 import { SymbolMatch } from '../SymbolMatch.js';
 import { SymbolMatch2 } from '../SymbolMatch2.js';
 

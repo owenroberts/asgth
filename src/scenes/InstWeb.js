@@ -1,9 +1,11 @@
 import { Counter, randomInt } from '../../cool/cool.js';
 import { Scene, TextSprite } from '../../lines/src/Engine.js';
-import { Trees } from '../Trees.js';
-import { Strings } from '../Strings.js';
 import { Consts } from '../Consts.js';
-import { Web } from '../Web.js';
+import { Strings } from '../Strings.js';
+
+import { Trees } from '../components/Trees.js';
+import { Web } from '../components/Web.js';
+
 import { WebUpdater } from '../WebUpdater.js';
 
 /**

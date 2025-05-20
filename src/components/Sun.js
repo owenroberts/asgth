@@ -1,12 +1,12 @@
-import { Sprite } from '../lines/src/Engine.js';
-import { Counter, map } from '../cool/cool.js';
-import { Consts } from './Consts.js';
+import { Sprite } from '../../lines/src/Engine.js';
+import { Counter, map } from '../../cool/cool.js';
+import { Consts } from '../Consts.js';
 
 /**
  * Animate sun progress, reset
  * @param {Sprite} sprite - the sun sprite
  * @param {number} height - the height to animate sun
- */
+*/
 export function Sun(gm) {
 
 	// make this a scene?? components?
