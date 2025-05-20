@@ -13,6 +13,7 @@ import { InterWebs } from './scenes/InterWebs.js';
 import { RockLevel } from './scenes/RockLevel.js';
 import { WalkLevel } from './scenes/WalkLevel.js';
 import { Narration } from './scenes/Narration.js';
+import { End } from './scenes/End.js';
 
 import { Strings } from './Strings.js';
 import { Consts } from './Consts.js';
@@ -139,34 +140,8 @@ gm.start = function() {
 		player.resetInput(); // need this? 
 	};
 
-	const ending = new Sprite(0, 0, gm.anims.sprites.ending);
-	gm.scenes.end.addToDisplay(ending);
-	gm.scenes.end.onKeyUp[Strings.RESET_BTN] = function() {
-		sfx.play('next_button');
-		resetGame();
-	};
-	ending.animation.play();
-	ending.animation.onPlayedOnce = function() {
-		ending.animation.onPlayedOnce = undefined;
-		ending.animation.state = "still_frame";
-		
-		gm.scenes.end.addToDisplay(new TextSprite({
-			msg: Strings.RESET_BTN,
-			x: 64 * 2,
-			y: 64 * 5.5,
-			letters: gm.anims.sprites.letters_keyboard,
-		}));
-		
-		gm.scenes.end.addToDisplay(new TextSprite({
-			msg: Strings.INST_RESTART,
-			wrap: 24,
-			track: Consts.LETTERS_TRACK,
-			lead: Consts.LETTERS_LEAD,
-			x: 64 * 3,
-			y: 64 * 5.5,
-			letters: gm.anims.sprites.letters,
-		}));
-	};
+	gm.scenes.end = End(gm);
+	
 
 	const loadingSprite = new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web);
 	loadingSprite.center = true;
@@ -308,7 +283,6 @@ gm.start = function() {
 			gm.scenes.narration.add([Strings.INST_DRAW]);
 			gm.scenes.setCurrent("narration");
 		});
-
 		seq.add(() => {
 			gm.scenes[levelName] = RockLevel(gm, player, seq, sfx);
 			gm.scenes.setCurrent(levelName);
@@ -319,7 +293,6 @@ gm.start = function() {
 				gm.scenes.inter_webs.setup();
 				gm.scenes.setCurrent("inter_webs");
 			} else {
-				// setupRockScene(gm.scenes.current);
 				gm.scenes[levelName].rock();
 			}
 		});
@@ -333,7 +306,8 @@ gm.start = function() {
 		});
 
 		seq.add(() => {
-			if (gm.props.levelCount > Consts.NUM_LEVELS) seq.next();
+			if (gm.props.levelCount > Consts.NUM_LEVELS) return seq.next();
+
 			const walkLevelName = 'walk-' + gm.props.levelCount;
 			gm.scenes[walkLevelName] = WalkLevel(gm, player, seq);
 			gm.scenes.setCurrent(walkLevelName);
@@ -343,6 +317,10 @@ gm.start = function() {
 			sfx.play('level_start', true);
 			gm.scenes.narration.hideScore();
 			if (gm.props.levelCount > Consts.NUM_LEVELS) {
+				gm.scenes.end.onKeyUp[Strings.RESET_BTN] = function() {
+					sfx.play('next_button');
+					resetGame();
+				};
 				gm.scenes.setCurrent("end");
 			} else {
 				gameLoop();

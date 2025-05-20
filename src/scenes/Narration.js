@@ -14,8 +14,8 @@ export function Narration(gm) {
 	let dialogList, goNext = false;
 	let isDone = true;
 
-	const scoreDisplay = scene.addSprite(new Texture({ animation: gm.anims.sprites.score }));
-	scoreDisplay.isActive = false;
+	const score = scene.addSprite(new Texture({ animation: gm.anims.sprites.score }));
+	score.isActive = false;
 
 	const text = scene.addSprite(new TextSprite({
 		x: Consts.CELL_SIZE.W / 2,
@@ -118,16 +118,16 @@ export function Narration(gm) {
 	};
 
 	scene.setScore = function() {
-		scoreDisplay.isActive = true;
+		score.isActive = true;
 
 		let scoreX = gm.width - Consts.CELL_SIZE.W * 1.25;
 		let scoreY = Consts.CELL_SIZE.H * 0.25 + (Consts.CELL_SIZE.H * (gm.props.points.SPIDER + gm.props.points.ROCK - 1));
 		let point = gm.props.lastPointWinner === 'SPIDER' ? 1 : 0;
-		scoreDisplay.addLocation(scoreX, scoreY,  point);
+		score.addLocation(scoreX, scoreY,  point);
 	};
 
 	scene.hideScore = function() {
-		scoreDisplay.isActive = false;
+		score.isActive = false;
 	};
 
 	scene.isDone = function() {
