@@ -2,7 +2,7 @@ import { Consts } from './Consts.js';
 
 /**
  * handles player input and web connections
- * @return {[type]} [description]
+ * @returns {update}
  */
 export function WebUpdater(sfx) {
 

@@ -62,7 +62,7 @@ export function InstWeb(sprites, player) {
 	// [connect 1 tree, connect 2 tree, release web]
 	const connections = [false, false, false];
 	const delay = new Counter(120, () => {
-		gm.seq.next();
+		gm.sq.next();
 	});
 
 	scene.onUpdate = () => {

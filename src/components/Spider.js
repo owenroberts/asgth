@@ -2,8 +2,9 @@ import { Counter } from '../../cool/cool.js';
 import { ColliderSprite } from '../../lines/src/Engine.js';
 
 /**
- * player controller - currently kind of weird mix between scene and factory ...
- * @param {Game} gm - game object
+ * player controller - returns sprite with player funcs
+ * @param {Object} gm - game
+ * @returns Sprite;
  */
 export function Spider(gm) {
 

@@ -136,7 +136,7 @@ export function RockLevel(gm, player, sfx) {
 		sun.update();
 		if (sun.isDone()) {
 			updateScore();
-			gm.seq.next();
+			gm.sq.next();
 		}
 	}
 
@@ -171,7 +171,7 @@ export function RockLevel(gm, player, sfx) {
 			rock.isActive = false;
 			rock.displayFunc = undefined;
 			player.isActive = true;
-			gm.seq.next();
+			gm.sq.next();
 		}
 		trees.shake();
 	}

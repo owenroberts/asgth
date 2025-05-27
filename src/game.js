@@ -11,7 +11,7 @@ import { InstWeb } from './scenes/InstWeb.js';
 import { InstSymbol } from './scenes/InstSymbol.js';
 import { InterWebs } from './scenes/InterWebs.js';
 import { RockLevel } from './scenes/RockLevel.js';
-import { WalkLevel } from './scenes/WalkLevel.js';
+import { createWalkLevel } from './scenes/WalkLevel.js';
 import { Narration } from './scenes/Narration.js';
 import { End } from './scenes/End.js';
 
@@ -23,7 +23,7 @@ import spritePaths from './data/sprites.json';
 
 const gm = new Game({
 	debug: true,
-	dps: 24,
+	drawInterval: 3,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
 	width: Consts.CELL_SIZE.W * Consts.GRID_COLS,
@@ -56,7 +56,7 @@ let doodoo, sfx; // add sfx to gm
 
 /* debug */
 document.addEventListener('keydown', ev => {
-	if (ev.code === 'KeyN' && gm.debug) gm.seq.next();
+	if (ev.code === 'KeyN' && gm.debug) gm.sq.next();
 });
 
 function soundSetup(withSound) {
@@ -83,12 +83,12 @@ function soundSetup(withSound) {
 			]
 		}, soundFiles => {
 			gm.scenes.narration.addSFX(sfx);
-			gm.seq.next(); // afterSetupOrSound();
+			gm.sq.next(); // afterSetupOrSound();
 		});
 	} else {
 		sfx = SoundProvider(); // empty sound provider plays nothing
 		gm.scenes.narration.addSFX(sfx);
-		gm.seq.next(); // afterSetupOrSound();
+		gm.sq.next(); // afterSetupOrSound();
 	}
 }
 
@@ -98,9 +98,8 @@ function getNextSymbolString(len) {
 
 function resetGame() {
 	gm.props.levelCount = 0;
-	gm.scenes.current = "splash";
-	lastPointWinner = undefined;
-	nextLevel = undefined;
+	gm.scenes.setCurrent("splash");
+	lastPointWinner = "";
 	if (doodoo) {
 		doodoo.stop();
 		doodoo.play();
@@ -115,7 +114,7 @@ gm.start = function() {
 	gm.setBounds('bottom', Consts.GRID_ROWS * Consts.CELL_SIZE.H);
 	
 	player = Spider(gm);
-	gm.seq = Sequencer();
+	gm.sq = Sequencer();
 	
 	gm.scenes.splash = Splash(gm);
 	gm.scenes.inst_move = InstMove(gm, player);
@@ -129,7 +128,7 @@ gm.start = function() {
 	gm.scenes.narration.onKeyUp['x'] = function() {
 		if (gm.scenes.narration.isDone()) {
 			sfx.play('next_button', true);
-			gm.seq.next();
+			gm.sq.next();
 		} else {
 			gm.scenes.narration.next();
 		}
@@ -140,8 +139,8 @@ gm.start = function() {
 	loadingSprite.center = true;
 	loadingSprite.animation.play();
 
-	gm.seq.add(() => { 
-		if (!gm.debug) return gm.seq.next();
+	gm.sq.add(() => { 
+		if (!gm.debug) return gm.sq.next();
 		gm.scenes.debug = new Scene();
 		gm.scenes.debug.add(new TextSprite({
 			msg: Strings.DEBUG_START,
@@ -152,66 +151,86 @@ gm.start = function() {
 		}));
 		gm.scenes.setCurrent("debug");
 		gm.scenes.debug.onKeyDown['x'] = () => {
-			gm.seq.next();	
+			gm.sq.next();	
 		};
 	});
 
-	gm.seq.add(() => {
-		if (!gm.debug) return gm.seq.next();
+	gm.sq.add(() => {
+		if (!gm.debug) return gm.sq.next();
 		loadingSprite.animation.frame = 0;
 		gm.scenes.setCurrent("loading");
 		soundSetup(true);
 	});
 
-	gm.seq.add(() => {
-		if (gm.debug) return gm.seq.next();
+	function walkCycle() {
+		gm.sq.add(() => {
+			const walkLevelName = 'walk-' + gm.props.levelCount;
+			gm.scenes[walkLevelName] = createWalkLevel(gm, player);
+			gm.scenes[walkLevelName].setup();
+			gm.scenes.setCurrent(walkLevelName);
+			console.log('walk level', walkLevelName);
+			gm.props.levelCount++;
+		});
+		gm.sq.add(() => {
+			if (gm.props.levelCount < 13) {
+				walkCycle();	
+			}
+		});
+	}
+
+	walkCycle();
+	gm.sq.next();
+	return;
+
+	gm.sq.add(() => {
+		if (gm.debug) return gm.sq.next();
 
 		gm.scenes.splash.setup();
 		gm.scenes.splash.onKeyDown['x'] = function() {
 			gm.useSound = true;
-			gm.seq.next();
+			gm.sq.next();
 		};
 		gm.scenes.splash.onKeyUp['z']= function() {
 			gm.props.useSound = false;
-			gm.seq.next();
+			gm.sq.next();
 		};
 		gm.scenes.setCurrent("splash");
 	});
 
-	gm.seq.add(() => {
-		if (gm.debug) return gm.seq.next();
+	gm.sq.add(() => {
+		if (gm.debug) return gm.sq.next();
 		loadingSprite.animation.frame = 0;
 		gm.scenes.setCurrent("loading");
 		soundSetup(gm.props.useSound);
 	});
 
 	// test instructions thing
-	gm.seq.add(() => {
-		if (gm.debug) return gm.seq.next();
-		if (!gm.props.hasCompletedInstructions) return gm.seq.next();
+	gm.sq.add(() => {
+		if (gm.debug) return gm.sq.next();
+		if (!gm.props.hasCompletedInstructions) return gm.sq.next();
 
 		gm.scenes.inst_choose.setup();
 
 		// skip instructions
 		gm.scenes.inst_choose.onKeyDown['x'] = () => {
-			gm.seq.next();
+			gm.sq.next();
 			player.resetInput();
 		};
 
 		// repeat instructions
 		gm.scenes.inst_choose.onKeyDown['z'] = () => {
 			gm.props.choseRepeatInstructions = true;
-			gm.seq.next();
+			gm.sq.next();
 			player.resetInput(); // need this?
 		};
 
 		gm.scenes.setCurrent("inst_choose");
 	});
 
-	gm.seq.add(() => {
-		if (gm.debug) return gm.seq.next();
+	gm.sq.add(() => {
+		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return gm.seq.next();
+			return gm.sq.next();
 		}
 
 		sfx.play("level_start", true);
@@ -219,67 +238,68 @@ gm.start = function() {
 		gm.scenes.inst_move.onKeyDown['x'] = function() {
 			if (!gm.scenes.inst_move.check()) return;
 			sfx.play("next_button");
-			gm.seq.next();
+			gm.sq.next();
 		};
 
 		gm.scenes.setCurrent("inst_move");
 	});
 
-	gm.seq.add(() => {
-		if (gm.debug) return gm.seq.next();
+	gm.sq.add(() => {
+		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return gm.seq.next();
+			return gm.sq.next();
 		}
 		
 		gm.scenes.inst_web.setup(sfx);
 		gm.scenes.setCurrent("inst_web");
 	});
 
-	gm.seq.add(() => {
-		if (gm.debug) return gm.seq.next();
+	gm.sq.add(() => {
+		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return gm.seq.next();
+			return gm.sq.next();
 		}
 		gm.scenes.narration.addSymbols(Consts.PRACTICE_SYMBOL);
 		gm.scenes.narration.add([Strings.INST_WEB_4, Strings.INST_SUN]);
 		gm.scenes.setCurrent("narration");
 	});
 
-	gm.seq.add(() => {
-		if (gm.debug) return gm.seq.next();
+	gm.sq.add(() => {
+		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return gm.seq.next();
+			return gm.sq.next();
 		}
 		gm.scenes.inst_symbol.setup(sfx);
 		gm.scenes.setCurrent("inst_symbol");
 	});
 
-	gm.seq.add(() => {
-		if (gm.debug) return gm.seq.next();
+	gm.sq.add(() => {
+		if (gm.debug) return gm.sq.next();
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
 		gm.scenes.narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
 		gm.scenes.setCurrent("narration");
 	});
 
-	gm.seq.add(() => { gameLoop(); });
+	gm.sq.add(() => { gameLoop(); });
 
 	function gameLoop() {
 
 		const levelName = `level-${gm.props.levelCount}`;
 		gm.props.nextSymbolString = getNextSymbolString();
 
-		gm.seq.add(() => {
-			if (gm.debug) return gm.seq.next();
+		gm.sq.add(() => {
+			if (gm.debug) return gm.sq.next();
 			gm.scenes.narration.addSymbols(gm.props.nextSymbolString);
 			gm.scenes.narration.add([Strings.INST_DRAW]);
 			gm.scenes.setCurrent("narration");
 		});
-		gm.seq.add(() => {
+
+		gm.sq.add(() => {
 			gm.scenes[levelName] = RockLevel(gm, player, sfx);
 			gm.scenes.setCurrent(levelName);
 		});
 
-		gm.seq.add(() => {
+		gm.sq.add(() => {
 			if (gm.props.lastPointWinner === "SPIDER") {
 				gm.scenes.inter_webs.setup();
 				gm.scenes.setCurrent("inter_webs");
@@ -288,7 +308,7 @@ gm.start = function() {
 			}
 		});
 
-		gm.seq.add(() => {
+		gm.sq.add(() => {
 			gm.props.levelCount++;
 			gm.scenes.narration.add(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
 			gm.scenes.narration.setScore();
@@ -296,15 +316,15 @@ gm.start = function() {
 			gm.scenes.setCurrent("narration");
 		});
 
-		gm.seq.add(() => {
-			if (gm.props.levelCount > Consts.NUM_LEVELS) return gm.seq.next();
+		gm.sq.add(() => {
+			if (gm.props.levelCount > Consts.NUM_LEVELS) return gm.sq.next();
 
 			const walkLevelName = 'walk-' + gm.props.levelCount;
 			gm.scenes[walkLevelName] = WalkLevel(gm, player);
 			gm.scenes.setCurrent(walkLevelName);
 		});
 
-		gm.seq.add(() => {
+		gm.sq.add(() => {
 			sfx.play('level_start', true);
 			gm.scenes.narration.hideScore();
 			if (gm.props.levelCount > Consts.NUM_LEVELS) {
@@ -318,10 +338,10 @@ gm.start = function() {
 			}
 		});
 
-		gm.seq.next();
+		gm.sq.next();
 	}
 
-	gm.seq.next();
+	gm.sq.next();
 };
 
 gm.update = function(timeElapsed) {

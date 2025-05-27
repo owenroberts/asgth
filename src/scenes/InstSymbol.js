@@ -141,7 +141,7 @@ export function InstSymbol(gm, player) {
 		sun.update();
 		if (sun.isDone()) {
 			if (gotSymbol) {
-				gm.seq.next();
+				gm.sq.next();
 			} else {
 				moreInstructions();
 				setupScene();
