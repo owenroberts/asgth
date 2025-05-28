@@ -33,6 +33,6 @@ export const Consts = {
 		COMPLETED: 2,
 		RELEASED: 3,
 		CANCELED: 4,
-	}
+	},
 
 };

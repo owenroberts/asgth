@@ -33,7 +33,7 @@ const gm = new Game({
 	bgColor: Consts.BG_COLOR,
 	stats: true,
 	suspend: true,
-	events: ['keyboard'],
+	events: ["keyboard"],
 	scenes: ["loading"],
 	// testPerformance: true,
 });

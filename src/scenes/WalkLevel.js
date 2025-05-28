@@ -14,16 +14,17 @@ import level_bounds from '../data/level_bounds.json';
 export function createWalkLevel(gm, player, sfx) {
 
 	const scene = new Scene();
-	let colliders = [], ender, moon, moonAnim;
+	let colliders = [], doorColliders = [], prevDoorIndex = 0, exit;
+	let moon, moonAnim;
 
 	scene.setup = function() {
 
-		const { bounds, start, end } = level_bounds.levels[gm.props.levelCount];
+		const { bounds, start, end, doors } = level_bounds.levels[gm.props.levelCount];
 		
 		player.spawn([
-			start[0] * Consts.CELL_SIZE.W + player.halfWidth, 
+			start[0] * Consts.CELL_SIZE.W + player.halfWidth,
 			start[1] * Consts.CELL_SIZE.H + player.halfHeight,
-		]);
+		], start[2]);
 		scene.addSprite(player);
 
 		moon = scene.addToDisplay(new Sprite(13 * Consts.CELL_SIZE.W, 7 * Consts.CELL_SIZE.H, gm.anims.sprites.moon));
@@ -34,15 +35,34 @@ export function createWalkLevel(gm, player, sfx) {
 		scene.addToDisplay(ground);
 
 		const bgTexture = scene.addToDisplay(new Texture({ animation: gm.anims.sprites.walk_tiles }));
-		const bgIndex = randomInt(0, bgTexture.animation.endFrame / 4) * 4;
+		const bgIndex = randomInt(0, (bgTexture.animation.endFrame - 1) / 4) * 4;
 
-		ender = new ColliderEmpty(
-			end[0] * Consts.CELL_SIZE.W, 
-			end[1] * Consts.CELL_SIZE.H, 
-			Consts.CELL_SIZE.W,
-			Consts.CELL_SIZE.H,
+		exit = new ColliderEmpty(
+			end[0] * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W / 4,
+			end[1] * Consts.CELL_SIZE.H + Consts.CELL_SIZE.W / 4,
+			Consts.CELL_SIZE.W / 2,
+			Consts.CELL_SIZE.H / 2,
 			// gm.anims.sprites.end_web
 		);
+
+		function addDoor(doorData) {
+			const dc = new ColliderEmpty(
+				doorData[0] * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W / 4,
+				doorData[1] * Consts.CELL_SIZE.H + Consts.CELL_SIZE.W / 4,
+				Consts.CELL_SIZE.W / 2, 
+				Consts.CELL_SIZE.H / 2,
+			);
+			dc.dir = doorData[2];
+			doorColliders.push(dc);
+		}
+
+		if (doors) {
+			addDoor(start); // initial prev door is start
+			for (let i = 0; i < doors.length; i++) {
+				addDoor(doors[i]);
+			}
+		}
+		
 
 		const tileMap = new TileMap(13, 8);
 
@@ -75,11 +95,36 @@ export function createWalkLevel(gm, player, sfx) {
 	};
 
 	scene.onUpdate = function() {
+
+		let isOnDoor = false;
+
+		for (let i = 0; i < doorColliders.length; i++) {
+			doorColliders[i].drawDebug();
+			if (player.collide(doorColliders[i])) {
+				isOnDoor = true;
+				if (i === prevDoorIndex) continue;
+				let randomIndex = randomInt(doorColliders.length - 1);
+				while (randomIndex === i) {
+					randomIndex = randomInt(doorColliders.length - 1);
+				}
+				player.spawn([
+					doorColliders[randomIndex].position[0] - Consts.CELL_SIZE.W / 4 + player.halfWidth,
+					doorColliders[randomIndex].position[1] - Consts.CELL_SIZE.W / 4 + player.halfHeight,
+				], doorColliders[randomIndex].dir);
+				player.resetInput();
+				prevDoorIndex = randomIndex;
+			}
+		}
+
+		if (!isOnDoor) {
+			prevDoorIndex = -1;
+		}
+
 		for (let i = 0; i < colliders.length; i++) {
 			if (player.collide(colliders[i])) player.back();
 		}
 		
-		if (player.collide(ender)) {
+		if (player.collide(exit)) {
 			gm.sq.next();
 		}
 

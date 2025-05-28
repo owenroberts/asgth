@@ -1,5 +1,6 @@
 import { Counter } from '../../cool/cool.js';
 import { ColliderSprite } from '../../lines/src/Engine.js';
+import { Consts } from '../Consts.js';
 
 /**
  * player controller - returns sprite with player funcs
@@ -11,20 +12,9 @@ export function Spider(gm) {
 	const sprite = new ColliderSprite(0, 0);
 	sprite.addAnimation(gm.anims.sprites.spider);
 	sprite.center = true;
+	sprite.debug = true;
 	const prevPosition = [0, 0];
 	sprite.input = { right: false, up: false, left: false, down: false, x: false, z: false, c: false };
-
-	const states = {
-		idle: 'idle',
-		up: 'up',
-		down: 'down',
-		left: 'left',
-		right: 'right',
-		up_left: 'up_left', 
-		up_right: 'up_right', 
-		down_left: 'down_left', 
-		down_right: 'down_right',
-	};
 
 	const DIRECTIONS = {
 		UP: 0,
@@ -37,7 +27,7 @@ export function Spider(gm) {
 		UP_LEFT: 7
 	};
 
-	let direction = 0;
+	let direction = DIRECTIONS.UP;
 	const directionStates = ['up', 'up_right', 'right', 'down_right', 'down', 'down_left', 'left', 'up_left'];
 	const speed = 16;
 	const directionSpeeds = [
@@ -57,11 +47,12 @@ export function Spider(gm) {
 	leftCounter.end();
 
 	sprite.animation.state = "idle_right";
-	sprite.setCollider(8, 8, 48, 48);
+	sprite.setCollider(16, 16, 32, 32);
 
-	sprite.spawn = function(location) {
+	sprite.spawn = function(location, dir) {
 		sprite.position[0] = location[0];
 		sprite.position[1] = location[1];
+		if (dir) direction = DIRECTIONS[dir];
 	};
 
 	// better name for this ... 
@@ -82,10 +73,9 @@ export function Spider(gm) {
 		return this.input.up || this.input.down || this.input.right || this.input.left;
 	};
 
-	// fuck scene update vs sprite update ...
-	// maybe everything should be a scene ... 
 	sprite.update = function(time, canMove) {
 
+		// for back, collision with walls
 		prevPosition[0] = sprite.position[0];
 		prevPosition[1] = sprite.position[1];
 		
@@ -109,6 +99,7 @@ export function Spider(gm) {
 		const state = (speed[0] === 0 && speed[1] === 0) ? 
 			'idle_' + directionStates[direction] :
 			directionStates[direction] ;
+
 		sprite.animation.state = state;
 
 		speed[0] *= time / 100;
