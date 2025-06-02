@@ -1,10 +1,12 @@
+import { Consts } from '../Consts.js';
 import { GameAnim } from '../../lines/src/Engine.js';
 import { Drawing, Layer, Style, POINTS } from '../../lines/src/Lines.js';
 
 /**
  * draw the spiders web
+ * @returns { display, getConnection }
  */
-export function Web() {
+export function Web(sfx) {
 	
 	const animation = new GameAnim();
 	const drawing = new Drawing();
@@ -19,40 +21,29 @@ export function Web() {
 	animation.setFrames();
 
 	let isActive = false;
-	let sfx;
 
+	let treeList = []; // track connected trees, is this ever used? -- maybe just need tree count
+	let prevTreeLocation; // location of tree under player
+
+	/* testing (still?) continuous web vs segmented */
+	let continuousWeb = true;
+	document.addEventListener('keydown', ev => {
+		if (ev.code === 'KeyT') {
+			continuousWeb = !continuousWeb;
+			console.log('Continuous web toggled', continuousWeb);
+		}
+	});
+
+	/**
+	 * display web animation
+	 */
 	function display() {
 		animation.draw();
 	}
 
-	function addPoint(point) {
-		drawing.add(point);
-	}
-
-	function insertPoint(point) {
-		drawing.points.splice(drawing.length - 1, 0, point);
-		drawing.offsets.splice(drawing.length - 1, 0, [[0,0],[0,0]]);
-	}
-
-	function insertEnd() {
-		drawing.points.splice(drawing.length - 1, 0, POINTS.END);
-		drawing.offsets.splice(drawing.length - 1, 0, [[0,0],[0,0]]);
-	}
-
-	function popPoint() {
-		drawing.points.pop();
-	}
-
-	function start() {
-		isActive = true;
-	}
-
-	function cancel() {
-		drawing.points.pop();
-		drawing.points.pop();
-		isActive = false;
-	}
-
+	/**
+	 * end active line drawing}
+	 */
 	function end() {
 		drawing.points.pop();
 		isActive = false;
@@ -61,11 +52,7 @@ export function Web() {
 		}
 	}
 
-	function clear() {
-		drawing.points = [];
-		drawing.offsets = [];
-	}
-
+	// do this with animator?
 	function startOverride() {
 		let w = 4, s = 0.1, n = 10;
 		animation.onDraw = () => {
@@ -81,28 +68,102 @@ export function Web() {
 		}
 	}
 
-	function cancelOverride() {
-		animation.cancelOverride();
-		animation.onDraw = undefined;
-	}
-
-	function getPoints({trimmed=false}) {
+	/**
+	 * get clone of points in web drawing
+	 * @param  {Boolean} { trimmed } trim off dangling spider points
+	 * @returns {number[]} points
+	 */
+	function getPoints(trimmed=false) {
 		const points = structuredClone(drawing.points)
 		if (trimmed) {
 			while (points.slice(-1)[0] !== POINTS.END && points.length > 0) {
 				points.pop();
 			}
-
 		}
 		return points;
 	}
 
-	return { 
-		display,
-		getPoints, addPoint, insertPoint, insertEnd, popPoint,
-		start, end, clear, cancel,
-		startOverride, cancelOverride, // need cancel?
-		isActive() { return isActive; },
-	};
+	/**
+	 * pop off last two poits to stop drawing web
+	 * when cacncelling drawing or getting symbol
+	 */
+	function cancel() {
+		drawing.points.pop();
+		drawing.points.pop();
+		isActive = false;
+	}
+
+	/**
+	 * @param  {Player}
+	 * @param  {Boolean|Array} location of tree spider is on or false
+	 * @returns {WEB_CONNECTION} type of web connection, NONE, STARTED, CONNECTED, RELEASED, CANCELED
+	 */
+	function getConnection(player, treeLocation) {
+
+		// cancel web
+		if (player.input.z) {
+			player.resetInput();
+			if (treeList.length > 1 && continuousWeb) {
+				drawing.points.pop(); // last spider point
+				end();
+				treeList = [];
+				sfx.play('cancel');
+				return Consts.WEB_CONNECTIONS.RELEASED;
+			}
+			if (isActive) {
+				cancel();				
+				return Consts.WEB_CONNECTIONS.CANCELED;
+			}
+		}
+
+		if (treeLocation) {
+			if (player.input.x) {
+				player.resetInput();
+				if (!isActive) {
+
+					isActive = true;
+					drawing.add([
+						treeLocation[0] + Consts.CELL_SIZE.W / 2, 
+						treeLocation[1] + Consts.CELL_SIZE.H / 2
+					]);
+					
+					// living reference, tracks player
+					drawing.add(player.position);
+					
+					treeList.push(structuredClone(treeLocation));
+					prevTreeLocation = structuredClone(treeLocation);
+					sfx.play('connect');
+					return Consts.WEB_CONNECTIONS.STARTED;
+
+				} else if (prevTreeLocation[0] !== treeLocation[0] || prevTreeLocation[1] !== treeLocation[1]) {
+
+					drawing.insert([
+						treeLocation[0] + Consts.CELL_SIZE.W / 2,
+						treeLocation[1] + Consts.CELL_SIZE.H / 2
+					]);
+					
+					sfx.play('connect');
+					if (!continuousWeb) {
+						end();
+						return Consts.WEB_CONNECTIONS.RELEASED;
+					} else {
+						drawing.insert(POINTS.END);
+						drawing.insert([
+							treeLocation[0] + Consts.CELL_SIZE.W / 2,
+							treeLocation[1] + Consts.CELL_SIZE.H / 2
+						]);
+						prevTreeLocation = treeLocation;
+						treeList.push([...treeLocation]);
+						return Consts.WEB_CONNECTIONS.COMPLETED;
+					}
+				} else {
+					sfx.play('cancel');
+					return Consts.WEB_CONNECTIONS.NONE;
+				}
+			}
+		}
+	}
+
+	return { display, getConnection, getPoints, cancel, startOverride, };
 
 }

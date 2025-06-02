@@ -8,10 +8,9 @@ import level_bounds from '../data/level_bounds.json';
  * generate walk level
  * @param {Object} gm     the game obj
  * @param {Player} player player sprite
- * @param {SoundProvider} sfx
  * @returns Scene
  */
-export function createWalkLevel(gm, player, sfx) {
+export function createWalkLevel(gm, player) {
 
 	const scene = new Scene();
 	let colliders = [], doorColliders = [], prevDoorIndex = 0, exit;
@@ -99,7 +98,7 @@ export function createWalkLevel(gm, player, sfx) {
 		let isOnDoor = false;
 
 		for (let i = 0; i < doorColliders.length; i++) {
-			doorColliders[i].drawDebug();
+			// doorColliders[i].drawDebug();
 			if (player.collide(doorColliders[i])) {
 				isOnDoor = true;
 				if (i === prevDoorIndex) continue;

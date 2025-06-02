@@ -178,9 +178,9 @@ gm.start = function() {
 		});
 	}
 
-	walkCycle();
-	gm.sq.next();
-	return;
+	// walkCycle();
+	// gm.sq.next();
+	// return;
 
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
@@ -245,7 +245,7 @@ gm.start = function() {
 	});
 
 	gm.sq.add(() => {
-		if (gm.debug) return gm.sq.next();
+		// if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return gm.sq.next();
 		}
@@ -265,7 +265,7 @@ gm.start = function() {
 	});
 
 	gm.sq.add(() => {
-		if (gm.debug) return gm.sq.next();
+		// if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return gm.sq.next();
 		}

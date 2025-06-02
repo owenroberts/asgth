@@ -6,7 +6,6 @@ import { Trees } from '../components/Trees.js';
 import { Web } from '../components/Web.js';
 import { Sun } from '../components/Sun.js';
 
-import { WebUpdater } from '../WebUpdater.js';
 import { SymbolMatch } from '../SymbolMatch.js';
 import { SymbolMatch2 } from '../SymbolMatch2.js';
 
@@ -34,18 +33,18 @@ export function InstSymbol(gm, player) {
 	});
 
 	scene.setup = function(_sfx) {
+		sfx = _sfx;
 
 		player.spawn([Consts.CELL_SIZE.W * 5.5, Consts.CELL_SIZE.H * 5.5]);
 		scene.add(player);
 
-		trees = Trees(gm.anims.sprites);
+		trees = Trees(gm);
 		scene.addSprite(trees.getSprites());
-		web = Web();
+		web = Web(sfx);
 		scene.addSprite(web);
-		webUpdater = WebUpdater(_sfx);
+		// webUpdater = WebUpdater(_sfx);
 		sun = Sun(gm);
 		scene.add(sun.getSprite());
-		sfx = _sfx;
 
 		scene.add(new TextSprite({
 			msg: Consts.PRACTICE_SYMBOL,
@@ -101,10 +100,13 @@ export function InstSymbol(gm, player) {
 	}
 
 	scene.onUpdate = function() {
-		const connection = webUpdater.update(player, web, trees); 
+		
+		const treeLocation = trees.isColliding(player);
+		const connection = web.getConnection(player, treeLocation);
+
 		if ((connection === Consts.WEB_CONNECTIONS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTIONS.RELEASED) {
 
-			const points = structuredClone(web.getPoints({ trimmed: connection === Consts.WEB_CONNECTIONS.COMPLETED }));
+			const points = web.getPoints(connection === Consts.WEB_CONNECTIONS.COMPLETED);
 
 			const symbolMatches = symbolMatch.getMatch(points, 64, 32)
 				.flatMap(m => m)

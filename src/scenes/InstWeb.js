@@ -6,14 +6,12 @@ import { Strings } from '../Strings.js';
 import { Trees } from '../components/Trees.js';
 import { Web } from '../components/Web.js';
 
-import { WebUpdater } from '../WebUpdater.js';
-
 /**
  * practice using web to connect two trees
- * @param {Object} sprites - game sprites
+ * @param {Object} gm - game manager
  * @param {Spider} player - the player
  */
-export function InstWeb(sprites, player) {
+export function InstWeb(gm, player) {
 
 	const scene = new Scene();
 	let xBtn, instText;
@@ -21,11 +19,10 @@ export function InstWeb(sprites, player) {
 
 	scene.setup = function(sfx) {
 
-		trees = Trees(scene, sprites);
-		web = Web();
-		webUpdater = WebUpdater(sfx);
+		trees = Trees(gm);
+		web = Web(sfx);
 
-		scene.addSprite([player, web]);
+		scene.addSprite([player, web, trees.getSprites()]);
 		
 		instText = scene.addToDisplay(new TextSprite({
 			countForward: true,
@@ -35,14 +32,14 @@ export function InstWeb(sprites, player) {
 			lead: Consts.LETTERS_LEAD,
 			x: Consts.CELL_SIZE.W * 1.5,
 			y: Consts.CELL_SIZE.H * 0.5,
-			letters: sprites.letters,
+			letters: gm.anims.sprites.letters,
 		}));
 
 		xBtn = scene.addToDisplay(new TextSprite({
 			msg: Strings.X_BTN,
 			x: Consts.CELL_SIZE.W * 0.5,
 			y: Consts.CELL_SIZE.H * 0.5,
-			letters: sprites.letters_keyboard,
+			letters: gm.anims.sprites.letters_keyboard,
 		}));
 
 		trees.addLocation(
@@ -59,37 +56,44 @@ export function InstWeb(sprites, player) {
 	};
 
 	// after connecting trees and releasing web, go to practice symbol
-	// [connect 1 tree, connect 2 tree, release web]
-	const connections = [false, false, false];
+	// conditions? some kind of condition manager?
+	const connections = {
+		firstTree: false,
+		secondTree: false,
+		releasedWeb: false,
+	};
+
 	const delay = new Counter(120, () => {
 		gm.sq.next();
 	});
 
-	scene.onUpdate = () => {
-		const connection = webUpdater.update(player, web, trees);
+	scene.onUpdate = function() {
+		// const connection = webUpdater.update(player, web, trees);
+		const treeLocation = trees.isColliding(player);
+		const connection = web.getConnection(player, treeLocation);
 
 		if (connection === Consts.WEB_CONNECTIONS.STARTED) {
-			if (!connections[0] && !connections[1] && !connections[2]) {
-				connections[0] = true;
+			if (!connections.firstTree && !connections.secondTree && !connections.releasedWeb) {
+				connections.firstTree = true;
 				instText.setMsg(Strings.INST_WEB_2);
 			}
 		}
 
 		if (connection === Consts.WEB_CONNECTIONS.COMPLETED) {
-			if (connections[0] && !connections[2]) {
-				connections[1] = true;
+			if (connections.firstTree && !connections.releasedWeb) {
+				connections.secondTree = true;
 				xBtn.setMsg(Strings.Z_BTN);
 				instText.setMsg(Strings.INST_WEB_3);
 			}
 		}
 
-		if (connection >= Consts.WEB_CONNECTIONS.RELEASE) {
-			if (connections[0] && connections[1]) {
-				connections[2] = true;
+		if (connection >= Consts.WEB_CONNECTIONS.RELEASED) {
+			if (connections.firstTree && connections.secondTree) {
+				connections.releasedWeb = true;
 			}
 		}
 		
-		if (connections.every(c => c)) {
+		if (connections.firstTree && connections.secondTree && connections.releasedWeb) {
 			delay.update();
 		}
 	};

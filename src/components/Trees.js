@@ -7,10 +7,10 @@ import { Consts } from '../Consts.js';
  * Draw and manage trees for walk and draw levels
  * @param {Object} animation animation for tree texture
  */
-export function Trees(sprites) {
+export function Trees(gm) {
 
 	// turn trees into a scene
-	const texture = new Texture({ animation: sprites.trees });
+	const texture = new Texture({ animation: gm.anims.sprites.trees });
 	const animator = Animator(texture.animation, {
 		jiggleRange: [1, 1],
 		segmentNum: [2, 3],
@@ -18,7 +18,7 @@ export function Trees(sprites) {
 	// animator.set();
 	const animCounter = Counter(24, () => { animator.set(); });
 	animCounter.setLoop(true);
-	const select = new Sprite(0, 0, sprites.select);
+	const select = new Sprite(0, 0, gm.anims.sprites.select);
 	select.isActive = false;
 	select.animation.play();
 	

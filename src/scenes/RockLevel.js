@@ -8,7 +8,6 @@ import { Trees } from '../components/Trees.js';
 import { Web } from '../components/Web.js';
 import { Sun } from '../components/Sun.js';
 
-import { WebUpdater } from '../WebUpdater.js';
 import { SymbolMatch } from '../SymbolMatch.js';
 import { SymbolMatch2 } from '../SymbolMatch2.js';
 
