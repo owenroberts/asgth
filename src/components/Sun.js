@@ -10,6 +10,7 @@ import { Consts } from '../Consts.js';
 export function Sun(gm) {
 
 	// make this a scene?? components?
+	// this could extend sprite ... or return a sprite
 
 	const sprite = new Sprite(12.85 * Consts.CELL_SIZE.W, 6 * Consts.CELL_SIZE.H, gm.anims.sprites.sun);
 	const counter = new Counter(Consts.SUN_INTERVAL);

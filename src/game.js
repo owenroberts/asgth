@@ -245,7 +245,7 @@ gm.start = function() {
 	});
 
 	gm.sq.add(() => {
-		// if (gm.debug) return gm.sq.next();
+		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return gm.sq.next();
 		}
@@ -265,7 +265,7 @@ gm.start = function() {
 	});
 
 	gm.sq.add(() => {
-		// if (gm.debug) return gm.sq.next();
+		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return gm.sq.next();
 		}
@@ -296,6 +296,7 @@ gm.start = function() {
 
 		gm.sq.add(() => {
 			gm.scenes[levelName] = RockLevel(gm, player, sfx);
+			gm.scenes[levelName].setup();
 			gm.scenes.setCurrent(levelName);
 		});
 

@@ -1,5 +1,7 @@
-import { choice, random } from '../../cool/cool.js';
-import { Scene, Sprite } from '../../lines/src/Engine.js';
+import { randomInt, choice, random } from '../../cool/cool.js';
+
+import { Scene, Sprite, Texture, TileMap } from '../../lines/src/Engine.js';
+import { BSPMap } from "../../hellmaps/src/Map.js";
 import { Consts } from '../Consts.js';
 
 import { Level } from '../classes/Level.js';
@@ -15,55 +17,87 @@ export function RockLevel(gm, player, sfx) {
 	
 	const scene = new Scene();
 
+	let trees, web, sun, rock;
+
+	const dir = choice(-1, 1); // rock starts animating
+	let rockRolled = false;		
+
+	const finishString = gm.props.nextSymbolString.split('').sort().join('');
+	let symbolsMatched = [];
+	let prevMatched = '';
 	const symbolMatch = SymbolMatch();
 	const symbolMatch2 = SymbolMatch2();
 
-	// setup func ... 
+	scene.setup = function() {
 
-	// rn all symbols are 1
-	// min room size is size of room, 3+ is easiest/guaranteed
-	let minNodeRoomSize = gm.props.nextSymbolString.length > 2 ? 2 : 1;
-	// make at least one with 3 for each 3 symbol
-	// or something more complex to make sure there are 3x3 grids for each symbol ... 
-	if (gm.props.levelCount === 0) minNodeRoomSize = 3;
-	
-	// maybe gonna change this a lot ... 
-	// set max nodes based on level -- fewer nodes means bigger rooms
-	// max 1x1 nodes 13x7 = 91, use 1/3 ish of that
-	// const maxNodes = 16 - levelCount + (points.rock - points.spider);
-	const maxNodes = Math.min(24, gm.props.levelCount + 3 + (gm.props.points.SPIDER - gm.props.points.ROCK));
+		// rn all symbols are 1
+		// min room size is size of room, 3+ is easiest/guaranteed
+		let minNodeRoomSize = gm.props.nextSymbolString.length > 2 ? 2 : 1;
+		// make at least one with 3 for each 3 symbol
+		// or something more complex to make sure there are 3x3 grids for each symbol ... 
+		if (gm.props.levelCount === 0) minNodeRoomSize = 3;
+		
+		// maybe gonna change this a lot ... 
+		// set max nodes based on level -- fewer nodes means bigger rooms
+		// max 1x1 nodes 13x7 = 91, use 1/3 ish of that
+		// const maxNodes = 16 - levelCount + (points.rock - points.spider);
+		const maxNodes = Math.min(24, gm.props.levelCount + 3 + (gm.props.points.SPIDER - gm.props.points.ROCK));
 
-	const groundTexture = choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
 
-	// turn this into map generator, no reason to keep in tree structure ... 
-	const level = new Level(minNodeRoomSize, maxNodes, gm.anims.sprites[groundTexture]);
-	scene.addSprite(level);
+		const map = new BSPMap(13, 7, minNodeRoomSize, 6, minNodeRoomSize);
+		map.build({ w: 0, h: 0 }, { w: 0, h: 0 }, maxNodes, Consts.CELL_SIZE, false);
 
-	const trees = Trees(gm.anims.sprites);
-	scene.addSprite(trees.getSprites());
-	level.locations.forEach(loc => trees.addLocation(...loc));
-	trees.clearAnimator();
-	
-	player.spawn(choice(level.walls)); // no spawn on edge
-	scene.addSprite(player);
+		trees = Trees(gm);
+		scene.addSprite(trees.getSprites());
+		trees.clearAnimator();
 
-	const sun = Sun(gm);
-	scene.add(sun.getSprite());
-	sun.setup();
+		map.nodes
+			.filter(n => n.room)
+			.forEach(n => {
+				const i = randomInt(25 - 3); // random tree clusters
+				const r = n.room;
+				for (let x = r.x; x < r.x + r.w; x++) {
+					for (let y = r.y; y < r.y + r.h; y++) {
+						trees.addLocation(
+							x * Consts.CELL_SIZE.W, 
+							y * Consts.CELL_SIZE.H, 
+							randomInt(i, i + 3)
+						);
+					}
+				}
+			});
 
-	const rock = scene.addSprite(new Sprite(gm.width, -gm.anims.sprites.rock.height, gm.anims.sprites.rock));
-	rock.isActive = false;
-	rock.animation.play();
-	const dir = choice(-1, 1); // rock starts animating
-	let rockRolled = false;
+		const groundTexture = choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
+		const ground = scene.add(new Texture({ animation: gm.anims.sprites[groundTexture] }));
+		const tileMap = new TileMap(13, 7);
+		tileMap.matrix = structuredClone(map.matrix);
+		console.log({map, tileMap})
 
-	const web = Web();
-	scene.addSprite(web);
-	const webUpdater = WebUpdater(sfx);
-	
-	let symbolsMatched = [];
-	let prevMatched = '';
-	const finishString = gm.props.nextSymbolString.split('').sort().join('');
+		const walls = [];
+
+		for (let i = 0; i < map.matrix.length; i++) {
+			if (map.matrix[i] === 0) {
+				const { x, y } = tileMap.getIndexPosition(i);
+				walls.push([x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H]);
+				const f = tileMap.getTextureByPosition(x, y, 0);
+				ground.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, f);
+			}
+		}		
+		
+		player.spawn(choice(walls)); // no spawn on edge
+		scene.addSprite(player);
+
+		sun = Sun(gm);
+		scene.add(sun.getSprite());
+		sun.setup();
+
+		rock = scene.addSprite(new Sprite(gm.width, -gm.anims.sprites.rock.height, gm.anims.sprites.rock));
+		rock.isActive = false;
+		rock.animation.play();
+
+		web = Web(sfx);
+		scene.addSprite(web);		
+	}
 
 	function updateScore() {
 		let point = prevMatched === finishString ? 1 : 0;
@@ -81,13 +115,14 @@ export function RockLevel(gm, player, sfx) {
 	});
 
 	// dont kys on this, going to remove probably ... but also use in another scene ... 
-	scene.onUpdate = () => {
+	scene.onUpdate = function() {
 		if (rockRolled) rockUpdate();
 		else webUpdate();
 	};
 
 	function webUpdate() {
-		const connection = webUpdater.update(player, web, trees);
+		const treeLocation = trees.isColliding(player);
+		const connection = web.getConnection(player, treeLocation);
 		if ((connection === Consts.WEB_CONNECTIONS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTIONS.RELEASED) {
 
 			const points = structuredClone(web.getPoints({ trimmed: connection === Consts.WEB_CONNECTIONS.COMPLETED }));
