@@ -7,7 +7,7 @@ import { Consts } from '../Consts.js';
  * @param {Object} sprites - game sprites
  * @returns scene
  */
-export function InstChoose(sprites) {
+export function instChoose(sprites) {
 
 	const scene = new Scene();
 

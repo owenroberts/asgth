@@ -95,7 +95,9 @@ export function Web(sfx) {
 		isActive = false;
 	}
 
+	// this also draws?
 	/**
+	 * draws web and tests connections
 	 * @param  {Player}
 	 * @param  {Boolean|Array} location of tree spider is on or false
 	 * @returns {WEB_CONNECTION} type of web connection, NONE, STARTED, CONNECTED, RELEASED, CANCELED

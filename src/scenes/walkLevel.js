@@ -10,7 +10,7 @@ import level_bounds from '../data/level_bounds.json';
  * @param {Player} player player sprite
  * @returns Scene
  */
-export function createWalkLevel(gm, player) {
+export function walkLevel(gm, player) {
 
 	const scene = new Scene();
 	let colliders = [], doorColliders = [], prevDoorIndex = 0, exit;

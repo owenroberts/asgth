@@ -6,7 +6,7 @@ import { Strings } from '../Strings.js';
  * handles displaying narration
  * @param {Game} gm - game engine object
  */
-export function Narration(gm) {
+export function narration(gm) {
 
 	const scene = new Scene();
 

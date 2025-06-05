@@ -11,7 +11,7 @@ import { Sun } from '../components/Sun.js';
 import { SymbolMatch } from '../SymbolMatch.js';
 import { SymbolMatch2 } from '../SymbolMatch2.js';
 
-export function RockLevel(gm, player, sfx) {
+export function rockLevel(gm, player, sfx) {
 	
 	const scene = new Scene();
 

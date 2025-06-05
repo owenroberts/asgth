@@ -11,7 +11,7 @@ import { Web } from '../components/Web.js';
  * @param {Object} gm - game manager
  * @param {Spider} player - the player
  */
-export function InstWeb(gm, player) {
+export function instWeb(gm, player) {
 
 	const scene = new Scene();
 	let xBtn, instText;

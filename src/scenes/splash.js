@@ -2,7 +2,7 @@ import { Scene, TextSprite } from '../../lines/src/Engine.js';
 import { Strings } from '../Strings.js';
 import { Consts } from '../Consts.js';
 
-export function Splash(gm) {
+export function splash(gm) {
 
 	const scene = new Scene();
 

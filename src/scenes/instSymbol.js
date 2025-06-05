@@ -9,7 +9,7 @@ import { Sun } from '../components/Sun.js';
 import { SymbolMatch } from '../SymbolMatch.js';
 import { SymbolMatch2 } from '../SymbolMatch2.js';
 
-export function InstSymbol(gm, player) {
+export function instSymbol(gm, player) {
 	
 	const scene = new Scene();
 	

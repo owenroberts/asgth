@@ -1,7 +1,7 @@
 import { Scene, Sprite, TextSprite } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 
-export function End(gm) {
+export function end(gm) {
 
 	const scene = new Scene();
 

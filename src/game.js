@@ -4,16 +4,17 @@ import { Game, Sprite, TextSprite, SoundProvider, Scene, generateBSPMap } from '
 
 import { Spider } from './components/Spider.js'; // not a scene?
 
-import { Splash } from './scenes/Splash.js';
-import { InstMove } from './scenes/InstMove.js';
-import { InstChoose } from './scenes/InstChoose.js';
-import { InstWeb } from './scenes/InstWeb.js';
-import { InstSymbol } from './scenes/InstSymbol.js';
-import { InterWebs } from './scenes/InterWebs.js';
-import { RockLevel } from './scenes/RockLevel.js';
-import { createWalkLevel } from './scenes/WalkLevel.js';
-import { Narration } from './scenes/Narration.js';
-import { End } from './scenes/End.js';
+import { splash } from './scenes/splash.js';
+import { instMove } from './scenes/instMove.js';
+import { instChoose } from './scenes/instChoose.js';
+import { instWeb } from './scenes/instWeb.js';
+import { instSymbol } from './scenes/instSymbol.js';
+import { interWebs } from './scenes/interWebs.js';
+import { rockLevel } from './scenes/rockLevel.js';
+import { walkLevel } from './scenes/walkLevel.js';
+import { narration } from './scenes/narration.js';
+import { end } from './scenes/end.js';
+import { pattern } from './scenes/pattern.js';
 
 import { Strings } from './Strings.js';
 import { Consts } from './Consts.js';
@@ -116,15 +117,15 @@ gm.start = function() {
 	player = Spider(gm);
 	gm.sq = Sequencer();
 	
-	gm.scenes.splash = Splash(gm);
-	gm.scenes.inst_move = InstMove(gm, player);
-	gm.scenes.inst_choose = InstChoose(gm);
-	gm.scenes.inst_web = InstWeb(gm, player);
-	gm.scenes.inst_symbol = InstSymbol(gm, player);
-	gm.scenes.inter_webs = InterWebs(gm);
-	gm.scenes.end = End(gm);
+	gm.scenes.splash = splash(gm);
+	gm.scenes.inst_move = instMove(gm, player);
+	gm.scenes.inst_choose = instChoose(gm);
+	gm.scenes.inst_web = instWeb(gm, player);
+	gm.scenes.inst_symbol = instSymbol(gm, player);
+	gm.scenes.inter_webs = interWebs(gm);
+	gm.scenes.end = end(gm);
 
-	gm.scenes.narration = Narration(gm);
+	gm.scenes.narration = narration(gm);
 	gm.scenes.narration.onKeyUp['x'] = function() {
 		if (gm.scenes.narration.isDone()) {
 			sfx.play('next_button', true);
@@ -165,7 +166,7 @@ gm.start = function() {
 	function walkCycle() {
 		gm.sq.add(() => {
 			const walkLevelName = 'walk-' + gm.props.levelCount;
-			gm.scenes[walkLevelName] = createWalkLevel(gm, player);
+			gm.scenes[walkLevelName] = walkLevel(gm, player);
 			gm.scenes[walkLevelName].setup();
 			gm.scenes.setCurrent(walkLevelName);
 			console.log('walk level', walkLevelName);
@@ -178,9 +179,15 @@ gm.start = function() {
 		});
 	}
 
+	gm.sq.add(() => {
+		gm.scenes.patternScene = pattern();
+		console.log(gm.scenes.patternScene);
+		gm.scenes.setCurrent('patternScene');
+	});
+
 	// walkCycle();
-	// gm.sq.next();
-	// return;
+	gm.sq.next();
+	return;
 
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
@@ -295,7 +302,7 @@ gm.start = function() {
 		});
 
 		gm.sq.add(() => {
-			gm.scenes[levelName] = RockLevel(gm, player, sfx);
+			gm.scenes[levelName] = rockLevel(gm, player, sfx);
 			gm.scenes[levelName].setup();
 			gm.scenes.setCurrent(levelName);
 		});
@@ -321,7 +328,7 @@ gm.start = function() {
 			if (gm.props.levelCount > Consts.NUM_LEVELS) return gm.sq.next();
 
 			const walkLevelName = 'walk-' + gm.props.levelCount;
-			gm.scenes[walkLevelName] = WalkLevel(gm, player);
+			gm.scenes[walkLevelName] = walkLevel(gm, player);
 			gm.scenes.setCurrent(walkLevelName);
 		});
 

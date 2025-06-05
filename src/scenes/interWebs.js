@@ -4,7 +4,7 @@ import { Animator } from '../../lines/src/Lines.js';
 import { Strings } from '../Strings.js';
 import { Consts } from '../Consts.js';
 
-export function InterWebs(gm, seq) {
+export function interWebs(gm, seq) {
 	
 	const scene = new Scene();
 	const sprite = scene.addSprite(new Sprite(0, 0, gm.anims.sprites.webs_2));
