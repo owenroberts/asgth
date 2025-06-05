@@ -1,6 +1,6 @@
 import { Sequencer } from '../cool/cool.js';
 import { Doodoo } from '../doodoo/src/Doodoo.js';
-import { Game, Sprite, TextSprite, SoundProvider, Scene } from '../lines/src/Engine.js';
+import { Game, Sprite, TextSprite, SoundProvider, Scene, generateBSPMap } from '../lines/src/Engine.js';
 
 import { Spider } from './components/Spider.js'; // not a scene?
 

@@ -1,6 +1,6 @@
 import { Consts } from '../Consts.js';
 import { GameAnim } from '../../lines/src/Engine.js';
-import { Drawing, Layer, Style, POINTS } from '../../lines/src/Lines.js';
+import { Drawing, Layer, Style, POINTS, Animator } from '../../lines/src/Lines.js';
 
 /**
  * draw the spiders web
@@ -53,6 +53,8 @@ export function Web(sfx) {
 	}
 
 	// do this with animator?
+	// can't because its only one frame and no update func
+	// that why coding is cool! i can do whatever
 	function startOverride() {
 		let w = 4, s = 0.1, n = 10;
 		animation.onDraw = () => {
