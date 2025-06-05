@@ -1,5 +1,5 @@
 import { Counter, randomInt, choice, map } from '../../cool/cool.js';
-import { TileMap, ColliderSprite, ColliderEmpty, Scene, Texture, Sprite } from '../../lines/src/Engine.js';
+import { BlobMap, TileMap, TileTypes, ColliderSprite, ColliderEmpty, Scene, Texture, Sprite } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 
 import level_bounds from '../data/level_bounds.json';
@@ -29,9 +29,7 @@ export function createWalkLevel(gm, player) {
 		moon = scene.addToDisplay(new Sprite(13 * Consts.CELL_SIZE.W, 7 * Consts.CELL_SIZE.H, gm.anims.sprites.moon));
 		moonAnim = new Counter(Consts.MOON_INTERVAL);
 
-		const groundTexture = choice('tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
-		const ground = new Texture({ animation: gm.anims.sprites[groundTexture] });
-		scene.addToDisplay(ground);
+		const ground = scene.addToDisplay(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_sparse_grass', 'tiles_dirt')] }));
 
 		const bgTexture = scene.addToDisplay(new Texture({ animation: gm.anims.sprites.walk_tiles }));
 		const bgIndex = randomInt(0, (bgTexture.animation.endFrame - 1) / 4) * 4;
@@ -63,15 +61,12 @@ export function createWalkLevel(gm, player) {
 		}
 		
 
-		const tileMap = new TileMap(13, 8);
+		// is this wackadoodle?
+		const map = new BlobMap(new TileMap(13, 8));
 
 		for (let i = 0; i < bounds.length; i++) {
 			const [x, y, w, h] = bounds[i];
-			for (let _x = x; _x < x + w; _x++) {
-				for (let _y = y; _y < y + h; _y++) {
-					tileMap.setTile(_x, _y, 1);
-				}
-			}
+			map.tileMap.setAreaProperty(x, y, w, h, "type", TileTypes.ON);
 			
 			colliders.push(new ColliderEmpty(
 				x * Consts.CELL_SIZE.W,
@@ -81,11 +76,11 @@ export function createWalkLevel(gm, player) {
 			));
 		}
 
-		for (let i = 0; i < tileMap.matrix.length; i++) {
-			const { x, y } = tileMap.getIndexPosition(i);
-			if (tileMap.matrix[i] === 0) {
-				const f = tileMap.getTextureByPosition(x, y, 0);
-				ground.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, f);
+		for (let i = 0; i < map.tileMap.tiles.length; i++) {
+			const { x, y } = map.tileMap.getIndexPosition(i);
+			if (map.tileMap.tiles[i].type === TileTypes.OFF) {
+				const blobIndex = map.getBlobIndex(x, y, TileTypes.OFF);
+				ground.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, blobIndex);
 			} else {
 				const f = bgIndex + randomInt(0, 3);
 				bgTexture.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, f);

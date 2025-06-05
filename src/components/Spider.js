@@ -1,4 +1,4 @@
-import { Counter } from '../../cool/cool.js';
+import { Counter, assert } from '../../cool/cool.js';
 import { ColliderSprite } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 
@@ -50,6 +50,8 @@ export function Spider(gm) {
 	sprite.setCollider(16, 16, 32, 32);
 
 	sprite.spawn = function(location, dir) {
+		assert(Number.isFinite(location[0]), "x is not a number");
+		assert(Number.isFinite(location[1]), "y is not a number");
 		sprite.position[0] = location[0];
 		sprite.position[1] = location[1];
 		if (dir) direction = DIRECTIONS[dir];

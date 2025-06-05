@@ -1,10 +1,8 @@
 import { randomInt, choice, random } from '../../cool/cool.js';
 
-import { Scene, Sprite, Texture, TileMap } from '../../lines/src/Engine.js';
+import { Scene, Sprite, Texture, TileMap, generateBSPMap, BSPTileTypes, BlobMap } from '../../lines/src/Engine.js';
 import { BSPMap } from "../../hellmaps/src/Map.js";
 import { Consts } from '../Consts.js';
-
-import { Level } from '../classes/Level.js';
 
 import { Trees } from '../components/Trees.js';
 import { Web } from '../components/Web.js';
@@ -29,62 +27,48 @@ export function RockLevel(gm, player, sfx) {
 	const symbolMatch2 = SymbolMatch2();
 
 	scene.setup = function() {
-
-		// rn all symbols are 1
-		// min room size is size of room, 3+ is easiest/guaranteed
-		let minNodeRoomSize = gm.props.nextSymbolString.length > 2 ? 2 : 1;
-		// make at least one with 3 for each 3 symbol
-		// or something more complex to make sure there are 3x3 grids for each symbol ... 
-		if (gm.props.levelCount === 0) minNodeRoomSize = 3;
 		
-		// maybe gonna change this a lot ... 
 		// set max nodes based on level -- fewer nodes means bigger rooms
 		// max 1x1 nodes 13x7 = 91, use 1/3 ish of that
-		// const maxNodes = 16 - levelCount + (points.rock - points.spider);
 		const maxNodes = Math.min(24, gm.props.levelCount + 3 + (gm.props.points.SPIDER - gm.props.points.ROCK));
+		console.log({levelCount: gm.props.levelCount, maxNodes});
 
-
-		const map = new BSPMap(13, 7, minNodeRoomSize, 6, minNodeRoomSize);
-		map.build({ w: 0, h: 0 }, { w: 0, h: 0 }, maxNodes, Consts.CELL_SIZE, false);
+		const map = generateBSPMap({ cols: 13, rows: 7, maxNodes, maxNodeSize: 6, createPaths: false });
 
 		trees = Trees(gm);
 		scene.addSprite(trees.getSprites());
 		trees.clearAnimator();
 
-		map.nodes
-			.filter(n => n.room)
-			.forEach(n => {
-				const i = randomInt(25 - 3); // random tree clusters
-				const r = n.room;
-				for (let x = r.x; x < r.x + r.w; x++) {
-					for (let y = r.y; y < r.y + r.h; y++) {
-						trees.addLocation(
-							x * Consts.CELL_SIZE.W, 
-							y * Consts.CELL_SIZE.H, 
-							randomInt(i, i + 3)
-						);
-					}
+		let treeClusterSize = 3;
+		// don't like mixing getTexture() with .animation ... 
+		let numTrees = trees.getTexture().animation.endFrame;
+		for (let i = 0; i < map.rooms.length; i++) {
+			const treeClusterIndex = randomInt(numTrees - treeClusterSize);
+			const r = map.rooms[i];
+			for (let x = r.x; x < r.x + r.w; x++) {
+				for (let y = r.y; y < r.y + r.h; y++) {
+					trees.addLocation(
+						x * Consts.CELL_SIZE.W, 
+						y * Consts.CELL_SIZE.H, 
+						randomInt(treeClusterIndex, treeClusterIndex + treeClusterSize),
+					);
 				}
-			});
-
-		const groundTexture = choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt');
-		const ground = scene.add(new Texture({ animation: gm.anims.sprites[groundTexture] }));
-		const tileMap = new TileMap(13, 7);
-		tileMap.matrix = structuredClone(map.matrix);
-		console.log({map, tileMap})
-
-		const walls = [];
-
-		for (let i = 0; i < map.matrix.length; i++) {
-			if (map.matrix[i] === 0) {
-				const { x, y } = tileMap.getIndexPosition(i);
-				walls.push([x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H]);
-				const f = tileMap.getTextureByPosition(x, y, 0);
-				ground.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, f);
 			}
-		}		
-		
-		player.spawn(choice(walls)); // no spawn on edge
+		}
+
+		const ground = scene.add(new Texture({ animation: gm.anims.sprites[choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt')] }));
+		const blobMap = new BlobMap(map.tileMap);
+		const wallTiles = map.tileMap.getTilesByType(BSPTileTypes.WALL);
+		for (let i = 0; i < wallTiles.length; i++) {
+			const { x, y } = map.tileMap.getPosition(wallTiles[i]);
+			const blobIndex = blobMap.getBlobIndex(x, y, BSPTileTypes.WALL);
+			ground.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, blobIndex);
+		}
+
+		// get tile type method?
+		const spawnTile = choice(map.tileMap.tiles.filter(t => t.type === BSPTileTypes.WALL));
+		const spawnLocation = map.tileMap.getPosition(spawnTile);
+		player.spawn([spawnLocation.x, spawnLocation.y]); // no spawn on edge ?
 		scene.addSprite(player);
 
 		sun = Sun(gm);
@@ -178,18 +162,19 @@ export function RockLevel(gm, player, sfx) {
 		
 		web.end(); // unset web scene
 		sfx.pause('web');
-		trees.startRock();
-		sun.getSprite().isActive = false;
+		sun.getSprite().isActive = false; // yuck
+		player.isActive = false; // double yuck
 		
 		rock.position[0] = dir === 1 ? -rock.halfWidth : gm.width;
 		rock.position[1] = -rock.halfHeight;
 		rock.isActive = true;
 
+		trees.startRock();
+		web.startOverride();
+		
 		sfx.play('stone');
 		sfx.play('rock');
-
-		player.isActive = false;
-		web.startOverride();
+		
 		rockRolled = true;
 	};
 
