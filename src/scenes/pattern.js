@@ -30,29 +30,39 @@ export function pattern(gm) {
 	let rows = 1;
 
 	const { W, H } = Consts.CELL_SIZE;
-	const w = W / 8;
-	const h = H / 8;
+	const w = W / 4;
+	const h = H / 4;
 	const corners = [
-		{ x: w * 2, y: h * 2 },
-		{ x: w * 4, y: h * 2 },
-		{ x: w * 2, y: h * 4 },
-		{ x: w * 4, y: h * 4 },
+		{ x: w * 3, y: h * 3 },
+		{ x: w * 5, y: h * 3 },
+		{ x: w * 3, y: h * 5 },
+		{ x: w * 5, y: h * 5 },
 	];
+
+	// 1.42 = .71 * 2
 	let directions = [
-		{ x: w * 0,     y: h * -1    }, // up
-		{ x: w * 0.71,  y: h * -0.71 }, // up right
-		{ x: w * 1,     y: h * 0     }, // right
-		{ x: w * 0.71,  y: h * 0.71  }, // down right
-		{ x: w * 0,     y: h * 1     }, // down
-		{ x: w * -0.71, y: h * 0.71  }, // down left
-		{ x: w * -1,    y: h * 0     }, // left
-		{ x: w * -0.71, y: h * -0.71 }, // up left
+		{ x: w * 0,     y: h * -2    }, // up
+		{ x: w * 1.42,  y: h * -1.42 }, // up right
+		{ x: w * 2,     y: h * 0     }, // right
+		{ x: w * 1.42,  y: h * 1.42  }, // down right
+		{ x: w * 0,     y: h * 2     }, // down
+		{ x: w * -1.42, y: h * 1.42  }, // down left
+		{ x: w * -2,    y: h * 0     }, // left
+		{ x: w * -1.42, y: h * -1.42 }, // up left
 	];
 
 	let dirIndex = 0;
 
-	function drawLine(corner, x, y) {
+	function drawLine(index, x, y) {
+		let corner = corners[index];
 		let d = directions[dirIndex++];
+
+		// no pointing inside
+		if (index === 0 && d.x > 0 && d.y > 0) return;
+		if (index === 1 && d.x < 0 && d.y > 0) return;
+		if (index === 2 && d.x > 0 && d.y < 0) return;
+		if (index === 3 && d.x < 0 && d.y < 0) return;
+
 		drawing.add([x + corner.x, y + corner.y]);
 		drawing.add([
 			x + corner.x + d.x,
@@ -66,8 +76,8 @@ export function pattern(gm) {
 			dirIndex = 0;
 			directions = shuffle(directions);
 			for (let i = 0; i < corners.length; i++) {
-				drawLine(corners[i], x * W + W, y * H + H);
-				drawLine(corners[i], x * W + W, y * H + H);
+				drawLine(i, x * W + W, y * H + H);
+				drawLine(i, x * W + W, y * H + H);
 			}			
 		}
 	}
