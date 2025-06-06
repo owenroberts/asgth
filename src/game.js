@@ -180,9 +180,20 @@ gm.start = function() {
 	}
 
 	gm.sq.add(() => {
-		gm.scenes.patternScene = pattern();
-		console.log(gm.scenes.patternScene);
-		gm.scenes.setCurrent('patternScene');
+		gm.scenes.pattern = pattern(gm);
+		gm.scenes.pattern.onKeyDown.x = function() {
+			if (gm.scenes.pattern.canContinue) gm.sq.next();
+		};
+		gm.props.pattern = structuredClone(gm.scenes.pattern.data);
+		console.log(gm.props.pattern);
+		gm.scenes.setCurrent('pattern');
+	});
+
+	gm.sq.add(() => {
+		const levelName = `level-${gm.props.levelCount}`;
+		gm.scenes[levelName] = rockLevel(gm, player, sfx);
+		gm.scenes[levelName].setup();
+		gm.scenes.setCurrent(levelName);
 	});
 
 	// walkCycle();
@@ -325,7 +336,9 @@ gm.start = function() {
 		});
 
 		gm.sq.add(() => {
-			if (gm.props.levelCount > Consts.NUM_LEVELS) return gm.sq.next();
+			if (gm.props.levelCount > Consts.NUM_LEVELS) {
+				return gm.sq.next();
+			}
 
 			const walkLevelName = 'walk-' + gm.props.levelCount;
 			gm.scenes[walkLevelName] = walkLevel(gm, player);

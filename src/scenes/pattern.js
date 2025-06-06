@@ -1,8 +1,9 @@
-// scene or what?
-import { random, shuffle } from '../../cool/cool.js';
-import { Sprite, Scene, GameAnim } from '../../lines/src/Engine.js';
+import { random, shuffle, coinFlip, Counter } from '../../cool/cool.js';
+import { Sprite, Scene, GameAnim, TextSprite } from '../../lines/src/Engine.js';
 import { Drawing, Layer, Style, POINTS, Animator } from '../../lines/src/Lines.js';
 import { Consts } from '../Consts.js';
+import { Strings } from '../Strings.js';
+import { continueUI } from './continueUI.js';
 
 export function pattern(gm) {
 
@@ -13,9 +14,9 @@ export function pattern(gm) {
 	animation.layers.push(new Layer());
 	animation.styles.push(new Style({
 		color: "#FFFFFF",
-		// segmentNum: 10,
-		// wiggleRange: 8,
-		// wiggleSegments: true,
+		segmentNum: 4,
+		wiggleRange: 1,
+		wiggleSegments: true,
 	}));
 	animation.setFrames(); // needs this for game anim that isn't loaded...
 
@@ -26,63 +27,100 @@ export function pattern(gm) {
 		}
 	});
 
-	let cols = 3;
-	let rows = 1;
 
-	const { W, H } = Consts.CELL_SIZE;
-	const w = W / 4;
-	const h = H / 4;
+	// no add this to the narration
+	scene.addToDisplay(new TextSprite({
+		msg: Strings.INST_DRAW_PATTERN,
+		track: Consts.LETTERS_TRACK,
+		lead: Consts.LETTERS_LEAD,
+		x: Consts.CELL_SIZE.W * 0.5,
+		y: Consts.CELL_SIZE.H * 0.5,
+		letters: gm.anims.sprites.letters,
+		wrap: 24,
+	}));
+
+	const { xBtn, xToContinue } = continueUI(gm);
+	scene.addToDisplay(xBtn);
+	scene.addToDisplay(xToContinue);
+	scene.canContinue = false;
+
+	const nextDelay = Counter(Consts.PATTERN_DELAY, () => {
+		xToContinue.isActive = true;
+		xBtn.isActive = true;
+		scene.canContinue = true;
+	});
+
+	scene.onUpdate = function() {
+		nextDelay.update();
+	};
+
+	const cols = 1;
+	const rows = 1;
+
+	scene.data = []; // save pattern for matching
+
+	const w = Consts.CELL_SIZE.W / 2;
+	const h = Consts.CELL_SIZE.H / 2;
 	const corners = [
-		{ x: w * 3, y: h * 3 },
-		{ x: w * 5, y: h * 3 },
-		{ x: w * 3, y: h * 5 },
-		{ x: w * 5, y: h * 5 },
+		{ x: w * 1, y: h * 1 }, // up left
+		{ x: w * 2, y: h * 1 }, // up right
+		{ x: w * 2, y: h * 2 }, // down right
+		{ x: w * 1, y: h * 2 }, // down left
 	];
 
 	// 1.42 = .71 * 2
-	let directions = [
-		{ x: w * 0,     y: h * -2    }, // up
-		{ x: w * 1.42,  y: h * -1.42 }, // up right
-		{ x: w * 2,     y: h * 0     }, // right
-		{ x: w * 1.42,  y: h * 1.42  }, // down right
-		{ x: w * 0,     y: h * 2     }, // down
-		{ x: w * -1.42, y: h * 1.42  }, // down left
-		{ x: w * -2,    y: h * 0     }, // left
-		{ x: w * -1.42, y: h * -1.42 }, // up left
+	const s = 1; // size of line
+	const directions = [
+		{ x: w * 0,  y: h * -s }, // up
+		{ x: w * s,  y: h * -s }, // up right
+		{ x: w * s,  y: h * s  }, // right
+		{ x: w * s,  y: h * s  }, // down right
+		{ x: w * 0,  y: h * s  }, // down
+		{ x: w * -s, y: h * s  }, // down left
+		{ x: w * -s, y: h * 0  }, // left
+		{ x: w * -s, y: h * -s }, // up left
 	];
 
-	let dirIndex = 0;
+	let dirIndexes = Array.from({ length: directions.length }, (_, i) => i);
+	let directionIndex = 0;
 
-	function drawLine(index, x, y) {
-		let corner = corners[index];
-		let d = directions[dirIndex++];
+	function drawLine(cornerIndex, x, y) {
+
+		// save line to pattern data
+		// (before changing directionIndex);
+		const lineData = structuredClone({ cornerIndex, directionIndex: dirIndexes[directionIndex] }); 
+
+		let bX = x * w * 3 + w * 2;
+		let bY = y * h * 3 + h * 4;
+		let corner = corners[cornerIndex];
+		let d = directions[dirIndexes[directionIndex++]];
 
 		// no pointing inside
-		if (index === 0 && d.x > 0 && d.y > 0) return;
-		if (index === 1 && d.x < 0 && d.y > 0) return;
-		if (index === 2 && d.x > 0 && d.y < 0) return;
-		if (index === 3 && d.x < 0 && d.y < 0) return;
+		if (cornerIndex === 0 && d.x > 0 && d.y > 0) return;
+		if (cornerIndex === 1 && d.x < 0 && d.y > 0) return;
+		if (cornerIndex === 2 && d.x > 0 && d.y < 0) return;
+		if (cornerIndex === 3 && d.x < 0 && d.y < 0) return;
 
-		drawing.add([x + corner.x, y + corner.y]);
+		scene.data.push(lineData);
+
+		drawing.add([bX + corner.x, bY + corner.y]);
 		drawing.add([
-			x + corner.x + d.x,
-			y + corner.y + d.y,
+			bX + corner.x + d.x,
+			bY + corner.y + d.y,
 		]);
 		drawing.add(POINTS.END);
 	}
 
 	for (let x = 0; x < cols; x++) {
 		for (let y = 0; y < rows; y++) {
-			dirIndex = 0;
-			directions = shuffle(directions);
+			directionIndex = 0;
+			dirIndexes = shuffle(dirIndexes);
 			for (let i = 0; i < corners.length; i++) {
-				drawLine(i, x * W + W, y * H + H);
-				drawLine(i, x * W + W, y * H + H);
+				drawLine(i, x, y);
+				drawLine(i, x, y);
 			}			
 		}
 	}
 
 	return scene;
-
-
 }

@@ -38,6 +38,7 @@ export function instMove(gm, player) {
 		const keyboardArrows = new Sprite(Consts.CELL_SIZE.W * 0.5, Consts.CELL_SIZE.H * 2.5, gm.anims.sprites.keyboard_arrows); 
 		scene.addToDisplay(keyboardArrows);
 
+		// repliace with continue ui
 		xBtn = scene.addToDisplay(new TextSprite({
 			msg: Strings.X_BTN,
 			x: Consts.CELL_SIZE.W * 0.5,

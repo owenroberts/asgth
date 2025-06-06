@@ -13,6 +13,7 @@ export const Consts = {
 	SYMBOL_INDEX_STRING: "abcdefghijklmnopqrstuvwxyz",
 	PRACTICE_SYMBOL: 'd',
 	
+	PATTERN_DELAY: 300,
 	WEBS_INTERVAL: 180,
 	ROCK_SHAKE_AMOUNT: 2,
 	SUN_FINISH_COUNT: 400,
