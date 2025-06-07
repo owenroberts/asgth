@@ -96,42 +96,21 @@ export function pattern(gm) {
 		if (cornerIndex === 2 && d.x > 0 && d.y < 0) return;
 		if (cornerIndex === 3 && d.x < 0 && d.y < 0) return;
 
-		// xy position and direction vector
-		// normalized to top-left
-		// console.log('~', JSON.stringify([
-		// 	x + corner.x ,//+ (d.x < 0 ? -1 : 0),
-		// 	y + corner.y ,//+ (d.y < 0 ? -1 : 0),
-		// 	Math.sign(d.x) ,//* (d.x < 0 ? -1 : 1),
-		// 	Math.sign(d.y) ,//* (d.y < 0 ? -1 : 1),
-		// ]));
-		
-		const code = [
-			x + corner.x, // + (d.x < 0 ? -1 : 0),
-			y + corner.y, // + (d.y < 0 ? -1 : 0),
-			Math.sign(d.x), // * (d.x < 0 ? -1 : 1),
-			Math.sign(d.y), //  * (d.y < 0 ? -1 : 1),
-		];
+		// console.log(cornerIndex, x, y, corner.x, corner.y, d.x, d.y);
+		const points = [
+			[x + corner.x, y + corner.y],
+			[x + corner.x + d.x, y + corner.y + d.y],
+		].sort();
 
-		console.log('~', JSON.stringify(code));
+		// console.log('~', JSON.stringify(points));
 
-
-		// draw lines from left to right, then top to bottom
-		if (d.x < 0) {
-			code[0] -= 1;
-			code[2] *= -1;
-		} else if (d.y < 0) {
-			code[1] -= 1;
-			code[3] *= -1;
-		}
-
-		console.log('*', JSON.stringify(code));
-
-		const codeInData = scene.data.some(d => {
-			return JSON.stringify(d) === JSON.stringify(code);
+		const pointsInData = scene.data.some(d => {
+			// console.log('in data', JSON.stringify(d))
+			return JSON.stringify(d) === JSON.stringify(points);
 		});
-		if (codeInData) return;
+		if (pointsInData) return;
 
-		scene.data.push(code);
+		scene.data.push(points);
 
 		drawing.add([bX + corner.x * w, bY + corner.y * h]);
 		drawing.add([

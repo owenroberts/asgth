@@ -1,37 +1,43 @@
 import { Consts } from './Consts.js';
 import { POINTS } from '../lines/src/Lines.js';
 
+// move top left to 0,0
+function normalizeTopLeft(array) {
+	let left = Math.min(...array.flatMap(p => p).map(p => p[0]));
+	let top = Math.min(...array.flatMap(p => p).map(p => p[1]));
+	// console.log({ left, top });
+	for (let i = 0; i < array.length; i++) {
+		array[i][0][0] -= left;
+		array[i][0][1] -= top;
+		array[i][1][0] -= left;
+		array[i][1][1] -= top;
+	}
+	return array;
+}
+
+// sort points by sum and then x
+function sortTopLeft(array) {
+	array = array.sort((p1, p2) => (p1[0] + p1[1]) - (p2[0] + p2[1]));
+	array = array.sort(); // default sorts first element as string (wacky javascript :D)
+	return array;
+}
+
 export function patternMatch(pattern, drawing) {
 
-	// get segments of the drawing, normalize for top-left, drawing bounds
+	// normalize pattern to start at 0,0
+	pattern = normalizeTopLeft(pattern);
+	// console.log('pattern', JSON.stringify(pattern));
+	// sort by sum, then x
+	pattern = sortTopLeft(pattern);
+	console.log('pattern', JSON.stringify(pattern));
 
-	const offset = 32;
+	// get segments of the drawing, normalize for top-left, drawing bounds
 	let points = drawing
 		.filter(p => p !== POINTS.END)
-		.map(p => p.map(c => (c - offset) / 64));
-
-	// move top left to 0,0
-	function normalizeTopLeft(array) {
-		let left = Math.min(...array.map(p => p[0]));
-		let top = Math.min(...array.map(p => p[1]));
-		for (let i = 0; i < array.length; i++) {
-			array[i][0] -= left;
-			array[i][1] -= top;
-		}
-		return array;
-	}
-
-	// sort points by sum and then x
-	function sortTopLeft(array) {
-		array = array.sort((p1, p2) => (p1[0] + p1[1]) - (p2[0] + p2[1]));
-		array = array.sort(); // default sorts first element as string (wacky javascript :D)
-		return array;
-	}
-
-	points = normalizeTopLeft(points);
+		.map(p => p.map(c => (c - Consts.CELL_SIZE.W / 2) / Consts.CELL_SIZE.W));
 
 	// get lines from points pairs
-	const lines = [];
+	let lines = [];
 	for (let i = 0; i < points.length; i += 2) {
 		lines.push(sortTopLeft([points[i], points[i + 1]]));
 	}
@@ -62,26 +68,24 @@ export function patternMatch(pattern, drawing) {
 			}
 		}
 	}
-
-	// convert segments to directions
-	const segments = lines.map(line => 
-		[
-			line[0][0], 
-			line[0][1], 
-			line[1][0] - line[0][0], 
-			line[1][1] - line[0][1],
-		]
-	);
-	console.log({ segments });
 	
-	// is pattern sorted when its made?
-	pattern = normalizeTopLeft(pattern);
-	pattern = sortTopLeft(pattern);
+	// remove duplicates
+	let nodupes = [];
+	for (let i = 0; i < lines.length; i++) {
+		if (nodupes.some(line => JSON.stringify(line) === JSON.stringify(lines[i]))) {
+			continue;
+		}
+		nodupes.push(lines[i]);
+	}
 
+	// console.log('lines ~', JSON.stringify(lines));
+	nodupes = normalizeTopLeft(nodupes);
+	// console.log('lines *', JSON.stringify(lines));
+	nodupes = sortTopLeft(nodupes);
 	
-	console.log('pattern', JSON.stringify(pattern));
-	console.log('segments', JSON.stringify(segments));
-	console.log(JSON.stringify(pattern) === JSON.stringify(segments))
+	console.log('nodupes', JSON.stringify(nodupes));
 
-	return JSON.stringify(pattern) === JSON.stringify(segments);
+	// console.log(JSON.stringify(pattern) === JSON.stringify(lines))
+
+	return JSON.stringify(pattern) === JSON.stringify(nodupes);
 }

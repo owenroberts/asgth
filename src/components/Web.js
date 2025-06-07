@@ -32,6 +32,11 @@ export function Web(sfx) {
 			continuousWeb = !continuousWeb;
 			console.log('Continuous web toggled', continuousWeb);
 		}
+
+		// add to gm and instructions?
+		if (ev.code === 'KeyC') {
+			clear();
+		}
 	});
 
 	/**
@@ -50,6 +55,11 @@ export function Web(sfx) {
 		if (drawing.points.slice(-1) !== POINTS.END) {
 			drawing.add(POINTS.END);
 		}
+	}
+
+	function clear() {
+		drawing.points = [];
+		drawing.offsets = [];
 	}
 
 	// do this with animator?

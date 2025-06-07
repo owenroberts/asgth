@@ -17,6 +17,8 @@ export function rockLevel(gm, player, sfx) {
 	let trees, web, sun, rock;
 	const dir = choice(-1, 1); // rock starts animating
 	let rockRolled = false;
+	let gotMatch = false;
+
 
 	scene.setup = function() {
 		
@@ -76,8 +78,8 @@ export function rockLevel(gm, player, sfx) {
 	};
 
 	function updateScore() {
-		let point = prevMatched === finishString ? 1 : 0;
-		gm.props.lastPointWinner = point === 1 ? 'SPIDER' : 'ROCK'; // save who got this point
+		let point = gotMatch ? 1 : 0;
+		gm.props.lastPointWinner = gotMatch ? 'SPIDER' : 'ROCK';
 		gm.props.points[gm.props.lastPointWinner]++;
 	}
 
@@ -96,6 +98,7 @@ export function rockLevel(gm, player, sfx) {
 		else webUpdate();
 	};
 
+
 	function webUpdate() {
 		const treeLocation = trees.isColliding(player);
 		const connection = web.getConnection(player, treeLocation);
@@ -104,40 +107,14 @@ export function rockLevel(gm, player, sfx) {
 			const points = structuredClone(web.getPoints({ trimmed: connection === Consts.WEB_CONNECTIONS.COMPLETED }));
 
 			const isMatch = patternMatch(gm.props.pattern, points);
-			console.log({isMatch});
-			return;
 			
-			const symbolMatches = symbolMatch.getMatch(points, 64, 32);
-
-			// only adds if the first one didn't get it
-			const symbolMatches2 = symbolMatch2.getMatch(points, 64, 32);
-			
-			let matched = [...symbolMatches];
-			const used = [...symbolMatches];
-			
-			symbolMatches2.forEach(s => {
-				if (!matched.includes(s)) {
-					matched.push(s);
-				} else if (!used.includes(s)) {
-					matched.push(s);
-				} else {
-					used.splice(used.indexOf(s), 1);
-				}
-			});
-
-			matched = matched.filter(s => finishString.includes(s));
-
-			if (matched.length > prevMatched.length) {
+			if (isMatch) {
 				if (connection === Consts.WEB_CONNECTIONS.COMPLETED) {
 					web.cancel();
 				}
 				sfx.play('match', true, 0.9, 1.1);
-			}
-			prevMatched = matched.sort().join('');
-
-			if (prevMatched === finishString) {
-				// spider got it
 				sun.end();
+				gotMatch = true;
 			}
 		}
 
