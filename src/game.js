@@ -185,7 +185,15 @@ gm.start = function() {
 			if (gm.scenes.pattern.canContinue) gm.sq.next();
 		};
 		gm.props.pattern = structuredClone(gm.scenes.pattern.data);
-		console.log(gm.props.pattern);
+		console.log('pattern', JSON.stringify(gm.props.pattern));
+		// let p = gm.props.pattern.sort((p1, p2) => (p1[0] + p1[1]) - (p2[0] + p2[1]));
+		// p = p.sort();
+		// console.log('pattern', JSON.stringify(p));
+		// let left = Math.min(...p.map(p => p[0]));
+		// let top = Math.min(...p.map(p => p[1]));
+		// p = p.map(p => [p[0] - left, p[1] - top, p[2], p[3]]);
+		// console.log('pattern', JSON.stringify(p));
+		
 		gm.scenes.setCurrent('pattern');
 	});
 

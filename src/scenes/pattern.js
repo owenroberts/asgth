@@ -27,7 +27,6 @@ export function pattern(gm) {
 		}
 	});
 
-
 	// no add this to the narration
 	scene.addToDisplay(new TextSprite({
 		msg: Strings.INST_DRAW_PATTERN,
@@ -62,33 +61,29 @@ export function pattern(gm) {
 	const w = Consts.CELL_SIZE.W / 2;
 	const h = Consts.CELL_SIZE.H / 2;
 	const corners = [
-		{ x: w * 1, y: h * 1 }, // up left
-		{ x: w * 2, y: h * 1 }, // up right
-		{ x: w * 2, y: h * 2 }, // down right
-		{ x: w * 1, y: h * 2 }, // down left
+		{ x: 1, y: 1 }, // up left
+		{ x: 1, y: 2 }, // down left
+		{ x: 2, y: 1 }, // up right
+		{ x: 2, y: 2 }, // down right
 	];
 
 	// 1.42 = .71 * 2
 	const s = 1; // size of line
 	const directions = [
-		{ x: w * 0,  y: h * -s }, // up
-		{ x: w * s,  y: h * -s }, // up right
-		{ x: w * s,  y: h * s  }, // right
-		{ x: w * s,  y: h * s  }, // down right
-		{ x: w * 0,  y: h * s  }, // down
-		{ x: w * -s, y: h * s  }, // down left
-		{ x: w * -s, y: h * 0  }, // left
-		{ x: w * -s, y: h * -s }, // up left
+		{ x: 0,  y: -1 }, // up
+		{ x: 1,  y: -1 }, // up right
+		{ x: 1,  y: 0  }, // right
+		{ x: 1,  y: 1  }, // down right
+		{ x: 0,  y: 1  }, // down
+		{ x: -1, y: 1  }, // down left
+		{ x: -1, y: 0  }, // left
+		{ x: -1, y: -1 }, // up left
 	];
 
 	let dirIndexes = Array.from({ length: directions.length }, (_, i) => i);
 	let directionIndex = 0;
 
 	function drawLine(cornerIndex, x, y) {
-
-		// save line to pattern data
-		// (before changing directionIndex);
-		const lineData = structuredClone({ cornerIndex, directionIndex: dirIndexes[directionIndex] }); 
 
 		let bX = x * w * 3 + w * 2;
 		let bY = y * h * 3 + h * 4;
@@ -101,12 +96,47 @@ export function pattern(gm) {
 		if (cornerIndex === 2 && d.x > 0 && d.y < 0) return;
 		if (cornerIndex === 3 && d.x < 0 && d.y < 0) return;
 
-		scene.data.push(lineData);
+		// xy position and direction vector
+		// normalized to top-left
+		// console.log('~', JSON.stringify([
+		// 	x + corner.x ,//+ (d.x < 0 ? -1 : 0),
+		// 	y + corner.y ,//+ (d.y < 0 ? -1 : 0),
+		// 	Math.sign(d.x) ,//* (d.x < 0 ? -1 : 1),
+		// 	Math.sign(d.y) ,//* (d.y < 0 ? -1 : 1),
+		// ]));
+		
+		const code = [
+			x + corner.x, // + (d.x < 0 ? -1 : 0),
+			y + corner.y, // + (d.y < 0 ? -1 : 0),
+			Math.sign(d.x), // * (d.x < 0 ? -1 : 1),
+			Math.sign(d.y), //  * (d.y < 0 ? -1 : 1),
+		];
 
-		drawing.add([bX + corner.x, bY + corner.y]);
+		console.log('~', JSON.stringify(code));
+
+
+		// draw lines from left to right, then top to bottom
+		if (d.x < 0) {
+			code[0] -= 1;
+			code[2] *= -1;
+		} else if (d.y < 0) {
+			code[1] -= 1;
+			code[3] *= -1;
+		}
+
+		console.log('*', JSON.stringify(code));
+
+		const codeInData = scene.data.some(d => {
+			return JSON.stringify(d) === JSON.stringify(code);
+		});
+		if (codeInData) return;
+
+		scene.data.push(code);
+
+		drawing.add([bX + corner.x * w, bY + corner.y * h]);
 		drawing.add([
-			bX + corner.x + d.x,
-			bY + corner.y + d.y,
+			bX + corner.x * w + d.x * w,
+			bY + corner.y * h + d.y * h,
 		]);
 		drawing.add(POINTS.END);
 	}
@@ -115,7 +145,7 @@ export function pattern(gm) {
 		for (let y = 0; y < rows; y++) {
 			directionIndex = 0;
 			dirIndexes = shuffle(dirIndexes);
-			for (let i = 0; i < corners.length; i++) {
+			for (let i = 0; i < 2; i++) {
 				drawLine(i, x, y);
 				drawLine(i, x, y);
 			}			

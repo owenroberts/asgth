@@ -8,23 +8,15 @@ import { Trees } from '../components/Trees.js';
 import { Web } from '../components/Web.js';
 import { Sun } from '../components/Sun.js';
 
-import { SymbolMatch } from '../SymbolMatch.js';
-import { SymbolMatch2 } from '../SymbolMatch2.js';
+import { patternMatch } from '../patternMatch.js';
 
 export function rockLevel(gm, player, sfx) {
 	
 	const scene = new Scene();
 
 	let trees, web, sun, rock;
-
 	const dir = choice(-1, 1); // rock starts animating
-	let rockRolled = false;		
-
-	const finishString = gm.props.nextSymbolString.split('').sort().join('');
-	let symbolsMatched = [];
-	let prevMatched = '';
-	const symbolMatch = SymbolMatch();
-	const symbolMatch2 = SymbolMatch2();
+	let rockRolled = false;
 
 	scene.setup = function() {
 		
@@ -33,7 +25,7 @@ export function rockLevel(gm, player, sfx) {
 		const maxNodes = Math.min(24, gm.props.levelCount + 3 + (gm.props.points.SPIDER - gm.props.points.ROCK));
 		console.log({levelCount: gm.props.levelCount, maxNodes});
 
-		const map = generateBSPMap({ cols: 13, rows: 7, maxNodes, maxNodeSize: 6, createPaths: false });
+		const map = generateBSPMap({ cols: 13, rows: 7, minRoomSize: 4, maxNodes, maxNodeSize: 6, createPaths: false });
 
 		trees = Trees(gm);
 		scene.addSprite(trees.getSprites());
@@ -81,7 +73,7 @@ export function rockLevel(gm, player, sfx) {
 
 		web = Web(sfx);
 		scene.addSprite(web);		
-	}
+	};
 
 	function updateScore() {
 		let point = prevMatched === finishString ? 1 : 0;
@@ -110,6 +102,10 @@ export function rockLevel(gm, player, sfx) {
 		if ((connection === Consts.WEB_CONNECTIONS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTIONS.RELEASED) {
 
 			const points = structuredClone(web.getPoints({ trimmed: connection === Consts.WEB_CONNECTIONS.COMPLETED }));
+
+			const isMatch = patternMatch(gm.props.pattern, points);
+			console.log({isMatch});
+			return;
 			
 			const symbolMatches = symbolMatch.getMatch(points, 64, 32);
 
