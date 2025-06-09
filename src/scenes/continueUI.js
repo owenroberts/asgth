@@ -2,6 +2,8 @@ import { Strings } from '../Strings.js';
 import { Consts } from '../Consts.js';
 import { TextSprite } from '../../lines/src/Engine.js';
 
+// maybe this should be part of gm object so it doesn't have to recreate these things ... 
+
 /**
  * provides x btn and continue text for common usage
  * @param  {Object} gm game manager
@@ -29,5 +31,4 @@ export function continueUI(gm) {
 	});
 
 	return { xBtn, xToContinue };
-
 }

@@ -25,8 +25,8 @@ const Strings = {
 
 	INST_CHOOSE: "press z to review instructions, press x to continue",
 
-	INST_PATTERN: " and draw it in the trees to absolve yourself",
-	INST_DRAW_PATTERN: "memorize this pattern",
+	INST_PATTERN: "and draw it in the trees to absolve yourself",
+	INST_DRAW_PATTERN: "draw this design in the trees",
 
 	X_BTN: "x", // primary and secondary button?
 	Z_BTN: "z",

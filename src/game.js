@@ -16,6 +16,8 @@ import { narration } from './scenes/narration.js';
 import { end } from './scenes/end.js';
 import { pattern } from './scenes/pattern.js';
 
+import { createPatternMaker } from './patternMaker.js';
+import { patternMatch } from './patternMatch.js';
 import { Strings } from './Strings.js';
 import { Consts } from './Consts.js';
 
@@ -109,6 +111,12 @@ function resetGame() {
 
 gm.start = function() {
 
+	// let pattern = [[[0,0],[1,1]],[[1,0],[2,1]],[[1,1],[2,1]],[[1,2],[1,3]],[[1,2],[2,1]],[[2,1],[3,1]],[[2,2],[2,3]],[[2,2],[3,1]],[[2,2],[3,3]]];
+	// let points = [[7,2],[8,3],[8,3],[10,3],[10,3],[9,4],[9,4],[10,5],[9,4],[9,5],[9,3],[8,4],[8,4],[8,5],[9,3],[8,2]];
+	// let drawing = [[480,32],[544,96],0,[544,96],[672,96],0,[672,96],[608,160],0,[608,160],[672,224],0,0,[608,160],[608,224],0,0,[608,96],[544,160],0,[544,160],[544,224],0,0,[608,96],[544,32],0,0];
+
+	// patternMatch(pattern, drawing);
+
 	gm.setBounds('left', 0);
 	gm.setBounds('top', 0);
 	gm.setBounds('right', (Consts.GRID_COLS - 1) * Consts.CELL_SIZE.W);
@@ -139,6 +147,8 @@ gm.start = function() {
 	const loadingSprite = gm.scenes.loading.addSprite(new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web));
 	loadingSprite.center = true;
 	loadingSprite.animation.play();
+
+	const patternMaker = createPatternMaker(); 
 
 	gm.sq.add(() => { 
 		if (!gm.debug) return gm.sq.next();
@@ -179,24 +189,33 @@ gm.start = function() {
 		});
 	}
 
-	gm.sq.add(() => {
-		gm.scenes.pattern = pattern(gm);
-		gm.scenes.pattern.onKeyDown.x = function() {
-			if (gm.scenes.pattern.canContinue) gm.sq.next();
-		};
-		gm.props.pattern = structuredClone(gm.scenes.pattern.data);
-		console.log('pattern', JSON.stringify(gm.props.pattern));
-		gm.scenes.setCurrent('pattern');
-	});
+	function rockCycle() {
+		gm.sq.add(() => {
+			gm.props.pattern = patternMaker.getPattern(gm.props.levelCount);
+			gm.props.patternBounds = patternMaker.getBounds();
+			gm.scenes.pattern = pattern(gm);
+			gm.scenes.pattern.onKeyDown.x = function() {
+				if (gm.scenes.pattern.canContinue) gm.sq.next();
+			};
+			gm.scenes.setCurrent('pattern');
+		});
 
-	gm.sq.add(() => {
-		const levelName = `level-${gm.props.levelCount}`;
-		gm.scenes[levelName] = rockLevel(gm, player, sfx);
-		gm.scenes[levelName].setup();
-		gm.scenes.setCurrent(levelName);
-	});
+		gm.sq.add(() => {
+
+			const levelName = `level-${gm.props.levelCount}`;
+			gm.scenes[levelName] = rockLevel(gm, player, sfx);
+			gm.scenes[levelName].setup();
+			gm.scenes.setCurrent(levelName);
+		});
+
+		gm.sq.add(() => {
+			gm.props.levelCount++;
+			rockCycle();
+		});
+	}
 
 	// walkCycle();
+	rockCycle();
 	gm.sq.next();
 	return;
 

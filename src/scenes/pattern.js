@@ -53,82 +53,23 @@ export function pattern(gm) {
 		nextDelay.update();
 	};
 
-	const cols = 1;
-	const rows = 1;
-
-	scene.data = []; // save pattern for matching
-
 	const w = Consts.CELL_SIZE.W / 2;
 	const h = Consts.CELL_SIZE.H / 2;
-	const corners = [
-		{ x: 1, y: 1 }, // up left
-		{ x: 1, y: 2 }, // down left
-		{ x: 2, y: 1 }, // up right
-		{ x: 2, y: 2 }, // down right
-	];
+	const sX = w * 2; // consts?
+	const sY = h * 4; 
 
-	// 1.42 = .71 * 2
-	const s = 1; // size of line
-	const directions = [
-		{ x: 0,  y: -1 }, // up
-		{ x: 1,  y: -1 }, // up right
-		{ x: 1,  y: 0  }, // right
-		{ x: 1,  y: 1  }, // down right
-		{ x: 0,  y: 1  }, // down
-		{ x: -1, y: 1  }, // down left
-		{ x: -1, y: 0  }, // left
-		{ x: -1, y: -1 }, // up left
-	];
-
-	let dirIndexes = Array.from({ length: directions.length }, (_, i) => i);
-	let directionIndex = 0;
-
-	function drawLine(cornerIndex, x, y) {
-
-		let bX = x * w * 3 + w * 2;
-		let bY = y * h * 3 + h * 4;
-		let corner = corners[cornerIndex];
-		let d = directions[dirIndexes[directionIndex++]];
-
-		// no pointing inside
-		if (cornerIndex === 0 && d.x > 0 && d.y > 0) return;
-		if (cornerIndex === 1 && d.x < 0 && d.y > 0) return;
-		if (cornerIndex === 2 && d.x > 0 && d.y < 0) return;
-		if (cornerIndex === 3 && d.x < 0 && d.y < 0) return;
-
-		// console.log(cornerIndex, x, y, corner.x, corner.y, d.x, d.y);
-		const points = [
-			[x + corner.x, y + corner.y],
-			[x + corner.x + d.x, y + corner.y + d.y],
-		].sort();
-
-		// console.log('~', JSON.stringify(points));
-
-		const pointsInData = scene.data.some(d => {
-			// console.log('in data', JSON.stringify(d))
-			return JSON.stringify(d) === JSON.stringify(points);
-		});
-		if (pointsInData) return;
-
-		scene.data.push(points);
-
-		drawing.add([bX + corner.x * w, bY + corner.y * h]);
+	// pattern[lines[points[xy]]]
+	// [[[x1, y1], [x2, y2]]]
+	for (let i = 0; i < gm.props.pattern.length; i++) {
 		drawing.add([
-			bX + corner.x * w + d.x * w,
-			bY + corner.y * h + d.y * h,
+			sX + gm.props.pattern[i][0][0] * w, 
+			sY + gm.props.pattern[i][0][1] * h,
+		]);
+		drawing.add([
+			sX + gm.props.pattern[i][1][0] * w, 
+			sY + gm.props.pattern[i][1][1] * h,
 		]);
 		drawing.add(POINTS.END);
-	}
-
-	for (let x = 0; x < cols; x++) {
-		for (let y = 0; y < rows; y++) {
-			directionIndex = 0;
-			dirIndexes = shuffle(dirIndexes);
-			for (let i = 0; i < 2; i++) {
-				drawLine(i, x, y);
-				drawLine(i, x, y);
-			}			
-		}
 	}
 
 	return scene;

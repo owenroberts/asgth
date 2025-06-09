@@ -16,31 +16,37 @@ function normalizeTopLeft(array) {
 }
 
 // sort points by sum and then x
-function sortTopLeft(array) {
+function sortPoints(array) {
 	array = array.sort((p1, p2) => (p1[0] + p1[1]) - (p2[0] + p2[1]));
-	array = array.sort(); // default sorts first element as string (wacky javascript :D)
+	array = array.sort((a, b) => a[0] - b[0]);
 	return array;
 }
 
 export function patternMatch(pattern, drawing) {
 
+	// console.log('drawing', JSON.stringify(drawing));
+
 	// normalize pattern to start at 0,0
 	pattern = normalizeTopLeft(pattern);
 	// console.log('pattern', JSON.stringify(pattern));
 	// sort by sum, then x
-	pattern = sortTopLeft(pattern);
-	console.log('pattern', JSON.stringify(pattern));
+	// pattern = sortPattern(pattern);
+	// console.log('pattern', JSON.stringify(pattern));
 
 	// get segments of the drawing, normalize for top-left, drawing bounds
 	let points = drawing
 		.filter(p => p !== POINTS.END)
 		.map(p => p.map(c => (c - Consts.CELL_SIZE.W / 2) / Consts.CELL_SIZE.W));
 
+	// console.log('points', JSON.stringify(points));
+
 	// get lines from points pairs
 	let lines = [];
 	for (let i = 0; i < points.length; i += 2) {
-		lines.push(sortTopLeft([points[i], points[i + 1]]));
+		lines.push(sortPoints([points[i], points[i + 1]]));
 	}
+
+	// console.log("lines", JSON.stringify(lines));
 
 	// break up lines into segments
 	for (let i = 0; i < lines.length; i++) {
@@ -56,7 +62,7 @@ export function patternMatch(pattern, drawing) {
 		if (dx > 1) {
 			lines[i][1][0] = x1 + 1;
 			lines[i][1][1] = y1 + slope; 
-			for (let x = x1 + 1; x < x2; x++) {
+			for (let x = 1; x < dx; x++) {
 				lines.push([[x1 + x, y1 + slope * x], [x1 + x + 1, y1 + slope * (x + 1)]])
 			}	
 		}
@@ -68,6 +74,8 @@ export function patternMatch(pattern, drawing) {
 			}
 		}
 	}
+
+	// console.log('segments', JSON.stringify(lines));
 	
 	// remove duplicates
 	let nodupes = [];
@@ -78,14 +86,21 @@ export function patternMatch(pattern, drawing) {
 		nodupes.push(lines[i]);
 	}
 
-	// console.log('lines ~', JSON.stringify(lines));
+	// console.log('no dupes', JSON.stringify(nodupes));
 	nodupes = normalizeTopLeft(nodupes);
-	// console.log('lines *', JSON.stringify(lines));
-	nodupes = sortTopLeft(nodupes);
-	
-	console.log('nodupes', JSON.stringify(nodupes));
+	// console.log('sortPattern', JSON.stringify(nodupes));
+	// nodupes = sortPattern(nodupes);
+	// console.log('sort', JSON.stringify(nodupes));
 
-	// console.log(JSON.stringify(pattern) === JSON.stringify(lines))
 
-	return JSON.stringify(pattern) === JSON.stringify(nodupes);
+	// console.log('nodupes', nodupes);
+	// console.log('pattern', pattern);
+	// simple check before all the map and sort
+	if (nodupes.length !== pattern.length) return false;
+
+	let drawingString = nodupes.map(l => l.flatMap(l => l).join('')).sort().join('');
+	let patternString = pattern.map(l => l.flatMap(l => l).join('')).sort().join('');
+
+	console.log('match', drawingString === patternString);
+	return drawingString === patternString;
 }

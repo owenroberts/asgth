@@ -19,15 +19,9 @@ export function rockLevel(gm, player, sfx) {
 	let rockRolled = false;
 	let gotMatch = false;
 
-
 	scene.setup = function() {
 		
-		// set max nodes based on level -- fewer nodes means bigger rooms
-		// max 1x1 nodes 13x7 = 91, use 1/3 ish of that
-		const maxNodes = Math.min(24, gm.props.levelCount + 3 + (gm.props.points.SPIDER - gm.props.points.ROCK));
-		console.log({levelCount: gm.props.levelCount, maxNodes});
-
-		const map = generateBSPMap({ cols: 13, rows: 7, minRoomSize: 4, maxNodes, maxNodeSize: 6, createPaths: false });
+		const map = generateBSPMap({ cols: 13, rows: 7, createPaths: false, inject: [{ type: "room", w: gm.props.patternBounds.width, h: gm.props.patternBounds.height }] });
 
 		trees = Trees(gm);
 		scene.addSprite(trees.getSprites());
@@ -44,7 +38,7 @@ export function rockLevel(gm, player, sfx) {
 					trees.addLocation(
 						x * Consts.CELL_SIZE.W, 
 						y * Consts.CELL_SIZE.H, 
-						randomInt(treeClusterIndex, treeClusterIndex + treeClusterSize),
+						randomInt(treeClusterIndex, treeClusterIndex + treeClusterSize, false),
 					);
 				}
 			}
@@ -125,6 +119,9 @@ export function rockLevel(gm, player, sfx) {
 		}
 
 		sun.update();
+
+		// return;
+
 		if (sun.isDone()) {
 			updateScore();
 			gm.sq.next();
