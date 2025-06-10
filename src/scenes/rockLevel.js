@@ -61,7 +61,6 @@ export function rockLevel(gm, player, sfx) {
 
 		sun = Sun(gm);
 		scene.add(sun.getSprite());
-		sun.setup();
 
 		rock = scene.addSprite(new Sprite(gm.width, -gm.anims.sprites.rock.height, gm.anims.sprites.rock));
 		rock.isActive = false;

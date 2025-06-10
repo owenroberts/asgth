@@ -3,7 +3,7 @@ import { Counter, map } from '../../cool/cool.js';
 import { Consts } from '../Consts.js';
 
 /**
- * Animate sun progress, reset
+ * animate sun progress, reset
  * @param {Sprite} sprite - the sun sprite
  * @param {number} height - the height to animate sun
 */
@@ -11,26 +11,16 @@ export function Sun(gm) {
 
 	// make this a scene?? components?
 	// this could extend sprite ... or return a sprite
+	
 
 	const sprite = new Sprite(12.85 * Consts.CELL_SIZE.W, 6 * Consts.CELL_SIZE.H, gm.anims.sprites.sun);
-	const counter = new Counter(Consts.SUN_INTERVAL);
-	const animation = new Counter(Consts.SUN_INTERVAL);
 
-	function reset() {
-		counter.setCount(Consts.SUN_INTERVAL);
-		counter.reset();
-		animation.reset();
-	}
+	const extraTime = gm.props.levelCount * 300 + gm.props.pattern.length * 100;
+	const counter = new Counter(Consts.SUN_INTERVAL + extraTime);
+	const animation = new Counter(Consts.SUN_INTERVAL + extraTime);
 
-	function setup() {
-		counter.setCount(Consts.SUN_INTERVAL);
-		animation.setCount(Consts.SUN_INTERVAL);
-		counter.setDuration(Consts.SUN_INTERVAL);
-		animation.setDuration(Consts.SUN_INTERVAL);
-		counter.reset();
-		animation.reset();
-	}
-
+	// console.log('sun', gm.props.levelCount, gm.props.pattern.length, extraTime, Consts.SUN_INTERVAL + extraTime);
+	
 	function update() {
 		counter.update();
 		animation.update();
@@ -49,7 +39,7 @@ export function Sun(gm) {
 	}
 
 	return { 
-		update, reset, end, setup,
+		update, end,
 		isDone: () => { return counter.isDone(); },
 		getSprite: () => { return sprite; },
 	};

@@ -87,7 +87,9 @@ export function createPatternMaker() {
 				dirIndexes = shuffle(dirIndexes);
 				for (let i = 0; i < cornerCount; i++) {
 					getPoints(i, x + ox, y);
-					getPoints(i, x + ox, y);
+					if (levelCount < 1 || coinFlip()) {
+						getPoints(i, x + ox, y);
+					}
 				}
 				if (coinFlip() && levelCount > 0) ox++;
 			}
@@ -103,7 +105,7 @@ export function createPatternMaker() {
 				// }
 			}
 		}
-		console.log({levelCount, cols, cornerCount, ox });
+		// console.log({levelCount, cols, cornerCount, ox });
 
 		// test patterns
 		
