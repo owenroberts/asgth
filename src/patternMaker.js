@@ -1,5 +1,4 @@
-import { shuffle } from '../cool/cool.js';
-
+import { shuffle, coinFlip } from '../cool/cool.js';
 
 /**
  * pattern creator factory
@@ -68,7 +67,6 @@ export function createPatternMaker() {
 		let cols = 1;
 		let rows = 1;
 		let cornerCount = 2;
-		
 
 		if (levelCount === 0) {
 			// cols = 3;
@@ -80,30 +78,32 @@ export function createPatternMaker() {
 			cols = levelCount - 3;
 		}
 
-		console.log({levelCount, cols, cornerCount });
 		pattern = [];
 
+		let ox = 0; // random offset
 		for (let x = 0; x < cols; x++) {
 			for (let y = 0; y < rows; y++) {
 				directionIndex = 0;
 				dirIndexes = shuffle(dirIndexes);
 				for (let i = 0; i < cornerCount; i++) {
-					getPoints(i, x, y);
-					getPoints(i, x, y);
-				}			
+					getPoints(i, x + ox, y);
+					getPoints(i, x + ox, y);
+				}
+				if (coinFlip() && levelCount > 0) ox++;
 			}
 		}
 
-		// if (levelCount === 0) {
-		// 	for (let i = 0, len = pattern.length; i < len; i++) {
-		// 		for (let j = 1; j <= 2; j++) {
-		// 			const copy = structuredClone(pattern[i]);
-		// 			copy[0][0] += j * 2;
-		// 			copy[1][0] += j * 2;
-		// 			pattern.push(copy);
-		// 		}
-		// 	}
-		// }
+		if (levelCount === 0) {
+			for (let i = 0, len = pattern.length; i < len; i++) {
+				// for (let j = 1; j <= 2; j++) {
+					const copy = structuredClone(pattern[i]);
+					copy[0][0] += 2; // j * 2;
+					copy[1][0] += 2; // j * 2;
+					pattern.push(copy);
+				// }
+			}
+		}
+		console.log({levelCount, cols, cornerCount, ox });
 
 		// test patterns
 		
@@ -118,6 +118,7 @@ export function createPatternMaker() {
 		// 
 		// pattern = [[[0,0],[1,1]],[[1,0],[2,1]],[[1,1],[2,1]],[[1,2],[1,3]],[[1,2],[2,1]],[[2,1],[3,1]],[[2,2],[2,3]],[[2,2],[3,1]],[[2,2],[3,3]]];
 		
+		console.log({pattern})
 		return pattern;
 	}
 

@@ -37,7 +37,7 @@ const gm = new Game({
 	stats: true,
 	suspend: true,
 	events: ["keyboard"],
-	scenes: ["loading"],
+	scenes: ["loading", "walkLevel", "rockLevel"],
 	// testPerformance: true,
 });
 gm.load({ animations: { sprites: spritePaths }, }, false);
@@ -153,13 +153,7 @@ gm.start = function() {
 	gm.sq.add(() => { 
 		if (!gm.debug) return gm.sq.next();
 		gm.scenes.debug = new Scene();
-		gm.scenes.debug.add(new TextSprite({
-			msg: Strings.DEBUG_START,
-			x: Consts.CELL_SIZE.W,
-			y: Consts.CELL_SIZE.H,
-			letters: gm.anims.sprites.letters,
-			letterIndexString: Consts.SYMBOL_INDEX_STRING,
-		}));
+		console.log("%c *** debug hit X to start ***", "background: #000; color: #ff0;");
 		gm.scenes.setCurrent("debug");
 		gm.scenes.debug.onKeyDown['x'] = () => {
 			gm.sq.next();	
@@ -201,11 +195,9 @@ gm.start = function() {
 		});
 
 		gm.sq.add(() => {
-
-			const levelName = `level-${gm.props.levelCount}`;
-			gm.scenes[levelName] = rockLevel(gm, player, sfx);
-			gm.scenes[levelName].setup();
-			gm.scenes.setCurrent(levelName);
+			gm.scenes.rockLevel = rockLevel(gm, player, sfx);
+			gm.scenes.rockLevel.setup();
+			gm.scenes.setCurrent("rockLevel");
 		});
 
 		gm.sq.add(() => {
@@ -358,10 +350,8 @@ gm.start = function() {
 			if (gm.props.levelCount > Consts.NUM_LEVELS) {
 				return gm.sq.next();
 			}
-
-			const walkLevelName = 'walk-' + gm.props.levelCount;
-			gm.scenes[walkLevelName] = walkLevel(gm, player);
-			gm.scenes.setCurrent(walkLevelName);
+			gm.scenes.walkLevel = walkLevel(gm, player);
+			gm.scenes.setCurrent("walkLevel");
 		});
 
 		gm.sq.add(() => {
