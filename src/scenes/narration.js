@@ -120,10 +120,12 @@ export function narration(gm) {
 	scene.setScore = function() {
 		score.isActive = true;
 
-		let scoreX = gm.width - Consts.CELL_SIZE.W * 1.25;
-		let scoreY = Consts.CELL_SIZE.H * 0.25 + (Consts.CELL_SIZE.H * (gm.props.points.SPIDER + gm.props.points.ROCK - 1));
+		let scoreX = gm.width - Consts.CELL_SIZE.W * 1;
+		let scoreY = Consts.CELL_SIZE.H * (gm.props.points.SPIDER + gm.props.points.ROCK - 1);
+
 		let point = gm.props.lastPointWinner === 'SPIDER' ? 1 : 0;
 		score.addLocation(scoreX, scoreY,  point);
+
 	};
 
 	scene.hideScore = function() {

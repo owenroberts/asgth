@@ -111,12 +111,6 @@ function resetGame() {
 
 gm.start = function() {
 
-	// let pattern = [[[0,0],[1,1]],[[1,0],[2,1]],[[1,1],[2,1]],[[1,2],[1,3]],[[1,2],[2,1]],[[2,1],[3,1]],[[2,2],[2,3]],[[2,2],[3,1]],[[2,2],[3,3]]];
-	// let points = [[7,2],[8,3],[8,3],[10,3],[10,3],[9,4],[9,4],[10,5],[9,4],[9,5],[9,3],[8,4],[8,4],[8,5],[9,3],[8,2]];
-	// let drawing = [[480,32],[544,96],0,[544,96],[672,96],0,[672,96],[608,160],0,[608,160],[672,224],0,0,[608,160],[608,224],0,0,[608,96],[544,160],0,[544,160],[544,224],0,0,[608,96],[544,32],0,0];
-
-	// patternMatch(pattern, drawing);
-
 	gm.setBounds('left', 0);
 	gm.setBounds('top', 0);
 	gm.setBounds('right', (Consts.GRID_COLS - 1) * Consts.CELL_SIZE.W);
@@ -206,10 +200,49 @@ gm.start = function() {
 		});
 	}
 
+	function storyCycle() {
+
+		gm.scenes.narration.onKeyUp['x'] = function() {
+			gm.props.levelCount++;
+			gm.props.lastPointWinner = 'SPIDER';
+			gm.props.points[gm.props.lastPointWinner]++;
+			storyCycle();
+			gm.sq.next();
+		};
+
+		gm.scenes.narration.onKeyUp['z'] = function() {
+			gm.props.levelCount++;
+			gm.props.lastPointWinner = 'ROCK';
+			gm.props.points[gm.props.lastPointWinner]++;
+			storyCycle();
+			gm.sq.next();
+		};
+
+		gm.sq.add(() => {
+			console.log('props', gm.props);
+			gm.scenes.narration.add(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
+			gm.scenes.narration.setScore();
+			sfx.play('level_start', true);
+			gm.scenes.setCurrent("narration");
+		});
+
+		gm.sq.add(() => {
+			if (gm.props.levelCount < 7) return gm.sq.next();
+
+			const endLine = gm.props.points.SPIDER > gm.props.points.ROCK ? 'SPIDER' : 'ROCK';
+			gm.scenes.narration.add(Strings.NARRATIVE.END[endLine]);
+			gm.scenes.narration.hideScore();
+			gm.scenes.setCurrent('narration');
+		});
+	}
+
 	// walkCycle();
-	rockCycle();
-	gm.sq.next();
-	return;
+	// rockCycle();
+	// gm.props.lastPointWinner = 'ROCK';
+	// gm.props.points[gm.props.lastPointWinner]++;
+	// storyCycle();
+	// gm.sq.next();
+	// return;
 
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
