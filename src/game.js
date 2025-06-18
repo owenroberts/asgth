@@ -144,6 +144,7 @@ gm.start = function() {
 
 	const patternMaker = createPatternMaker(); 
 
+	// debug start
 	gm.sq.add(() => { 
 		if (!gm.debug) return gm.sq.next();
 		gm.scenes.debug = new Scene();
@@ -154,6 +155,7 @@ gm.start = function() {
 		};
 	});
 
+	// debug loading
 	gm.sq.add(() => {
 		if (!gm.debug) return gm.sq.next();
 		loadingSprite.animation.frame = 0;
@@ -241,9 +243,10 @@ gm.start = function() {
 	// gm.props.lastPointWinner = 'ROCK';
 	// gm.props.points[gm.props.lastPointWinner]++;
 	// storyCycle();
-	// gm.sq.next();
-	// return;
+	
+	// return gm.sq.next();
 
+	// splash
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
 
@@ -259,6 +262,7 @@ gm.start = function() {
 		gm.scenes.setCurrent("splash");
 	});
 
+	// loading
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
 		loadingSprite.animation.frame = 0;
@@ -266,7 +270,7 @@ gm.start = function() {
 		soundSetup(gm.props.useSound);
 	});
 
-	// test instructions thing
+	// choose instructions
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
 		if (!gm.props.hasCompletedInstructions) return gm.sq.next();
@@ -289,6 +293,7 @@ gm.start = function() {
 		gm.scenes.setCurrent("inst_choose");
 	});
 
+	// movement instructions
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
@@ -306,6 +311,7 @@ gm.start = function() {
 		gm.scenes.setCurrent("inst_move");
 	});
 
+	// web instructions
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
@@ -316,6 +322,7 @@ gm.start = function() {
 		gm.scenes.setCurrent("inst_web");
 	});
 
+	// symbol practice setup
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
@@ -326,6 +333,7 @@ gm.start = function() {
 		gm.scenes.setCurrent("narration");
 	});
 
+	// symbol practice
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
@@ -335,6 +343,7 @@ gm.start = function() {
 		gm.scenes.setCurrent("inst_symbol");
 	});
 
+	// premise, edwards quotations
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
@@ -342,35 +351,58 @@ gm.start = function() {
 		gm.scenes.setCurrent("narration");
 	});
 
+	// start game loop
 	gm.sq.add(() => { gameLoop(); });
 
 	function gameLoop() {
 
-		const levelName = `level-${gm.props.levelCount}`;
-		gm.props.nextSymbolString = getNextSymbolString();
-
+		// drawing instructions
 		gm.sq.add(() => {
-			if (gm.debug) return gm.sq.next();
-			gm.scenes.narration.addSymbols(gm.props.nextSymbolString);
-			gm.scenes.narration.add([Strings.INST_DRAW]);
+			// if (gm.debug) return gm.sq.next();
+			gm.scenes.narration.add([Strings.INST_PATTERN]);
 			gm.scenes.setCurrent("narration");
 		});
 
+		// pattern
 		gm.sq.add(() => {
-			gm.scenes[levelName] = rockLevel(gm, player, sfx);
-			gm.scenes[levelName].setup();
-			gm.scenes.setCurrent(levelName);
+			gm.props.pattern = patternMaker.getPattern(gm.props.levelCount);
+			gm.props.patternBounds = patternMaker.getBounds();
+			gm.scenes.pattern = pattern(gm);
+			gm.scenes.pattern.onKeyDown.x = function() {
+				if (gm.scenes.pattern.canContinue) gm.sq.next();
+			};
+			gm.scenes.setCurrent('pattern');
 		});
 
+		// walk level
+		gm.sq.add(() => {
+			if (gm.props.levelCount === 0) return gm.sq.next();
+			if (gm.props.levelCount > Consts.NUM_LEVELS) {
+				return gm.sq.next();
+			}
+			gm.scenes.walkLevel = walkLevel(gm, player);
+			gm.scenes.walkLevel.setup();
+			gm.scenes.setCurrent("walkLevel");
+		});
+
+		// rock level
+		gm.sq.add(() => {
+			gm.scenes.rockLevel = rockLevel(gm, player, sfx);
+			gm.scenes.rockLevel.setup();
+			gm.scenes.setCurrent("rockLevel");
+		});
+
+		// webs or rock rolls based on score
 		gm.sq.add(() => {
 			if (gm.props.lastPointWinner === "SPIDER") {
 				gm.scenes.inter_webs.setup();
 				gm.scenes.setCurrent("inter_webs");
 			} else {
-				gm.scenes[levelName].rock();
+				gm.scenes.rockLevel.rock();
 			}
 		});
 
+		// score narration
 		gm.sq.add(() => {
 			gm.props.levelCount++;
 			gm.scenes.narration.add(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
@@ -379,14 +411,7 @@ gm.start = function() {
 			gm.scenes.setCurrent("narration");
 		});
 
-		gm.sq.add(() => {
-			if (gm.props.levelCount > Consts.NUM_LEVELS) {
-				return gm.sq.next();
-			}
-			gm.scenes.walkLevel = walkLevel(gm, player);
-			gm.scenes.setCurrent("walkLevel");
-		});
-
+		// next loop or end
 		gm.sq.add(() => {
 			sfx.play('level_start', true);
 			gm.scenes.narration.hideScore();
@@ -404,7 +429,7 @@ gm.start = function() {
 		gm.sq.next();
 	}
 
-	gm.sq.next();
+	gm.sq.next(); // start ... clearer way to do this
 };
 
 gm.update = function(timeElapsed) {

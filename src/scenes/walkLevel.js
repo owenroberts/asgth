@@ -24,6 +24,7 @@ export function walkLevel(gm, player) {
 			start[0] * Consts.CELL_SIZE.W + player.halfWidth,
 			start[1] * Consts.CELL_SIZE.H + player.halfHeight,
 		], start[2]);
+		player.setCollider(...Consts.WALK_COLLIDER);
 		scene.addSprite(player);
 
 		moon = scene.addToDisplay(new Sprite(13 * Consts.CELL_SIZE.W, 7 * Consts.CELL_SIZE.H, gm.anims.sprites.moon));
@@ -60,9 +61,7 @@ export function walkLevel(gm, player) {
 			}
 		}
 		
-
-		// is this wackadoodle?
-		const map = new BlobMap(new TileMap(13, 8));
+		const map = new BlobMap(new TileMap(13, 8)); // is this wackadoodle?
 
 		for (let i = 0; i < bounds.length; i++) {
 			const [x, y, w, h] = bounds[i];

@@ -12,7 +12,7 @@ export function Spider(gm) {
 	const sprite = new ColliderSprite(0, 0);
 	sprite.addAnimation(gm.anims.sprites.spider);
 	sprite.center = true;
-	// sprite.debug = true;
+	sprite.debug = true;
 	const prevPosition = [0, 0];
 	sprite.input = { right: false, up: false, left: false, down: false, x: false, z: false, c: false };
 

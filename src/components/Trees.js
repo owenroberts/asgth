@@ -5,18 +5,20 @@ import { Consts } from '../Consts.js';
 
 /**
  * Draw and manage trees for walk and draw levels
- * @param {Object} animation animation for tree texture
+ * @param {Game} gm - game manager {}
  */
 export function Trees(gm) {
 
-	// turn trees into a scene
+	// turn trees into a scene?
 	const texture = new Texture({ animation: gm.anims.sprites.trees });
 	const animator = Animator(texture.animation, {
 		jiggleRange: [1, 1],
 		segmentNum: [2, 3],
 	});
 	// animator.set();
-	const animCounter = Counter(24, () => { animator.set(); });
+	const animCounter = Counter(24, () => { 
+		animator.set(); 
+	});
 	animCounter.setLoop(true);
 	const select = new Sprite(0, 0, gm.anims.sprites.select);
 	select.isActive = false;
@@ -32,11 +34,6 @@ export function Trees(gm) {
 		for (let i = 0; i < texture.locations.length; i++) {
 			let x = texture.locations[i][0];
 			let y = texture.locations[i][1];
-			if (texture.center) {
-				x -= texture.halfWidth;
-				y -= texture.halfHeight;
-			}
-
 			if (player.tap(x + 32, y + 32)) {
 				select.position = [x, y];
 				select.isActive = true;
@@ -67,6 +64,9 @@ export function Trees(gm) {
 		getTexture: () => { return texture; },
 		addLocation: (x, y, frameIndex) => { texture.addLocation(x, y, frameIndex); },
 		clear: () => { texture.clear(); },
-		clearAnimator: () => { animator.clear(); },
+		clearAnimator: () => { 
+			animator.clear();
+			texture.offset = [0, 0];
+		},
 	};
 }

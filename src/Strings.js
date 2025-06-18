@@ -25,7 +25,7 @@ export const Strings = {
 
 	INST_CHOOSE: "press z to review instructions, press x to continue",
 
-	INST_PATTERN: "and draw it in the trees to absolve yourself",
+	INST_PATTERN: "you must connect the trees to absolve yourself of sin",
 	INST_DRAW_PATTERN: "draw this design in the trees",
 
 	X_BTN: "x", // primary and secondary button?

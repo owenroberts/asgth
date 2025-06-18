@@ -55,8 +55,14 @@ export function rockLevel(gm, player, sfx) {
 
 		// get tile type method?
 		const spawnTile = choice(map.tileMap.tiles.filter(t => t.type === BSPTileTypes.WALL));
+
 		const spawnLocation = map.tileMap.getPosition(spawnTile);
-		player.spawn([spawnLocation.x, spawnLocation.y]); // no spawn on edge ?
+		player.spawn([
+			spawnLocation.x * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.5, 
+			spawnLocation.y * Consts.CELL_SIZE.H + Consts.CELL_SIZE.H * 0.5,
+		]); // no spawn on edge ?
+
+		player.setCollider(...Consts.ROCK_COLLIDER);
 		scene.addSprite(player);
 
 		sun = Sun(gm);

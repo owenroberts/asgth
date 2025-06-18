@@ -67,6 +67,7 @@ export function Web(sfx) {
 	// that why coding is cool! i can do whatever
 	function startOverride() {
 		let w = 4, s = 0.1, n = 10;
+		console.log({animation})
 		animation.onDraw = () => {
 			if (w < 32) {
 				w += 0.04;

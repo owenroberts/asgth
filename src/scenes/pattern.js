@@ -32,8 +32,8 @@ export function pattern(gm) {
 		msg: Strings.INST_DRAW_PATTERN,
 		track: Consts.LETTERS_TRACK,
 		lead: Consts.LETTERS_LEAD,
-		x: Consts.CELL_SIZE.W * 0.5,
-		y: Consts.CELL_SIZE.H * 0.5,
+		x: Consts.CELL_SIZE.W * Consts.TEXT_MARGIN.W,
+		y: Consts.CELL_SIZE.H * Consts.TEXT_MARGIN.H,
 		letters: gm.anims.sprites.letters,
 		wrap: 24,
 	}));

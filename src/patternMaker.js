@@ -97,30 +97,13 @@ export function createPatternMaker() {
 
 		if (levelCount === 0) {
 			for (let i = 0, len = pattern.length; i < len; i++) {
-				// for (let j = 1; j <= 2; j++) {
-					const copy = structuredClone(pattern[i]);
-					copy[0][0] += 2; // j * 2;
-					copy[1][0] += 2; // j * 2;
-					pattern.push(copy);
-				// }
+				const copy = structuredClone(pattern[i]);
+				copy[0][0] += 2; // j * 2;
+				copy[1][0] += 2; // j * 2;
+				pattern.push(copy);
 			}
 		}
-		// console.log({levelCount, cols, cornerCount, ox });
-
-		// test patterns
 		
-		// think i figured out
-		// pattern = [[[0,1],[1,0]],[[1,0],[1,1]],[[1,0],[2,0]],[[1,1],[2,2]],[[2,0],[3,0]]];
-		// pattern = [[[0,1],[1,1]],[[1,0],[1,1]],[[1,2],[2,2]],[[1,2],[2,3]]];
-		// [[[0,2],[1,1]],[[0,2],[1,2]],[[1,1],[1,2]],[[1,2],[2,3]],[[2,0],[2,1]],[[2,1],[2,2]],[[2,1],[3,1]],[[2,2],[3,1]],[[3,0],[3,1]]]		
-		// pattern = [[[0,1],[1,1]],[[1,1],[2,0]],[[1,2],[1,3]],[[1,2],[2,1]],[[1,2],[2,2]],[[2,0],[2,1]]];
-
-		// couldnt' recreate mismatch consistently
-		// pattern = [[[0,2],[1,1]],[[1,1],[1,2]],[[1,1],[2,1]],[[1,2],[2,1]],[[1,2],[2,2]],[[1,2],[2,3]],[[2,0],[2,1]],[[2,0],[3,1]],[[2,2],[2,3]],[[2,2],[3,2]],[[3,0],[3,1]]];
-		// 
-		// pattern = [[[0,0],[1,1]],[[1,0],[2,1]],[[1,1],[2,1]],[[1,2],[1,3]],[[1,2],[2,1]],[[2,1],[3,1]],[[2,2],[2,3]],[[2,2],[3,1]],[[2,2],[3,3]]];
-		
-		console.log({pattern})
 		return pattern;
 	}
 

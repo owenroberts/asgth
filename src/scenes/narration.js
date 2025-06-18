@@ -18,8 +18,8 @@ export function narration(gm) {
 	score.isActive = false;
 
 	const text = scene.addSprite(new TextSprite({
-		x: Consts.CELL_SIZE.W / 2,
-		y: Consts.CELL_SIZE.H / 2,
+		x: Consts.CELL_SIZE.W * Consts.TEXT_MARGIN.W,
+		y: Consts.CELL_SIZE.H * Consts.TEXT_MARGIN.H,
 		wrap: 20,
 		letters: gm.anims.sprites.letters,
 		track: Consts.LETTERS_TRACK,
