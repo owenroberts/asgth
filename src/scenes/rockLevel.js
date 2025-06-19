@@ -7,6 +7,7 @@ import { Consts } from '../Consts.js';
 import { Trees } from '../components/Trees.js';
 import { Web } from '../components/Web.js';
 import { Sun } from '../components/Sun.js';
+import { Tracing } from '../components/Tracing.js';
 
 import { patternMatch } from '../patternMatch.js';
 
@@ -14,14 +15,19 @@ export function rockLevel(gm, player, sfx) {
 	
 	const scene = new Scene();
 
-	let trees, web, sun, rock;
+	let trees, web, sun, rock, tracing;
 	const dir = choice(-1, 1); // rock starts animating
 	let rockRolled = false;
 	let gotMatch = false;
+	let showTracing = false;
 
 	scene.setup = function() {
 		
-		const map = generateBSPMap({ cols: 13, rows: 7, createPaths: false, inject: [{ type: "room", w: gm.props.patternBounds.width, h: gm.props.patternBounds.height }] });
+		const map = generateBSPMap({ cols: 13, rows: 7, createPaths: false, inject: [{ type: "room", w: gm.props.patternBounds.width, h: gm.props.patternBounds.height, name: 'drawing' }] });
+
+		const tracingStartTile = map.rooms.filter(r => r.name == "drawing")[0]
+		tracing = Tracing(gm, tracingStartTile);
+		scene.addToDisplay(tracing);
 
 		trees = Trees(gm);
 		scene.addSprite(trees.getSprites());
@@ -55,7 +61,6 @@ export function rockLevel(gm, player, sfx) {
 
 		// get tile type method?
 		const spawnTile = choice(map.tileMap.tiles.filter(t => t.type === BSPTileTypes.WALL));
-
 		const spawnLocation = map.tileMap.getPosition(spawnTile);
 		player.spawn([
 			spawnLocation.x * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.5, 
@@ -97,8 +102,14 @@ export function rockLevel(gm, player, sfx) {
 		else webUpdate();
 	};
 
-
 	function webUpdate() {
+
+		if (player.input.v) {
+			showTracing = !showTracing;
+			tracing.setActive(showTracing);
+			player.resetInput();
+		}
+
 		const treeLocation = trees.isColliding(player);
 		const connection = web.getConnection(player, treeLocation);
 		if ((connection === Consts.WEB_CONNECTIONS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTIONS.RELEASED) {

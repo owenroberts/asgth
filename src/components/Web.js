@@ -32,11 +32,6 @@ export function Web(sfx) {
 			continuousWeb = !continuousWeb;
 			console.log('Continuous web toggled', continuousWeb);
 		}
-
-		// add to gm and instructions?
-		if (ev.code === 'KeyC') {
-			clear();
-		}
 	});
 
 	/**
@@ -114,6 +109,13 @@ export function Web(sfx) {
 	 * @returns {WEB_CONNECTION} type of web connection, NONE, STARTED, CONNECTED, RELEASED, CANCELED
 	 */
 	function getConnection(player, treeLocation) {
+
+		if (player.input.c) {
+			player.input.c = false;
+			// better than player.resetInput('c') ?
+			clear();
+			return Consts.WEB_CONNECTIONS.CLEARED;
+		}
 
 		// cancel web
 		if (player.input.z) {

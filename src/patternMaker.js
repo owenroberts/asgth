@@ -120,5 +120,4 @@ export function createPatternMaker() {
 	}
 
 	return { getPattern, getBounds };
-
 }

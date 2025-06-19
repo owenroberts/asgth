@@ -12,7 +12,6 @@ export function Sun(gm) {
 	// make this a scene?? components?
 	// this could extend sprite ... or return a sprite
 	
-
 	const sprite = new Sprite(12.85 * Consts.CELL_SIZE.W, 6 * Consts.CELL_SIZE.H, gm.anims.sprites.sun);
 
 	const extraTime = gm.props.levelCount * 300 + gm.props.pattern.length * 100;

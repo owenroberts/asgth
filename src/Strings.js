@@ -15,6 +15,7 @@ export const Strings = {
 	INST_WEB_1: "connect your web to a tree",
 	INST_WEB_2: "connect the trees",
 	INST_WEB_3: "release the web",
+	INST_WEB_4: "clear the web",
 
 	INST_SYMBOL_1: "practice drawing the symbol with your web",
 	INST_SYMBOL_2: "try again to recreate the symbol",
@@ -23,6 +24,8 @@ export const Strings = {
 
 	INST_SUN: "finish before the sun sets",
 
+	INST_TRACE: "visualize pattern",
+
 	INST_CHOOSE: "press z to review instructions, press x to continue",
 
 	INST_PATTERN: "you must connect the trees to absolve yourself of sin",
@@ -30,6 +33,7 @@ export const Strings = {
 
 	X_BTN: "x", // primary and secondary button?
 	Z_BTN: "z",
+	C_BTN: "c", // this is stupid naming
 	RESET_BTN: "r",
 	CONTINUE: "continue",
 

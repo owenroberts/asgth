@@ -25,7 +25,7 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
 const gm = new Game({
-	debug: true,
+	debug: false,
 	drawInterval: 3,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
@@ -52,6 +52,7 @@ gm.props = {
 	useSound: false,
 	hasCompletedInstructions: false, // localStorage.getItem('spider-instructions-complete');
 	choseRepeatInstructions: false,
+	pattern: [], // sun extra time fix
 };
 
 let player; // can this be a component ... only if input moves to gm
@@ -102,6 +103,7 @@ function getNextSymbolString(len) {
 function resetGame() {
 	gm.props.levelCount = 0;
 	gm.scenes.setCurrent("splash");
+	gm.props.pattern = [];
 	lastPointWinner = "";
 	if (doodoo) {
 		doodoo.stop();
@@ -120,10 +122,10 @@ gm.start = function() {
 	gm.sq = Sequencer();
 	
 	gm.scenes.splash = splash(gm);
-	gm.scenes.inst_move = instMove(gm, player);
+	gm.scenes.instMove = instMove(gm, player);
 	gm.scenes.inst_choose = instChoose(gm);
-	gm.scenes.inst_web = instWeb(gm, player);
-	gm.scenes.inst_symbol = instSymbol(gm, player);
+	gm.scenes.instWeb = instWeb(gm, player);
+	gm.scenes.instSymbol = instSymbol(gm, player);
 	gm.scenes.inter_webs = interWebs(gm);
 	gm.scenes.end = end(gm);
 
@@ -301,14 +303,14 @@ gm.start = function() {
 		}
 
 		sfx.play("level_start", true);
-		gm.scenes.inst_move.setup();
-		gm.scenes.inst_move.onKeyDown['x'] = function() {
-			if (!gm.scenes.inst_move.check()) return;
+		gm.scenes.instMove.setup();
+		gm.scenes.instMove.onKeyDown.x = function() {
+			if (!gm.scenes.instMove.check()) return;
 			sfx.play("next_button");
 			gm.sq.next();
 		};
 
-		gm.scenes.setCurrent("inst_move");
+		gm.scenes.setCurrent("instMove");
 	});
 
 	// web instructions
@@ -318,8 +320,8 @@ gm.start = function() {
 			return gm.sq.next();
 		}
 		
-		gm.scenes.inst_web.setup(sfx);
-		gm.scenes.setCurrent("inst_web");
+		gm.scenes.instWeb.setup(sfx);
+		gm.scenes.setCurrent("instWeb");
 	});
 
 	// symbol practice setup
@@ -329,7 +331,7 @@ gm.start = function() {
 			return gm.sq.next();
 		}
 		gm.scenes.narration.addSymbols(Consts.PRACTICE_SYMBOL);
-		gm.scenes.narration.add([Strings.INST_WEB_4, Strings.INST_SUN]);
+		gm.scenes.narration.add([Strings.INST_SYMBOL_1, Strings.INST_SUN]);
 		gm.scenes.setCurrent("narration");
 	});
 
@@ -339,8 +341,8 @@ gm.start = function() {
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return gm.sq.next();
 		}
-		gm.scenes.inst_symbol.setup(sfx);
-		gm.scenes.setCurrent("inst_symbol");
+		gm.scenes.instSymbol.setup(sfx);
+		gm.scenes.setCurrent("instSymbol");
 	});
 
 	// premise, edwards quotations
@@ -348,6 +350,7 @@ gm.start = function() {
 		if (gm.debug) return gm.sq.next();
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
 		gm.scenes.narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
+		gm.scenes.narration.cancelSymbols();
 		gm.scenes.setCurrent("narration");
 	});
 
@@ -492,5 +495,8 @@ gm.keyUp = function(key) {
 		case 'm':
 			player.inputKey(key, false);
 		break;
+
+	case 'c':
+		gm
 	}
 };

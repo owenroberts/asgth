@@ -17,7 +17,7 @@ export const Consts = {
 	WEBS_INTERVAL: 180,
 	ROCK_SHAKE_AMOUNT: 2,
 	SUN_FINISH_COUNT: 400,
-	SUN_INTERVAL: 10, // 1280,
+	SUN_INTERVAL: 1280,
 	MOON_INTERVAL: 1280,
 	ROCK_SPEED: 1.8,
 
@@ -39,6 +39,7 @@ export const Consts = {
 		COMPLETED: 2,
 		RELEASED: 3,
 		CANCELED: 4,
+		CLEARED: 5,
 	},
 
 };

@@ -69,7 +69,7 @@ export function instSymbol(gm, player) {
 			Strings.INST_WEB_7,
 		]);
 		narration.addCallback(() => {
-			gme.scenes.setCurrent("inst_symbol");
+			gme.scenes.setCurrent("instSymbol");
 		});
 		gm.scenes.setCurrent("narration");
 	}

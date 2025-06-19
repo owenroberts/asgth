@@ -61,6 +61,7 @@ export function instWeb(gm, player) {
 		firstTree: false,
 		secondTree: false,
 		releasedWeb: false,
+		clearedWeb: false,
 	};
 
 	const delay = new Counter(120, () => {
@@ -87,13 +88,24 @@ export function instWeb(gm, player) {
 			}
 		}
 
-		if (connection >= Consts.WEB_CONNECTIONS.RELEASED) {
+		if (connection === Consts.WEB_CONNECTIONS.RELEASED ||
+			connection === Consts.WEB_CONNECTIONS.CANCELED) {
 			if (connections.firstTree && connections.secondTree) {
 				connections.releasedWeb = true;
+				xBtn.setMsg(Strings.C_BTN);
+				instText.setMsg(Strings.INST_WEB_4);
 			}
 		}
+
+		if (connection === Consts.WEB_CONNECTIONS.CLEARED) {
+			if (connections.firstTree && connections.secondTree && connections.releasedWeb) {
+				connections.clearedWeb = true;
+			}
+		}
+
+
 		
-		if (connections.firstTree && connections.secondTree && connections.releasedWeb) {
+		if (connections.firstTree && connections.secondTree && connections.releasedWeb && connections.clearedWeb) {
 			delay.update();
 		}
 	};
