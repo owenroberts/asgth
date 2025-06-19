@@ -16,7 +16,7 @@ export function Spider(gm) {
 	const prevPosition = [0, 0];
 	sprite.input = { right: false, up: false, left: false, down: false, x: false, z: false, c: false };
 
-	const DIRECTIONS = {
+	const Directions = {
 		UP: 0,
 		UP_RIGHT: 1,
 		RIGHT: 2,
@@ -27,7 +27,7 @@ export function Spider(gm) {
 		UP_LEFT: 7
 	};
 
-	let direction = DIRECTIONS.UP;
+	let direction = Directions.UP;
 	const directionStates = ['up', 'up_right', 'right', 'down_right', 'down', 'down_left', 'left', 'up_left'];
 	const speed = 16;
 	const directionSpeeds = [
@@ -54,7 +54,7 @@ export function Spider(gm) {
 		assert(Number.isFinite(location[1]), "y is not a number");
 		sprite.position[0] = location[0];
 		sprite.position[1] = location[1];
-		if (dir) direction = DIRECTIONS[dir];
+		if (dir) direction = Directions[dir];
 	};
 
 	// better name for this ... 

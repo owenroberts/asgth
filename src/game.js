@@ -8,7 +8,7 @@ import { splash } from './scenes/splash.js';
 import { instMove } from './scenes/instMove.js';
 import { instChoose } from './scenes/instChoose.js';
 import { instWeb } from './scenes/instWeb.js';
-import { instSymbol } from './scenes/instSymbol.js';
+import { instPattern } from './scenes/instPattern.js';
 import { interWebs } from './scenes/interWebs.js';
 import { rockLevel } from './scenes/rockLevel.js';
 import { walkLevel } from './scenes/walkLevel.js';
@@ -125,7 +125,7 @@ gm.start = function() {
 	gm.scenes.instMove = instMove(gm, player);
 	gm.scenes.inst_choose = instChoose(gm);
 	gm.scenes.instWeb = instWeb(gm, player);
-	gm.scenes.instSymbol = instSymbol(gm, player);
+	gm.scenes.instPattern = instPattern(gm, player);
 	gm.scenes.inter_webs = interWebs(gm);
 	gm.scenes.end = end(gm);
 
@@ -297,6 +297,7 @@ gm.start = function() {
 
 	// movement instructions
 	gm.sq.add(() => {
+		return gm.sq.next();
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return gm.sq.next();
@@ -315,6 +316,7 @@ gm.start = function() {
 
 	// web instructions
 	gm.sq.add(() => {
+		return gm.sq.next();
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return gm.sq.next();
@@ -324,25 +326,42 @@ gm.start = function() {
 		gm.scenes.setCurrent("instWeb");
 	});
 
-	// symbol practice setup
+	// pattern practice setup
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return gm.sq.next();
 		}
-		gm.scenes.narration.addSymbols(Consts.PRACTICE_SYMBOL);
-		gm.scenes.narration.add([Strings.INST_SYMBOL_1, Strings.INST_SUN]);
+		// gm.scenes.narration.addSymbols(Consts.PRACTICE_SYMBOL);
+		gm.scenes.narration.add([Strings.INST_PATTERN_PRACTICE, Strings.INST_SUN]);
 		gm.scenes.setCurrent("narration");
 	});
 
-	// symbol practice
+	// show pattern
+	gm.sq.add(() => {
+		// repeating this shit a lot ... maybe some yuck func like return dbg(), return gm.dbg()? return instCheck()
+		if (gm.debug) return gm.sq.next();
+		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
+			return gm.sq.next();
+		}
+
+		gm.props.pattern = Consts.PRACTICE_PATTERN;
+		gm.scenes.pattern = pattern(gm);
+		gm.scenes.pattern.onKeyDown.x = function() {
+			if (gm.scenes.pattern.canContinue) gm.sq.next();
+		};
+		gm.scenes.setCurrent('pattern');
+	});
+
+	// solve pattern
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
 			return gm.sq.next();
 		}
-		gm.scenes.instSymbol.setup(sfx);
-		gm.scenes.setCurrent("instSymbol");
+		gm.scenes.instPattern.setup(sfx);
+		gm.scenes.setCurrent("instPattern");
+
 	});
 
 	// premise, edwards quotations

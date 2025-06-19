@@ -12,7 +12,15 @@ export const Consts = {
 	NUM_LEVELS: 7, // 7
 	SYMBOL_INDEX_STRING: "abcdefghijklmnopqrstuvwxyz",
 	PRACTICE_SYMBOL: 'd',
+
+	PRACTICE_PATTERN: [
+		[[1,1],[2,2]],
+		[[1,3],[2,2]],
+		[[2,2],[3,1]],
+		[[2,2],[3,3]],
+	],
 	
+	PRACTICE_DELAY: 120,
 	PATTERN_DELAY: 50, // 300
 	WEBS_INTERVAL: 180,
 	ROCK_SHAKE_AMOUNT: 2,

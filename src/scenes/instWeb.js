@@ -1,10 +1,11 @@
-import { Counter, randomInt } from '../../cool/cool.js';
-import { Scene, TextSprite } from '../../lines/src/Engine.js';
+import { Counter, randomInt, choice } from '../../cool/cool.js';
+import { Scene, TextSprite, TileMap, BlobMap, Texture } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 import { Strings } from '../Strings.js';
 
 import { Trees } from '../components/Trees.js';
 import { Web } from '../components/Web.js';
+import { Tracing } from '../components/Tracing.js';
 
 /**
  * practice using web to connect two trees
@@ -14,8 +15,8 @@ import { Web } from '../components/Web.js';
 export function instWeb(gm, player) {
 
 	const scene = new Scene();
-	let xBtn, instText;
-	let trees, web, webUpdater;
+	let instBtn, instText;
+	let trees, web, tracing;
 
 	scene.setup = function(sfx) {
 
@@ -35,77 +36,113 @@ export function instWeb(gm, player) {
 			letters: gm.anims.sprites.letters,
 		}));
 
-		xBtn = scene.addToDisplay(new TextSprite({
+		instBtn = scene.addToDisplay(new TextSprite({
 			msg: Strings.X_BTN,
 			x: Consts.CELL_SIZE.W * 0.5,
 			y: Consts.CELL_SIZE.H * 0.5,
 			letters: gm.anims.sprites.letters_keyboard,
 		}));
 
-		trees.addLocation(
-			randomInt(2 * Consts.CELL_SIZE.W, 4 * Consts.CELL_SIZE.W), 
-			randomInt(3 * Consts.CELL_SIZE.W, 6 * Consts.CELL_SIZE.W), 
-			randomInt(25)
-		);
 
-		trees.addLocation(
-			randomInt(7 * 64, 12 * 64), 
-			randomInt(3 * 64, 6 * 64), 
-			randomInt(25)
-		);
+		const start = { x: 1, y: 3 };
+		const ground = scene.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }, true));
+
+		const tileMap = new TileMap(12, 3);
+		const treeLocations = [[randomInt(0, 5), randomInt(0, 2)], [randomInt(6, 11), randomInt(0, 2)]];
+
+
+		for (let i = 0; i < treeLocations.length; i++) {
+			let [x, y] = treeLocations[i];
+			trees.addLocation(
+				(start.x + x) * Consts.CELL_SIZE.W,
+				(start.y + y) * Consts.CELL_SIZE.H,
+				randomInt(25),
+			);
+
+			tileMap.setTileProperty(x, y, 'type', 1); // default type is 0
+		}
+
+		const blobMap = new BlobMap(tileMap);
+		for (let i = 0; i < tileMap.tiles.length; i++) {
+			if (tileMap.tiles[i].type === 1) continue;
+			const { x, y } = tileMap.getIndexPosition(i);
+			// console.log(x, y);
+			const blobIndex = blobMap.getBlobIndex(x, y, 0);
+			ground.addLocation(
+				(start.x + x) * Consts.CELL_SIZE.W, 
+				(start.y + y) * Consts.CELL_SIZE.H,
+				blobIndex,
+			);
+		}
+
+		tracing = Tracing([treeLocations], { x: 1, y: 3 }, true);
+		scene.addToDisplay(tracing);
+
+		player.spawn([
+			start.x * Consts.CELL_SIZE.W,
+			(start.y + 1) * Consts.CELL_SIZE.H,
+		], 'RIGHT');
 	};
 
 	// after connecting trees and releasing web, go to practice symbol
 	// conditions? some kind of condition manager?
-	const connections = {
+	const conditions = {
 		firstTree: false,
 		secondTree: false,
 		releasedWeb: false,
 		clearedWeb: false,
+		visualizedWeb: false,
 	};
 
-	const delay = new Counter(120, () => {
+	const delay = new Counter(Consts.PRACTICE_DELAY, () => {
 		gm.sq.next();
 	});
 
 	scene.onUpdate = function() {
-		// const connection = webUpdater.update(player, web, trees);
+
+		if (player.input.v) {
+			player.input.v = false;
+			tracing.toggle();
+			conditions.visualizedWeb = true;
+		}
+
 		const treeLocation = trees.isColliding(player);
 		const connection = web.getConnection(player, treeLocation);
 
 		if (connection === Consts.WEB_CONNECTIONS.STARTED) {
-			if (!connections.firstTree && !connections.secondTree && !connections.releasedWeb) {
-				connections.firstTree = true;
+			if (!conditions.firstTree && !conditions.secondTree && !conditions.releasedWeb) {
+				conditions.firstTree = true;
 				instText.setMsg(Strings.INST_WEB_2);
 			}
 		}
 
 		if (connection === Consts.WEB_CONNECTIONS.COMPLETED) {
-			if (connections.firstTree && !connections.releasedWeb) {
-				connections.secondTree = true;
-				xBtn.setMsg(Strings.Z_BTN);
+			if (conditions.firstTree && !conditions.releasedWeb) {
+				conditions.secondTree = true;
+				instBtn.setMsg(Strings.Z_BTN);
 				instText.setMsg(Strings.INST_WEB_3);
 			}
 		}
 
 		if (connection === Consts.WEB_CONNECTIONS.RELEASED ||
 			connection === Consts.WEB_CONNECTIONS.CANCELED) {
-			if (connections.firstTree && connections.secondTree) {
-				connections.releasedWeb = true;
-				xBtn.setMsg(Strings.C_BTN);
+			if (conditions.firstTree && conditions.secondTree) {
+				conditions.releasedWeb = true;
+				instBtn.setMsg(Strings.C_BTN);
 				instText.setMsg(Strings.INST_WEB_4);
 			}
 		}
 
 		if (connection === Consts.WEB_CONNECTIONS.CLEARED) {
-			if (connections.firstTree && connections.secondTree && connections.releasedWeb) {
-				connections.clearedWeb = true;
+			if (conditions.firstTree && conditions.secondTree && conditions.releasedWeb) {
+				conditions.clearedWeb = true;
+				instBtn.setMsg(Strings.V_BTN);
+				instText.setMsg(Strings.INST_WEB_5);
 			}
 		}
 
-
 		
-		if (connections.firstTree && connections.secondTree && connections.releasedWeb && connections.clearedWeb) {
+		if (conditions.firstTree && conditions.secondTree && conditions.releasedWeb && conditions.clearedWeb && conditions.visualizedWeb) {
 			delay.update();
 		}
 	};

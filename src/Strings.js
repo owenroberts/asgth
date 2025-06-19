@@ -16,24 +16,26 @@ export const Strings = {
 	INST_WEB_2: "connect the trees",
 	INST_WEB_3: "release the web",
 	INST_WEB_4: "clear the web",
+	INST_WEB_5: "toggle web visualization",
 
 	INST_SYMBOL_1: "practice drawing the symbol with your web",
 	INST_SYMBOL_2: "try again to recreate the symbol",
 	INST_SYMBOL_3: "create lines by connecting trees",
 	INST_SYMBOL_4: "you can connect more than one line to a tree",
 
+	INST_PATTERN_PRACTICE: "practice drawing in the trees with your web",
+	INST_PATTERN_RESET: "try creating the drawing again",
 	INST_SUN: "finish before the sun sets",
-
-	INST_TRACE: "visualize pattern",
 
 	INST_CHOOSE: "press z to review instructions, press x to continue",
 
-	INST_PATTERN: "you must connect the trees to absolve yourself of sin",
-	INST_DRAW_PATTERN: "draw this design in the trees",
+	INST_PATTERN: "draw in the trees to absolve yourself of sin",
+	INST_DRAW_PATTERN: "draw in the trees",
 
 	X_BTN: "x", // primary and secondary button?
 	Z_BTN: "z",
 	C_BTN: "c", // this is stupid naming
+	V_BTN: "v",
 	RESET_BTN: "r",
 	CONTINUE: "continue",
 

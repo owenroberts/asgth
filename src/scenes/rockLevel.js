@@ -1,7 +1,6 @@
 import { randomInt, choice, random } from '../../cool/cool.js';
 
 import { Scene, Sprite, Texture, TileMap, generateBSPMap, BSPTileTypes, BlobMap } from '../../lines/src/Engine.js';
-import { BSPMap } from "../../hellmaps/src/Map.js";
 import { Consts } from '../Consts.js';
 
 import { Trees } from '../components/Trees.js';
@@ -26,7 +25,7 @@ export function rockLevel(gm, player, sfx) {
 		const map = generateBSPMap({ cols: 13, rows: 7, createPaths: false, inject: [{ type: "room", w: gm.props.patternBounds.width, h: gm.props.patternBounds.height, name: 'drawing' }] });
 
 		const tracingStartTile = map.rooms.filter(r => r.name == "drawing")[0]
-		tracing = Tracing(gm, tracingStartTile);
+		tracing = Tracing(gm.props.pattern, tracingStartTile);
 		scene.addToDisplay(tracing);
 
 		trees = Trees(gm);
@@ -105,9 +104,8 @@ export function rockLevel(gm, player, sfx) {
 	function webUpdate() {
 
 		if (player.input.v) {
-			showTracing = !showTracing;
-			tracing.setActive(showTracing);
-			player.resetInput();
+			player.input.v = false;
+			tracing.toggle();
 		}
 
 		const treeLocation = trees.isColliding(player);
@@ -135,8 +133,6 @@ export function rockLevel(gm, player, sfx) {
 		}
 
 		sun.update();
-
-		// return;
 
 		if (sun.isDone()) {
 			updateScore();

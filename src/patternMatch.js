@@ -101,6 +101,6 @@ export function patternMatch(pattern, drawing) {
 	let drawingString = nodupes.map(l => l.flatMap(l => l).join('')).sort().join('');
 	let patternString = pattern.map(l => l.flatMap(l => l).join('')).sort().join('');
 
-	console.log('match', drawingString === patternString);
+	// console.log('match', drawingString === patternString);
 	return drawingString === patternString;
 }

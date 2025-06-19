@@ -1,0 +1,129 @@
+import { Counter, randomInt, choice } from '../../cool/cool.js';
+import { Scene, TextSprite, TileMap, BlobMap, Texture } from '../../lines/src/Engine.js';
+
+import { Consts } from '../Consts.js';
+import { Strings } from '../Strings.js';
+import { patternMatch } from '../patternMatch.js';
+
+import { Trees } from '../components/Trees.js';
+import { Web } from '../components/Web.js';
+import { Sun } from '../components/Sun.js';
+import { Tracing } from '../components/Tracing.js';
+
+
+
+export function instPattern(gm, player) {
+
+	const scene = new Scene();
+	let trees, web, tracing, sun;
+	let sfx;
+	let checkUnfinished = true;
+	let gotMatch = false;
+
+	scene.setup = function(_sfx) {
+		sfx = _sfx;
+
+		trees = Trees(gm);
+		web = Web(sfx);
+		sun = Sun(gm);
+		scene.add(sun.getSprite());
+
+		scene.addSprite([player, web, trees.getSprites()]);
+		
+
+		// not DRY ... idk
+		const start = { x: 4, y: 1 };
+		const ground = scene.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }, true));
+
+		const tileMap = new TileMap(5, 5);
+		const treeLocations = [[1,1], [1,2], [1,3], [2,1], [2,2], [2,3], [3,1], [3,2], [3,3]];
+
+
+		for (let i = 0; i < treeLocations.length; i++) {
+			let [x, y] = treeLocations[i];
+			trees.addLocation(
+				(start.x + x) * Consts.CELL_SIZE.W,
+				(start.y + y) * Consts.CELL_SIZE.H,
+				randomInt(25),
+			);
+
+			tileMap.setTileProperty(x, y, 'type', 1); // default type is 0
+		}
+
+		const blobMap = new BlobMap(tileMap);
+		for (let i = 0; i < tileMap.tiles.length; i++) {
+			if (tileMap.tiles[i].type === 1) continue;
+			const { x, y } = tileMap.getIndexPosition(i);
+			// console.log(x, y);
+			const blobIndex = blobMap.getBlobIndex(x, y, 0);
+			ground.addLocation(
+				(start.x + x) * Consts.CELL_SIZE.W, 
+				(start.y + y) * Consts.CELL_SIZE.H,
+				blobIndex,
+			);
+		}
+
+		tracing = Tracing(gm.props.pattern, start, true);
+		scene.addToDisplay(tracing);
+
+		player.spawn([
+			start.x * Consts.CELL_SIZE.W,
+			(start.y + 1) * Consts.CELL_SIZE.H,
+		], 'RIGHT');
+	};
+
+	function moreInstructions() {
+		web.clear();
+		gm.scenes.narration.add([Strings.INST_PATTERN_RESET]);
+		gm.scenes.narration.addCallback(() => {
+			gm.scenes.setCurrent("instPattern");
+		});
+		gm.scenes.setCurrent("narration");
+	}
+
+	scene.onUpdate = function() {
+
+		// not dry ...
+		if (player.input.v) {
+			player.input.v = false;
+			tracing.toggle();
+		}
+
+		const treeLocation = trees.isColliding(player);
+		const connection = web.getConnection(player, treeLocation);
+		if ((connection === Consts.WEB_CONNECTIONS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTIONS.RELEASED) {
+
+			const points = structuredClone(web.getPoints({ trimmed: connection === Consts.WEB_CONNECTIONS.COMPLETED }));
+
+			const isMatch = patternMatch(gm.props.pattern, points);
+			
+			if (isMatch) {
+				if (connection === Consts.WEB_CONNECTIONS.COMPLETED) {
+					web.cancel();
+				}
+				sfx.play('match', true, 0.9, 1.1);
+				gotMatch = true;
+				sun.end();
+			}
+		}
+
+		if (web.isActive() && player.isMoving()) {
+			sfx.play('web');
+		} else {
+			sfx.pause('web');
+		}
+
+		sun.update();
+		if (sun.isDone()) {
+			if (gotMatch) {
+				gm.sq.next();
+			} else {
+				moreInstructions();
+			}
+		}
+
+	};
+
+	return scene;
+
+}
