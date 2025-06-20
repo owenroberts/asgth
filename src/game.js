@@ -25,7 +25,7 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
 const gm = new Game({
-	debug: false,
+	debug: true,
 	drawInterval: 3,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
@@ -175,6 +175,7 @@ gm.start = function() {
 			gm.props.levelCount++;
 		});
 		gm.sq.add(() => {
+			console.log('next');
 			if (gm.props.levelCount < 13) {
 				walkCycle();	
 			}

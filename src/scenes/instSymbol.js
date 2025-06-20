@@ -42,7 +42,6 @@ export function instSymbol(gm, player) {
 		scene.addSprite(trees.getSprites());
 		web = Web(sfx);
 		scene.addSprite(web);
-		// webUpdater = WebUpdater(_sfx);
 		sun = Sun(gm);
 		scene.add(sun.getSprite());
 
