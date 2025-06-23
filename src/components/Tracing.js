@@ -48,12 +48,16 @@ export function Tracing(pattern, startTile, ignoreOffset=false) {
 		drawing.add(POINTS.END);
 	}
 
-	function toggle(sfx) {
-		isActive = !isActive;
-		if (isActive) sfx.play("vis_on");
-		else sfx.play("vis_off");
+	function activate(sfx) {
+		isActive = true;
+		sfx.play("vis_on");
+		
+		setTimeout(() => {
+			isActive = false;
+			sfx.play("vis_off");
+		}, Consts.TRACING_TIMEOUT);
 	}
 
-	return { name: "Tracing", display, toggle, };
+	return { name: "Tracing", display, activate, };
 
 }
