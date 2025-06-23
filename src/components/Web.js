@@ -55,6 +55,7 @@ export function Web(sfx) {
 	function clear() {
 		drawing.points = [];
 		drawing.offsets = [];
+		isActive = false;
 	}
 
 	// do this with animator?
@@ -62,7 +63,6 @@ export function Web(sfx) {
 	// that why coding is cool! i can do whatever
 	function startOverride() {
 		let w = 4, s = 0.1, n = 10;
-		console.log({animation})
 		animation.onDraw = () => {
 			if (w < 32) {
 				w += 0.04;
@@ -113,6 +113,10 @@ export function Web(sfx) {
 		if (player.input.c) {
 			player.input.c = false;
 			// better than player.resetInput('c') ?
+			if (drawing.length > 0) {
+				sfx.play("web_clear");
+				sfx.play("web_clear_web");
+			}
 			clear();
 			return Consts.WEB_CONNECTIONS.CLEARED;
 		}
@@ -128,7 +132,8 @@ export function Web(sfx) {
 				return Consts.WEB_CONNECTIONS.RELEASED;
 			}
 			if (isActive) {
-				cancel();				
+				cancel();		
+				// sfx?		
 				return Consts.WEB_CONNECTIONS.CANCELED;
 			}
 		}
@@ -140,8 +145,8 @@ export function Web(sfx) {
 
 					isActive = true;
 					drawing.add([
-						treeLocation[0] + Consts.CELL_SIZE.W / 2, 
-						treeLocation[1] + Consts.CELL_SIZE.H / 2
+						treeLocation[0] + Consts.CELL_SIZE.W2, 
+						treeLocation[1] + Consts.CELL_SIZE.H2,
 					]);
 					
 					// living reference, tracks player
@@ -155,8 +160,8 @@ export function Web(sfx) {
 				} else if (prevTreeLocation[0] !== treeLocation[0] || prevTreeLocation[1] !== treeLocation[1]) {
 
 					drawing.insert([
-						treeLocation[0] + Consts.CELL_SIZE.W / 2,
-						treeLocation[1] + Consts.CELL_SIZE.H / 2
+						treeLocation[0] + Consts.CELL_SIZE.W2,
+						treeLocation[1] + Consts.CELL_SIZE.H2,
 					]);
 					
 					sfx.play('connect');
@@ -166,8 +171,8 @@ export function Web(sfx) {
 					} else {
 						drawing.insert(POINTS.END);
 						drawing.insert([
-							treeLocation[0] + Consts.CELL_SIZE.W / 2,
-							treeLocation[1] + Consts.CELL_SIZE.H / 2
+							treeLocation[0] + Consts.CELL_SIZE.W2,
+							treeLocation[1] + Consts.CELL_SIZE.H2,
 						]);
 						prevTreeLocation = treeLocation;
 						treeList.push([...treeLocation]);

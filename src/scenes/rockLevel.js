@@ -22,7 +22,7 @@ export function rockLevel(gm, player, sfx) {
 
 	scene.setup = function() {
 		
-		const map = generateBSPMap({ cols: 13, rows: 7, createPaths: false, inject: [{ type: "room", w: gm.props.patternBounds.width, h: gm.props.patternBounds.height, name: 'drawing' }] });
+		const map = generateBSPMap({ cols: 13, rows: 7, minNodeSize: 2, maxNodeSize: 6, createPaths: false, inject: [{ type: "room", w: gm.props.patternBounds.width, h: gm.props.patternBounds.height, name: 'drawing' }] });
 
 		const tracingStartTile = map.rooms.filter(r => r.name == "drawing")[0]
 		tracing = Tracing(gm.props.pattern, tracingStartTile);
@@ -105,7 +105,7 @@ export function rockLevel(gm, player, sfx) {
 
 		if (player.input.v) {
 			player.input.v = false;
-			tracing.toggle();
+			tracing.toggle(sfx);
 		}
 
 		const treeLocation = trees.isColliding(player);

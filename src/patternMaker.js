@@ -95,11 +95,15 @@ export function createPatternMaker() {
 			}
 		}
 
-		if (levelCount === 0) {
+		// duplicate pattern on first level or simple pattern
+		// console.log({levelCount, pattern})
+
+		if (levelCount === 0 || pattern.length <= 3) {
+			const bounds = getBounds();
 			for (let i = 0, len = pattern.length; i < len; i++) {
 				const copy = structuredClone(pattern[i]);
-				copy[0][0] += 2; // j * 2;
-				copy[1][0] += 2; // j * 2;
+				copy[0][0] += bounds.width;
+				copy[1][0] += bounds.width;
 				pattern.push(copy);
 			}
 		}

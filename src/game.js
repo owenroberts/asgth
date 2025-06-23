@@ -84,6 +84,13 @@ function soundSetup(withSound) {
 				{ key: 'rock',  sequence: [1, 9] },
 				{ key: 'match', sequence: [1, 7] },
 				{ key: 'level_start', sequence: [1, 3] },
+				{ key: 'web_clear', sequence: [1, 3] },
+				{ key: 'web_clear_web', url: "web_clear_web_fade.wav" },
+				{ key : 'vis_on', url: "vis_on.wav" },
+				{ key : 'vis_off', url: "vis_off.wav" },
+				{ key: 'inter', sequence: [1, 4] },
+
+
 			]
 		}, soundFiles => {
 			gm.scenes.narration.addSFX(sfx);
@@ -126,7 +133,7 @@ gm.start = function() {
 	gm.scenes.inst_choose = instChoose(gm);
 	gm.scenes.instWeb = instWeb(gm, player);
 	gm.scenes.instPattern = instPattern(gm, player);
-	gm.scenes.inter_webs = interWebs(gm);
+	gm.scenes.interWebs = interWebs(gm);
 	gm.scenes.end = end(gm);
 
 	gm.scenes.narration = narration(gm);
@@ -184,6 +191,7 @@ gm.start = function() {
 
 	function rockCycle() {
 		gm.sq.add(() => {
+			gm.props.levelCount = 1;
 			gm.props.pattern = patternMaker.getPattern(gm.props.levelCount);
 			gm.props.patternBounds = patternMaker.getBounds();
 			gm.scenes.pattern = pattern(gm);
@@ -242,12 +250,12 @@ gm.start = function() {
 	}
 
 	// walkCycle();
-	// rockCycle();
+	rockCycle();
 	// gm.props.lastPointWinner = 'ROCK';
 	// gm.props.points[gm.props.lastPointWinner]++;
 	// storyCycle();
 	
-	// return gm.sq.next();
+	return gm.sq.next();
 
 	// splash
 	gm.sq.add(() => {
@@ -418,8 +426,9 @@ gm.start = function() {
 		// webs or rock rolls based on score
 		gm.sq.add(() => {
 			if (gm.props.lastPointWinner === "SPIDER") {
-				gm.scenes.inter_webs.setup();
-				gm.scenes.setCurrent("inter_webs");
+				sfx.play("inter");
+				gm.scenes.interWebs.setup();
+				gm.scenes.setCurrent("interWebs");
 			} else {
 				gm.scenes.rockLevel.rock();
 			}

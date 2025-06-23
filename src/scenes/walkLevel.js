@@ -128,7 +128,7 @@ export function walkLevel(gm, player) {
 		let isOnDoor = false;
 
 		for (let i = 0; i < doorColliders.length; i++) {
-			doorColliders[i].drawDebug();
+			// doorColliders[i].drawDebug();
 			if (player.collide(doorColliders[i])) {
 				// isOnDoor = true;
 				player.spawn([
@@ -148,7 +148,7 @@ export function walkLevel(gm, player) {
 			if (player.collide(colliders[i])) player.back();
 		}
 		
-		exit.drawDebug("#ffbb00");
+		// exit.drawDebug("#ffbb00");
 		if (player.collide(exit)) {
 			gm.sq.next();
 		}
