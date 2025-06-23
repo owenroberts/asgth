@@ -49,6 +49,7 @@ export function Tracing(pattern, startTile, ignoreOffset=false) {
 	}
 
 	function activate(sfx) {
+		if (!isActive) return;
 		isActive = true;
 		sfx.play("vis_on");
 		

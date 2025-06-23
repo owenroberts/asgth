@@ -25,7 +25,7 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
 const gm = new Game({
-	debug: true,
+	debug: false,
 	drawInterval: 3,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
@@ -50,8 +50,9 @@ gm.props = {
 	lastPointWinner: '',
 	nextSymbolString: "", // maybe don't need this if not setting up rock thing
 	useSound: false,
-	hasCompletedInstructions: false, // localStorage.getItem('spider-instructions-complete');
-	choseRepeatInstructions: false,
+	completedInst: false, // localStorage.getItem('spider-instructions-complete');
+	repeatInst: false,
+	skipInst: false,
 	pattern: [], // sun extra time fix
 };
 
@@ -60,7 +61,7 @@ let doodoo, sfx; // add sfx to gm
 
 /* debug */
 document.addEventListener('keydown', ev => {
-	if (ev.code === 'KeyN' && gm.debug) gm.sq.next();
+	if (ev.code === 'KeyN' && gm.debug && import.meta.env.DEV) gm.sq.next();
 });
 
 function soundSetup(withSound) {
@@ -90,7 +91,6 @@ function soundSetup(withSound) {
 				{ key : 'vis_off', url: "vis_off.wav" },
 				{ key: 'inter', sequence: [1, 4] },
 
-
 			]
 		}, soundFiles => {
 			gm.scenes.narration.addSFX(sfx);
@@ -109,13 +109,15 @@ function getNextSymbolString(len) {
 
 function resetGame() {
 	gm.props.levelCount = 0;
-	gm.scenes.setCurrent("splash");
 	gm.props.pattern = [];
-	lastPointWinner = "";
+	gm.props.lastPointWinner = "";
+	gm.props.repeatInst = false;
+	gm.props.skipInst = false;
 	if (doodoo) {
 		doodoo.stop();
 		doodoo.play();
 	}
+	gm.scenes.setCurrent("splash");
 }
 
 gm.start = function() {
@@ -130,7 +132,7 @@ gm.start = function() {
 	
 	gm.scenes.splash = splash(gm);
 	gm.scenes.instMove = instMove(gm, player);
-	gm.scenes.inst_choose = instChoose(gm);
+	gm.scenes.instChoose = instChoose(gm);
 	gm.scenes.instWeb = instWeb(gm, player);
 	gm.scenes.instPattern = instPattern(gm, player);
 	gm.scenes.interWebs = interWebs(gm);
@@ -158,15 +160,16 @@ gm.start = function() {
 		if (!gm.debug) return gm.sq.next();
 		gm.scenes.debug = new Scene();
 		console.log("%c *** debug hit X to start ***", "background: #000; color: #ff0;");
-		gm.scenes.setCurrent("debug");
-		gm.scenes.debug.onKeyDown['x'] = () => {
+		gm.scenes.debug.onKeyDown.x = function() {
 			gm.sq.next();	
 		};
+		gm.scenes.setCurrent("debug");
 	});
 
 	// debug loading
 	gm.sq.add(() => {
 		if (!gm.debug) return gm.sq.next();
+
 		loadingSprite.animation.frame = 0;
 		gm.scenes.setCurrent("loading");
 		soundSetup(true);
@@ -177,11 +180,11 @@ gm.start = function() {
 		if (gm.debug) return gm.sq.next();
 
 		gm.scenes.splash.setup();
-		gm.scenes.splash.onKeyDown['x'] = function() {
-			gm.useSound = true;
+		gm.scenes.splash.onKeyDown.x = function() {
+			gm.props.useSound = true;
 			gm.sq.next();
 		};
-		gm.scenes.splash.onKeyUp['z']= function() {
+		gm.scenes.splash.onKeyUp.z = function() {
 			gm.props.useSound = false;
 			gm.sq.next();
 		};
@@ -191,6 +194,7 @@ gm.start = function() {
 	// loading
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
+
 		loadingSprite.animation.frame = 0;
 		gm.scenes.setCurrent("loading");
 		soundSetup(gm.props.useSound);
@@ -199,33 +203,31 @@ gm.start = function() {
 	// choose instructions
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
-		if (!gm.props.hasCompletedInstructions) return gm.sq.next();
+		if (!gm.props.completedInst) return gm.sq.next();
 
-		gm.scenes.inst_choose.setup();
+		gm.scenes.instChoose.setup();
 
 		// skip instructions
-		gm.scenes.inst_choose.onKeyDown['x'] = () => {
+		gm.scenes.instChoose.onKeyDown.x = function() {
+			gm.props.skipInst = true;
 			gm.sq.next();
 			player.resetInput();
 		};
 
 		// repeat instructions
-		gm.scenes.inst_choose.onKeyDown['z'] = () => {
-			gm.props.choseRepeatInstructions = true;
+		gm.scenes.instChoose.onKeyDown.z = function() {
+			gm.props.repeatInst = true;
 			gm.sq.next();
-			player.resetInput(); // need this?
+			player.resetInput();
 		};
 
-		gm.scenes.setCurrent("inst_choose");
+		gm.scenes.setCurrent("instChoose");
 	});
 
 	// movement instructions
 	gm.sq.add(() => {
-		return gm.sq.next();
 		if (gm.debug) return gm.sq.next();
-		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return gm.sq.next();
-		}
+		if (gm.props.skipInst) return gm.sq.next();
 
 		sfx.play("level_start", true);
 		gm.scenes.instMove.setup();
@@ -234,17 +236,13 @@ gm.start = function() {
 			sfx.play("next_button");
 			gm.sq.next();
 		};
-
 		gm.scenes.setCurrent("instMove");
 	});
 
 	// web instructions
 	gm.sq.add(() => {
-		return gm.sq.next();
 		if (gm.debug) return gm.sq.next();
-		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return gm.sq.next();
-		}
+		if (gm.props.skipInst) return gm.sq.next();
 		
 		gm.scenes.instWeb.setup(sfx);
 		gm.scenes.setCurrent("instWeb");
@@ -253,21 +251,16 @@ gm.start = function() {
 	// pattern practice setup
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
-		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return gm.sq.next();
-		}
-		// gm.scenes.narration.addSymbols(Consts.PRACTICE_SYMBOL);
+		if (gm.props.skipInst) return gm.sq.next();
+
 		gm.scenes.narration.add([Strings.INST_PATTERN_PRACTICE, Strings.INST_SUN]);
 		gm.scenes.setCurrent("narration");
 	});
 
-	// show pattern
+	// show pattern practice
 	gm.sq.add(() => {
-		// repeating this shit a lot ... maybe some yuck func like return dbg(), return gm.dbg()? return instCheck()
 		if (gm.debug) return gm.sq.next();
-		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return gm.sq.next();
-		}
+		if (gm.props.skipInst) return gm.sq.next();
 
 		gm.props.pattern = Consts.PRACTICE_PATTERN;
 		gm.scenes.pattern = pattern(gm);
@@ -277,12 +270,11 @@ gm.start = function() {
 		gm.scenes.setCurrent('pattern');
 	});
 
-	// solve pattern
+	// solve pattern practice
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
-		if (gm.props.hasCompletedInstructions && !gm.props.choseRepeatInstructions) {
-			return gm.sq.next();
-		}
+		if (gm.props.skipInst) return gm.sq.next();
+
 		gm.scenes.instPattern.setup(sfx);
 		gm.scenes.setCurrent("instPattern");
 
@@ -291,6 +283,7 @@ gm.start = function() {
 	// premise, edwards quotations
 	gm.sq.add(() => {
 		if (gm.debug) return gm.sq.next();
+
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
 		gm.scenes.narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
 		gm.scenes.narration.cancelSymbols();

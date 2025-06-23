@@ -17,8 +17,12 @@ export function instWeb(gm, player) {
 	const scene = new Scene();
 	let instBtn, instText;
 	let trees, web, tracing;
+	let sfx;
 
-	scene.setup = function(sfx) {
+	scene.setup = function(_sfx) {
+
+		sfx = _sfx;
+
 
 		trees = Trees(gm);
 		web = Web(sfx);
@@ -102,7 +106,7 @@ export function instWeb(gm, player) {
 
 		if (player.input.v) {
 			player.input.v = false;
-			tracing.toggle();
+			tracing.activate(sfx);
 			conditions.visualizedWeb = true;
 		}
 

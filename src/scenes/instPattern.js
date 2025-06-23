@@ -86,7 +86,7 @@ export function instPattern(gm, player) {
 		// not dry ...
 		if (player.input.v) {
 			player.input.v = false;
-			tracing.toggle();
+			tracing.activate(sfx);
 		}
 
 		const treeLocation = trees.isColliding(player);

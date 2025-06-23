@@ -19,7 +19,7 @@ export const Consts = {
 		[[2,2],[3,3]],
 	],
 	
-	PRACTICE_DELAY: 120,
+	PRACTICE_DELAY: 180,
 	PATTERN_DELAY: cdbg ? 50 : 300,
 	WEBS_INTERVAL: 180,
 	ROCK_SHAKE_AMOUNT: 2,
