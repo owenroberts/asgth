@@ -118,7 +118,7 @@ export function Web(sfx) {
 				sfx.play("web_clear_web");
 			}
 			clear();
-			return Consts.WEB_CONNECTIONS.CLEARED;
+			return Consts.WEB_CONNECTS.CLEARED;
 		}
 
 		// cancel web
@@ -129,12 +129,12 @@ export function Web(sfx) {
 				end();
 				treeList = [];
 				sfx.play('cancel');
-				return Consts.WEB_CONNECTIONS.RELEASED;
+				return Consts.WEB_CONNECTS.RELEASED;
 			}
 			if (isActive) {
 				cancel();		
 				// sfx?		
-				return Consts.WEB_CONNECTIONS.CANCELED;
+				return Consts.WEB_CONNECTS.CANCELED;
 			}
 		}
 
@@ -155,7 +155,7 @@ export function Web(sfx) {
 					treeList.push(structuredClone(treeLocation));
 					prevTreeLocation = structuredClone(treeLocation);
 					sfx.play('connect');
-					return Consts.WEB_CONNECTIONS.STARTED;
+					return Consts.WEB_CONNECTS.STARTED;
 
 				} else if (prevTreeLocation[0] !== treeLocation[0] || prevTreeLocation[1] !== treeLocation[1]) {
 
@@ -167,7 +167,7 @@ export function Web(sfx) {
 					sfx.play('connect');
 					if (!continuousWeb) {
 						end();
-						return Consts.WEB_CONNECTIONS.RELEASED;
+						return Consts.WEB_CONNECTS.RELEASED;
 					} else {
 						drawing.insert(POINTS.END);
 						drawing.insert([
@@ -176,11 +176,11 @@ export function Web(sfx) {
 						]);
 						prevTreeLocation = treeLocation;
 						treeList.push([...treeLocation]);
-						return Consts.WEB_CONNECTIONS.COMPLETED;
+						return Consts.WEB_CONNECTS.COMPLETED;
 					}
 				} else {
 					sfx.play('cancel');
-					return Consts.WEB_CONNECTIONS.NONE;
+					return Consts.WEB_CONNECTS.NONE;
 				}
 			}
 		}

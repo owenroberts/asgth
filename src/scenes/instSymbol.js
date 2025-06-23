@@ -103,9 +103,9 @@ export function instSymbol(gm, player) {
 		const treeLocation = trees.isColliding(player);
 		const connection = web.getConnection(player, treeLocation);
 
-		if ((connection === Consts.WEB_CONNECTIONS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTIONS.RELEASED) {
+		if ((connection === Consts.WEB_CONNECTS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTS.RELEASED) {
 
-			const points = web.getPoints(connection === Consts.WEB_CONNECTIONS.COMPLETED);
+			const points = web.getPoints(connection === Consts.WEB_CONNECTS.COMPLETED);
 
 			const symbolMatches = symbolMatch.getMatch(points, 64, 32)
 				.flatMap(m => m)
@@ -123,7 +123,7 @@ export function instSymbol(gm, player) {
 			}
 
 			if (gotSymbol) {
-				if (connection === Consts.WEB_CONNECTIONS.COMPLETED) {
+				if (connection === Consts.WEB_CONNECTS.COMPLETED) {
 					sfx.play('cancel');
 					web.cancel();
 				}

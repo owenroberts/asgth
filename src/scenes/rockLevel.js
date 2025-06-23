@@ -18,7 +18,6 @@ export function rockLevel(gm, player, sfx) {
 	const dir = choice(-1, 1); // rock starts animating
 	let rockRolled = false;
 	let gotMatch = false;
-	let showTracing = false;
 
 	scene.setup = function() {
 		
@@ -105,19 +104,19 @@ export function rockLevel(gm, player, sfx) {
 
 		if (player.input.v) {
 			player.input.v = false;
-			tracing.toggle(sfx);
+			tracing.activate(sfx);
 		}
 
 		const treeLocation = trees.isColliding(player);
 		const connection = web.getConnection(player, treeLocation);
-		if ((connection === Consts.WEB_CONNECTIONS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTIONS.RELEASED) {
+		if ((connection === Consts.WEB_CONNECTS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTS.RELEASED) {
 
-			const points = structuredClone(web.getPoints({ trimmed: connection === Consts.WEB_CONNECTIONS.COMPLETED }));
+			const points = structuredClone(web.getPoints({ trimmed: connection === Consts.WEB_CONNECTS.COMPLETED }));
 
 			const isMatch = patternMatch(gm.props.pattern, points);
 			
 			if (isMatch) {
-				if (connection === Consts.WEB_CONNECTIONS.COMPLETED) {
+				if (connection === Consts.WEB_CONNECTS.COMPLETED) {
 					web.cancel();
 				}
 				sfx.play('match', true, 0.9, 1.1);

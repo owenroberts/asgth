@@ -2,16 +2,15 @@
  * game constants
  * @type {Object}
  */
+const cdbg = import.meta.env.DEV; // consts debug
+
 export const Consts = {
 	CELL_SIZE: { W: 64, H: 64, W2: 32, H2: 32, W8: 16, H8: 16 },
 	GRID_COLS: 14, /** columns in game layout grid */
 	GRID_ROWS: 7,
 	BG_COLOR: '#aeaaa6', //'#4a4047',
 	
-	LEVEL_ORDER: 'abcefglmn', // 'abcefglmn',
-	NUM_LEVELS: 7, // 7
-	SYMBOL_INDEX_STRING: "abcdefghijklmnopqrstuvwxyz",
-	PRACTICE_SYMBOL: 'd',
+	NUM_LEVELS: 7,
 
 	PRACTICE_PATTERN: [
 		[[1,1],[2,2]],
@@ -21,13 +20,14 @@ export const Consts = {
 	],
 	
 	PRACTICE_DELAY: 120,
-	PATTERN_DELAY: 50, // 300
+	PATTERN_DELAY: cdbg ? 50 : 300,
 	WEBS_INTERVAL: 180,
 	ROCK_SHAKE_AMOUNT: 2,
 	SUN_FINISH_COUNT: 400,
 	SUN_INTERVAL: 1280,
 	MOON_INTERVAL: 1280,
 	ROCK_SPEED: 1.8,
+	TRACING_TIMEOUT: 1000,
 
 	TEXT_MARGIN: { W: 0.25, H: 0.25 },
 	
@@ -41,7 +41,7 @@ export const Consts = {
 	WALK_COLLIDER: [16, 16, 32, 32],
 	ROCK_COLLIDER: [12, 12, 40, 40], // [8, 8, 48, 48],
 
-	WEB_CONNECTIONS: {
+	WEB_CONNECTS: {
 		NONE: 0,
 		STARTED: 1,
 		COMPLETED: 2,

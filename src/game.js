@@ -151,7 +151,7 @@ gm.start = function() {
 	loadingSprite.center = true;
 	loadingSprite.animation.play();
 
-	const patternMaker = createPatternMaker(); 
+	const patternMaker = createPatternMaker();
 
 	// debug start
 	gm.sq.add(() => { 
@@ -171,91 +171,6 @@ gm.start = function() {
 		gm.scenes.setCurrent("loading");
 		soundSetup(true);
 	});
-
-	function walkCycle() {
-		gm.sq.add(() => {
-			const walkLevelName = 'walk-' + gm.props.levelCount;
-			gm.scenes[walkLevelName] = walkLevel(gm, player);
-			gm.scenes[walkLevelName].setup();
-			gm.scenes.setCurrent(walkLevelName);
-			console.log('walk level', walkLevelName);
-			gm.props.levelCount++;
-		});
-		gm.sq.add(() => {
-			console.log('next');
-			if (gm.props.levelCount < 13) {
-				walkCycle();	
-			}
-		});
-	}
-
-	function rockCycle() {
-		gm.sq.add(() => {
-			gm.props.levelCount = 1;
-			gm.props.pattern = patternMaker.getPattern(gm.props.levelCount);
-			gm.props.patternBounds = patternMaker.getBounds();
-			gm.scenes.pattern = pattern(gm);
-			gm.scenes.pattern.onKeyDown.x = function() {
-				if (gm.scenes.pattern.canContinue) gm.sq.next();
-			};
-			gm.scenes.setCurrent('pattern');
-		});
-
-		gm.sq.add(() => {
-			gm.scenes.rockLevel = rockLevel(gm, player, sfx);
-			gm.scenes.rockLevel.setup();
-			gm.scenes.setCurrent("rockLevel");
-		});
-
-		gm.sq.add(() => {
-			gm.props.levelCount++;
-			rockCycle();
-		});
-	}
-
-	function storyCycle() {
-
-		gm.scenes.narration.onKeyUp['x'] = function() {
-			gm.props.levelCount++;
-			gm.props.lastPointWinner = 'SPIDER';
-			gm.props.points[gm.props.lastPointWinner]++;
-			storyCycle();
-			gm.sq.next();
-		};
-
-		gm.scenes.narration.onKeyUp['z'] = function() {
-			gm.props.levelCount++;
-			gm.props.lastPointWinner = 'ROCK';
-			gm.props.points[gm.props.lastPointWinner]++;
-			storyCycle();
-			gm.sq.next();
-		};
-
-		gm.sq.add(() => {
-			console.log('props', gm.props);
-			gm.scenes.narration.add(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
-			gm.scenes.narration.setScore();
-			sfx.play('level_start', true);
-			gm.scenes.setCurrent("narration");
-		});
-
-		gm.sq.add(() => {
-			if (gm.props.levelCount < 7) return gm.sq.next();
-
-			const endLine = gm.props.points.SPIDER > gm.props.points.ROCK ? 'SPIDER' : 'ROCK';
-			gm.scenes.narration.add(Strings.NARRATIVE.END[endLine]);
-			gm.scenes.narration.hideScore();
-			gm.scenes.setCurrent('narration');
-		});
-	}
-
-	// walkCycle();
-	rockCycle();
-	// gm.props.lastPointWinner = 'ROCK';
-	// gm.props.points[gm.props.lastPointWinner]++;
-	// storyCycle();
-	
-	return gm.sq.next();
 
 	// splash
 	gm.sq.add(() => {

@@ -24,7 +24,7 @@
 			matched = matched.filter(s => finishString.includes(s));
 
 			if (matched.length > prevMatched.length) {
-				if (connection === Consts.WEB_CONNECTIONS.COMPLETED) {
+				if (connection === Consts.WEB_CONNECTS.COMPLETED) {
 					web.cancel();
 				}
 				sfx.play('match', true, 0.9, 1.1);

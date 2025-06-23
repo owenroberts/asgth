@@ -109,14 +109,14 @@ export function instWeb(gm, player) {
 		const treeLocation = trees.isColliding(player);
 		const connection = web.getConnection(player, treeLocation);
 
-		if (connection === Consts.WEB_CONNECTIONS.STARTED) {
+		if (connection === Consts.WEB_CONNECTS.STARTED) {
 			if (!conditions.firstTree && !conditions.secondTree && !conditions.releasedWeb) {
 				conditions.firstTree = true;
 				instText.setMsg(Strings.INST_WEB_2);
 			}
 		}
 
-		if (connection === Consts.WEB_CONNECTIONS.COMPLETED) {
+		if (connection === Consts.WEB_CONNECTS.COMPLETED) {
 			if (conditions.firstTree && !conditions.releasedWeb) {
 				conditions.secondTree = true;
 				instBtn.setMsg(Strings.Z_BTN);
@@ -124,8 +124,8 @@ export function instWeb(gm, player) {
 			}
 		}
 
-		if (connection === Consts.WEB_CONNECTIONS.RELEASED ||
-			connection === Consts.WEB_CONNECTIONS.CANCELED) {
+		if (connection === Consts.WEB_CONNECTS.RELEASED ||
+			connection === Consts.WEB_CONNECTS.CANCELED) {
 			if (conditions.firstTree && conditions.secondTree) {
 				conditions.releasedWeb = true;
 				instBtn.setMsg(Strings.C_BTN);
@@ -133,7 +133,7 @@ export function instWeb(gm, player) {
 			}
 		}
 
-		if (connection === Consts.WEB_CONNECTIONS.CLEARED) {
+		if (connection === Consts.WEB_CONNECTS.CLEARED) {
 			if (conditions.firstTree && conditions.secondTree && conditions.releasedWeb) {
 				conditions.clearedWeb = true;
 				instBtn.setMsg(Strings.V_BTN);
