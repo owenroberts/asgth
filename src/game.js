@@ -90,6 +90,7 @@ function soundSetup(withSound) {
 				{ key: 'vis_on', url: "vis_on.wav" },
 				{ key: 'vis_off', url: "vis_off.wav" },
 				{ key: 'inter', sequence: [1, 4] },
+				{ key: 'walk', sequence: [1, 3] },
 				{ key: 'continue', url: "continue.wav" },
 
 			]
@@ -137,7 +138,6 @@ gm.start = function() {
 
 	gm.scenes.narration = narration(gm);
 	gm.scenes.narration.onKeyUp.x = function() {
-		console.log('next', gm.scenes.narration.isDone())
 		if (gm.scenes.narration.isDone()) {
 			sfx.play('next_button', true);
 			gm.sq.next();
@@ -318,7 +318,7 @@ gm.start = function() {
 			if (gm.props.levelCount > Consts.NUM_LEVELS) {
 				return gm.sq.next();
 			}
-			gm.scenes.walkLevel = walkLevel(gm, player);
+			gm.scenes.walkLevel = walkLevel(gm, player, sfx);
 			gm.scenes.walkLevel.setup();
 			gm.scenes.setCurrent("walkLevel");
 		});

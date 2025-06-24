@@ -10,7 +10,7 @@ import level_bounds from '../data/level_bounds.json';
  * @param {Player} player player sprite
  * @returns Scene
  */
-export function walkLevel(gm, player) {
+export function walkLevel(gm, player, sfx) {
 
 	const scene = new Scene();
 	let colliders = [], doorColliders = [], exit;
@@ -130,18 +130,14 @@ export function walkLevel(gm, player) {
 		for (let i = 0; i < doorColliders.length; i++) {
 			// doorColliders[i].drawDebug();
 			if (player.collide(doorColliders[i])) {
-				// isOnDoor = true;
 				player.spawn([
 					doorColliders[i].destination.x,
 					doorColliders[i].destination.y,
 				]);
 				player.resetInput();
+				sfx.play("walk", true);
 			}
 		}
-
-		// if (!isOnDoor) {
-		// 	prevDoorIndex = -1;
-		// }
 
 		for (let i = 0; i < colliders.length; i++) {
 			// colliders[i].drawDebug();
@@ -150,6 +146,7 @@ export function walkLevel(gm, player) {
 		
 		// exit.drawDebug("#ffbb00");
 		if (player.collide(exit)) {
+			sfx.play("walk", true);
 			gm.sq.next();
 		}
 
@@ -157,8 +154,8 @@ export function walkLevel(gm, player) {
 		moon.position[1] = map(Math.sin(moonAnim.getProgress() * Math.PI), 0, 1, gm.height - 64, 0, true);
 		
 		if (moonAnim.isDone()) {
-			// scene.clear();
-			// scene.setup();
+			scene.clear();
+			scene.setup();
 		}
 	};
 
