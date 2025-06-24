@@ -12,8 +12,8 @@ import { TextSprite } from '../../lines/src/Engine.js';
 export function continueUI(gm) {
 
 	const xBtn = new TextSprite({
-		msg: Strings.X_BTN,
-		x: Consts.CELL_SIZE.W * 0.5,
+		msg: Consts.PRIMARY_BTN,
+		x: Consts.CELL_SIZE.W * 4,
 		y: Consts.CELL_SIZE.H * 5.5,
 		letters: gm.anims.sprites.letters_keyboard,
 		isActive: false,
@@ -24,7 +24,7 @@ export function continueUI(gm) {
 		wrap: 24,
 		track: Consts.LETTERS_TRACK,
 		lead: Consts.LETTERS_LEAD,
-		x: Consts.CELL_SIZE.W  * 1.5,
+		x: Consts.CELL_SIZE.W  * 0.5,
 		y: Consts.CELL_SIZE.H  * 5.5,
 		letters: gm.anims.sprites.letters,
 		isActive: false,

@@ -5,45 +5,34 @@
 export const Strings = {
 
 	TITLE: "all spiders go to hell",
+	START_SOUND: "Start with sound",
+	START_SILENT: "Start slient",
 
 	DEBUG_START: "x to start debug",
 	LOCAL_STORAGE: "spider-instructions-complete",
 	
-	INST_MOVE_YOU: "you are the spider",
-	INST_MOVE_KEYS: "move with the arrow keys",
+	INST_MOVE_YOU: "You are the spider.",
+	INST_MOVE_KEYS: "Move with the arrow keys.",
 
-	INST_WEB_1: "connect your web to a tree",
-	INST_WEB_2: "connect the trees",
-	INST_WEB_3: "release the web",
-	INST_WEB_4: "clear the web",
-	INST_WEB_5: "toggle web visualization",
+	INST_WEB_1: "Connect your web to a tree",
+	INST_WEB_2: "Connect the trees",
+	INST_WEB_3: "Release the web",
+	INST_WEB_4: "Clear the web",
+	INST_WEB_5: "Toggle web visualization",
 
-	INST_SYMBOL_1: "practice drawing the symbol with your web",
-	INST_SYMBOL_2: "try again to recreate the symbol",
-	INST_SYMBOL_3: "create lines by connecting trees",
-	INST_SYMBOL_4: "you can connect more than one line to a tree",
+	INST_PATTERN_PRACTICE: "Practice drawing in the trees with your web.",
+	INST_PATTERN_RESET: "Try creating the drawing again.",
+	INST_SUN: "Finish before the sun sets.",
 
-	INST_PATTERN_PRACTICE: "practice drawing in the trees with your web",
-	INST_PATTERN_RESET: "try creating the drawing again",
-	INST_SUN: "finish before the sun sets",
+	INST_CHOOSE: "Press z to review instructions, press x to continue.",
 
-	INST_CHOOSE: "press z to review instructions, press x to continue",
+	INST_PATTERN: "Draw in the trees to absolve yourself of sin.",
+	INST_DRAW_PATTERN: "Draw in the trees:",
 
-	INST_PATTERN: "draw in the trees to absolve yourself of sin",
-	INST_DRAW_PATTERN: "draw in the trees",
-
-	X_BTN: "x", // primary and secondary button?
-	Z_BTN: "z",
-	C_BTN: "c", // this is stupid naming
-	V_BTN: "v",
-	RESET_BTN: "r",
-	CONTINUE: "continue",
+	CONTINUE: "Continue",
 
 	EDWARDS_QUOTE_1: '"... and all your righteousness, would have no more influence to uphold you, and keep you out of hell ..."',
 	EDWARDS_QUOTE_2: '"... than a spider\'s web would have to stop a falling rock."',
-
-	INST_DRAW: "draw the symbol to defeat the rock",
-	INST_RESTART: "play again",
 
 	NARRATIVE: {
 		SPIDER: [

@@ -18,6 +18,18 @@ export const Consts = {
 		[[2,2],[3,1]],
 		[[2,2],[3,3]],
 	],
+
+	INST_WEB_X1: 11,
+	INST_WEB_X2: 8,
+	INST_WEB_X3: 7,
+	INST_WEB_X4: 7,
+	INST_WEB_X5: 10,
+
+	PRIMARY_BTN: "x", // primary and secondary button?
+	SECONDARY_BTN: "z",
+	CLEAR_BTN: "c", // this is stupid naming
+	VIZ_BTN: "v",
+	RESET_BTN: "r",
 	
 	PRACTICE_DELAY: 180,
 	PATTERN_DELAY: cdbg ? 50 : 300,

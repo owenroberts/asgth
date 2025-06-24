@@ -23,7 +23,6 @@ export function instWeb(gm, player) {
 
 		sfx = _sfx;
 
-
 		trees = Trees(gm);
 		web = Web(sfx);
 
@@ -35,25 +34,28 @@ export function instWeb(gm, player) {
 			wrap: 22,
 			track: Consts.LETTERS_TRACK,
 			lead: Consts.LETTERS_LEAD,
-			x: Consts.CELL_SIZE.W * 1.5,
-			y: Consts.CELL_SIZE.H * 0.5,
+			x: Consts.CELL_SIZE.W2,
+			y: Consts.CELL_SIZE.H2,
 			letters: gm.anims.sprites.letters,
 		}));
 
 		instBtn = scene.addToDisplay(new TextSprite({
-			msg: Strings.X_BTN,
-			x: Consts.CELL_SIZE.W * 0.5,
-			y: Consts.CELL_SIZE.H * 0.5,
+			msg: Consts.PRIMARY_BTN,
+			x: Consts.CELL_SIZE.W * Consts.INST_WEB_X1,
+			y: Consts.CELL_SIZE.H2,
 			letters: gm.anims.sprites.letters_keyboard,
 		}));
 
+		const start = { x: 0, y: 3 };
+		const ground = scene.add(new Texture({ 
+			animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')]
+		}));
 
-		const start = { x: 1, y: 3 };
-		const ground = scene.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }, true));
-
-		const tileMap = new TileMap(12, 3);
-		const treeLocations = [[randomInt(0, 5), randomInt(0, 2)], [randomInt(6, 11), randomInt(0, 2)]];
-
+		const tileMap = new TileMap(13, 3);
+		const treeLocations = [
+			[randomInt(0, 5), randomInt(0, 2)], 
+			[randomInt(6, 11), randomInt(0, 2)]
+		];
 
 		for (let i = 0; i < treeLocations.length; i++) {
 			let [x, y] = treeLocations[i];
@@ -79,13 +81,13 @@ export function instWeb(gm, player) {
 			);
 		}
 
-		tracing = Tracing([treeLocations], { x: 1, y: 3 }, true);
+		tracing = Tracing([treeLocations], start, true);
 		scene.addToDisplay(tracing);
 
 		player.spawn([
-			start.x * Consts.CELL_SIZE.W,
-			(start.y + 1) * Consts.CELL_SIZE.H,
-		], 'RIGHT');
+			(start.x + 1) * Consts.CELL_SIZE.W,
+			(start.y) * Consts.CELL_SIZE.H,
+		], 'DOWN');
 	};
 
 	// after connecting trees and releasing web, go to practice symbol
@@ -116,6 +118,7 @@ export function instWeb(gm, player) {
 		if (connection === Consts.WEB_CONNECTS.STARTED) {
 			if (!conditions.firstTree && !conditions.secondTree && !conditions.releasedWeb) {
 				conditions.firstTree = true;
+				instBtn.x = Consts.INST_WEB_X2 * Consts.CELL_SIZE.W;
 				instText.setMsg(Strings.INST_WEB_2);
 			}
 		}
@@ -123,7 +126,8 @@ export function instWeb(gm, player) {
 		if (connection === Consts.WEB_CONNECTS.COMPLETED) {
 			if (conditions.firstTree && !conditions.releasedWeb) {
 				conditions.secondTree = true;
-				instBtn.setMsg(Strings.Z_BTN);
+				instBtn.setMsg(Consts.SECONDARY_BTN);
+				instBtn.x = Consts.INST_WEB_X3 * Consts.CELL_SIZE.W;
 				instText.setMsg(Strings.INST_WEB_3);
 			}
 		}
@@ -132,7 +136,8 @@ export function instWeb(gm, player) {
 			connection === Consts.WEB_CONNECTS.CANCELED) {
 			if (conditions.firstTree && conditions.secondTree) {
 				conditions.releasedWeb = true;
-				instBtn.setMsg(Strings.C_BTN);
+				instBtn.setMsg(Consts.CLEAR_BTN);
+				instBtn.x = Consts.INST_WEB_X4 * Consts.CELL_SIZE.W;
 				instText.setMsg(Strings.INST_WEB_4);
 			}
 		}
@@ -140,7 +145,8 @@ export function instWeb(gm, player) {
 		if (connection === Consts.WEB_CONNECTS.CLEARED) {
 			if (conditions.firstTree && conditions.secondTree && conditions.releasedWeb) {
 				conditions.clearedWeb = true;
-				instBtn.setMsg(Strings.V_BTN);
+				instBtn.setMsg(Consts.VIZ_BTN);
+				instBtn.x = Consts.INST_WEB_X5 * Consts.CELL_SIZE.W;
 				instText.setMsg(Strings.INST_WEB_5);
 			}
 		}

@@ -25,7 +25,7 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
 const gm = new Game({
-	debug: false,
+	debug: true,
 	drawInterval: 3,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
@@ -48,7 +48,6 @@ gm.props = {
 	levelCount: 0,
 	points: { ROCK: 0, SPIDER: 0 },
 	lastPointWinner: '',
-	nextSymbolString: "", // maybe don't need this if not setting up rock thing
 	useSound: false,
 	completedInst: false, // localStorage.getItem('spider-instructions-complete');
 	repeatInst: false,
@@ -62,6 +61,8 @@ let doodoo, sfx; // add sfx to gm
 /* debug */
 document.addEventListener('keydown', ev => {
 	if (ev.code === 'KeyN' && gm.debug && import.meta.env.DEV) gm.sq.next();
+
+	if (ev.code === "KeyS") sfx.play("next_button", true);
 });
 
 function soundSetup(withSound) {
@@ -78,7 +79,6 @@ function soundSetup(withSound) {
 				{ key: 'web', url: 'zip_lock.wav', },
 				{ key: 'connect', sequence: [1, 6] },
 				{ key: 'cancel', url: 'cancel.wav', },
-				// { key: 'button', sequence: [1, 3] },
 				{ key: 'skip_button', url: 'button_2.wav' },
 				{ key: 'next_button', url: 'button_3.wav' },
 				{ key: 'stone',  sequence: [1, 9] },
@@ -87,9 +87,10 @@ function soundSetup(withSound) {
 				{ key: 'level_start', sequence: [1, 3] },
 				{ key: 'web_clear', sequence: [1, 3] },
 				{ key: 'web_clear_web', url: "web_clear_web_fade.wav" },
-				{ key : 'vis_on', url: "vis_on.wav" },
-				{ key : 'vis_off', url: "vis_off.wav" },
+				{ key: 'vis_on', url: "vis_on.wav" },
+				{ key: 'vis_off', url: "vis_off.wav" },
 				{ key: 'inter', sequence: [1, 4] },
+				{ key: 'continue', url: "continue.wav" },
 
 			]
 		}, soundFiles => {
@@ -101,10 +102,6 @@ function soundSetup(withSound) {
 		gm.scenes.narration.addSFX(sfx);
 		gm.sq.next(); // afterSetupOrSound();
 	}
-}
-
-function getNextSymbolString(len) {
-	return Consts.LEVEL_ORDER.charAt(gm.props.levelCount);
 }
 
 function resetGame() {
@@ -139,7 +136,8 @@ gm.start = function() {
 	gm.scenes.end = end(gm);
 
 	gm.scenes.narration = narration(gm);
-	gm.scenes.narration.onKeyUp['x'] = function() {
+	gm.scenes.narration.onKeyUp.x = function() {
+		console.log('next', gm.scenes.narration.isDone())
 		if (gm.scenes.narration.isDone()) {
 			sfx.play('next_button', true);
 			gm.sq.next();
@@ -250,7 +248,7 @@ gm.start = function() {
 
 	// pattern practice setup
 	gm.sq.add(() => {
-		if (gm.debug) return gm.sq.next();
+		// if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 
 		gm.scenes.narration.add([Strings.INST_PATTERN_PRACTICE, Strings.INST_SUN]);
@@ -259,34 +257,35 @@ gm.start = function() {
 
 	// show pattern practice
 	gm.sq.add(() => {
-		if (gm.debug) return gm.sq.next();
+		// if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 
 		gm.props.pattern = Consts.PRACTICE_PATTERN;
-		gm.scenes.pattern = pattern(gm);
+		gm.scenes.pattern = pattern(gm, sfx);
 		gm.scenes.pattern.onKeyDown.x = function() {
-			if (gm.scenes.pattern.canContinue) gm.sq.next();
+			if (gm.scenes.pattern.canContinue) {
+				sfx.play("next_button", true);
+				gm.sq.next();
+			}
 		};
 		gm.scenes.setCurrent('pattern');
 	});
 
 	// solve pattern practice
 	gm.sq.add(() => {
-		if (gm.debug) return gm.sq.next();
+		// if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 
 		gm.scenes.instPattern.setup(sfx);
 		gm.scenes.setCurrent("instPattern");
-
 	});
 
 	// premise, edwards quotations
 	gm.sq.add(() => {
-		if (gm.debug) return gm.sq.next();
+		// if (gm.debug) return gm.sq.next();
 
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
 		gm.scenes.narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
-		gm.scenes.narration.cancelSymbols();
 		gm.scenes.setCurrent("narration");
 	});
 
@@ -306,7 +305,7 @@ gm.start = function() {
 		gm.sq.add(() => {
 			gm.props.pattern = patternMaker.getPattern(gm.props.levelCount);
 			gm.props.patternBounds = patternMaker.getBounds();
-			gm.scenes.pattern = pattern(gm);
+			gm.scenes.pattern = pattern(gm, sfx);
 			gm.scenes.pattern.onKeyDown.x = function() {
 				if (gm.scenes.pattern.canContinue) gm.sq.next();
 			};

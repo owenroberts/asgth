@@ -2,6 +2,7 @@ import { Counter } from '../../cool/cool.js';
 import { Scene, Sprite, TextSprite } from '../../lines/src/Engine.js';
 import { Strings } from '../Strings.js';
 import { Consts } from '../Consts.js';
+import { continueUI } from './continueUI.js';
 
 export function instMove(gm, player) {
 
@@ -11,7 +12,7 @@ export function instMove(gm, player) {
 	scene.setup = function() {
 
 		scene.add(player);
-		player.spawn([64 * 10, 64 * 1]);
+		player.spawn([Consts.CELL_SIZE.W * 5, Consts.CELL_SIZE.H * 3.5]);
 		
 		scene.addToDisplay(new TextSprite({
 			countForward: true,
@@ -35,28 +36,13 @@ export function instMove(gm, player) {
 			wrap: 22,
 		}));
 
-		const keyboardArrows = new Sprite(Consts.CELL_SIZE.W * 0.5, Consts.CELL_SIZE.H * 2.5, gm.anims.sprites.keyboard_arrows); 
+		const keyboardArrows = new Sprite(Consts.CELL_SIZE.W * 0.5, Consts.CELL_SIZE.H * 3, gm.anims.sprites.keyboard_arrows); 
 		scene.addToDisplay(keyboardArrows);
 
-		// repliace with continue ui
-		xBtn = scene.addToDisplay(new TextSprite({
-			msg: Strings.X_BTN,
-			x: Consts.CELL_SIZE.W * 0.5,
-			y: Consts.CELL_SIZE.H * 5.5,
-			letters: gm.anims.sprites.letters_keyboard,
-			isActive: false,
-		}));
-
-		xToContinue = scene.addToDisplay(new TextSprite({
-			msg: Strings.CONTINUE,
-			wrap: 24,
-			track: Consts.LETTERS_TRACK,
-			lead: Consts.LETTERS_LEAD,
-			x: Consts.CELL_SIZE.W  * 1.5,
-			y: Consts.CELL_SIZE.H  * 5.5,
-			letters: gm.anims.sprites.letters,
-			isActive: false,
-		}));
+		const ui = continueUI(gm);
+		xBtn = scene.addToDisplay(ui.xBtn);
+		xToContinue = scene.addToDisplay(ui.xToContinue);
+		
 	};
 
 	// after player presses all three arrow buttons, next

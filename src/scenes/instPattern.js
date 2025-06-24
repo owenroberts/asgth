@@ -10,8 +10,6 @@ import { Web } from '../components/Web.js';
 import { Sun } from '../components/Sun.js';
 import { Tracing } from '../components/Tracing.js';
 
-
-
 export function instPattern(gm, player) {
 
 	const scene = new Scene();
@@ -30,7 +28,6 @@ export function instPattern(gm, player) {
 
 		scene.addSprite([player, web, trees.getSprites()]);
 		
-
 		// not DRY ... idk
 		const start = { x: 4, y: 1 };
 		const ground = scene.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }, true));
