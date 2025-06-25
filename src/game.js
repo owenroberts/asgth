@@ -49,7 +49,7 @@ gm.props = {
 	points: { ROCK: 0, SPIDER: 0 },
 	lastPointWinner: '',
 	useSound: false,
-	completedInst: localStorage.getItem('spider-instructions-complete'),
+	completedInst: JSON.parse(localStorage.getItem('spider-instructions-complete')),
 	repeatInst: false,
 	skipInst: false,
 	pattern: [], // sun extra time fix
