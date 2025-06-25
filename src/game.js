@@ -60,9 +60,9 @@ let doodoo, sfx; // add sfx to gm
 
 /* debug */
 document.addEventListener('keydown', ev => {
-	if (ev.code === 'KeyN' && gm.debug && import.meta.env.DEV) gm.sq.next();
+	if (ev.code === 'KeyN' && gm.debug) gm.sq.next();
 
-	if (ev.code === "KeyS") sfx.play("next_button", true);
+	if (ev.code === "KeyS" && gm.debug) sfx.play("next_button", true);
 });
 
 function soundSetup(withSound) {
@@ -307,7 +307,10 @@ gm.start = function() {
 			gm.props.patternBounds = patternMaker.getBounds();
 			gm.scenes.pattern = pattern(gm, sfx);
 			gm.scenes.pattern.onKeyDown.x = function() {
-				if (gm.scenes.pattern.canContinue) gm.sq.next();
+				if (gm.scenes.pattern.canContinue) {
+					sfx.play("next_button", true);
+					gm.sq.next();
+				}
 			};
 			gm.scenes.setCurrent('pattern');
 		});
@@ -315,9 +318,9 @@ gm.start = function() {
 		// walk level
 		gm.sq.add(() => {
 			if (gm.props.levelCount === 0) return gm.sq.next();
-			if (gm.props.levelCount > Consts.NUM_LEVELS) {
-				return gm.sq.next();
-			}
+			// if (gm.props.levelCount > Consts.NUM_LEVELS) {
+			// 	return gm.sq.next();
+			// }
 			gm.scenes.walkLevel = walkLevel(gm, player, sfx);
 			gm.scenes.walkLevel.setup();
 			gm.scenes.setCurrent("walkLevel");
@@ -352,7 +355,7 @@ gm.start = function() {
 
 		// next loop or end
 		gm.sq.add(() => {
-			sfx.play('level_start', true);
+			// sfx.play('level_start', true);
 			gm.scenes.narration.hideScore();
 			if (gm.props.levelCount > Consts.NUM_LEVELS) {
 				gm.scenes.end.onKeyUp[Strings.RESET_BTN] = function() {
