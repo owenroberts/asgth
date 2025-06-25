@@ -25,7 +25,7 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
 const gm = new Game({
-	debug: true,
+	debug: false,
 	drawInterval: 3,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
@@ -49,7 +49,7 @@ gm.props = {
 	points: { ROCK: 0, SPIDER: 0 },
 	lastPointWinner: '',
 	useSound: false,
-	completedInst: false, // localStorage.getItem('spider-instructions-complete');
+	completedInst: localStorage.getItem('spider-instructions-complete'),
 	repeatInst: false,
 	skipInst: false,
 	pattern: [], // sun extra time fix
@@ -61,7 +61,6 @@ let doodoo, sfx; // add sfx to gm
 /* debug */
 document.addEventListener('keydown', ev => {
 	if (ev.code === 'KeyN' && gm.debug) gm.sq.next();
-
 	if (ev.code === "KeyS" && gm.debug) sfx.play("next_button", true);
 });
 
@@ -207,6 +206,7 @@ gm.start = function() {
 
 		// skip instructions
 		gm.scenes.instChoose.onKeyDown.x = function() {
+			if (!gm.scenes.instChoose.isDone()) return;
 			gm.props.skipInst = true;
 			gm.sq.next();
 			player.resetInput();

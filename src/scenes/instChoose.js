@@ -7,21 +7,26 @@ import { Consts } from '../Consts.js';
  * @param {Object} sprites - game sprites
  * @returns scene
  */
-export function instChoose(sprites) {
+export function instChoose(gm) {
 
 	const scene = new Scene();
+	let instText;
 
 	scene.setup = function() {
-		scene.addToDisplay(new TextSprite({
+		instText = scene.addToDisplay(new TextSprite({
 			countForward: true,
 			msg: Strings.INST_CHOOSE,
-			wrap: 14,
+			wrap: 24,
 			track: Consts.LETTERS_TRACK,
 			lead: Consts.LETTERS_LEAD,
 			x: Consts.CELL_SIZE.W * 0.5,
-			y: Consts.CELL_SIZE.H * 2,
-			letters: sprites.letters,
+			y: Consts.CELL_SIZE.H * 0.5,
+			letters: gm.anims.sprites.letters,
 		}));
+	};
+
+	scene.isDone = function() {
+		return instText.isDone();
 	};
 
 	return scene;
