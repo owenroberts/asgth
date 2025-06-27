@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import vitePluginString from 'vite-plugin-string';
-import { resolve } from 'path';
 
 export default defineConfig({
 	base: '',
@@ -21,12 +20,5 @@ export default defineConfig({
 				},
 			]
 		}),
-	],
-	build: {
-		rollupOptions: {
-			input: {
-				main: resolve(__dirname, 'index.html')			
-			}
-		},
-	},
+	]
 });

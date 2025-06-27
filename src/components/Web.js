@@ -187,7 +187,7 @@ export function Web(sfx) {
 	}
 
 	return { 
-		display, getConnection, getPoints, cancel, startOverride, end,
+		display, getConnection, getPoints, cancel, startOverride, end, clear,
 		isActive() { return isActive; }
 	};
 }

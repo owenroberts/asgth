@@ -2,7 +2,7 @@
  * game constants
  * @type {Object}
  */
-const cdbg = import.meta.env.DEV; // consts debug
+const debug = import.meta.env.DEV; // consts debug
 
 export const Consts = {
 	CELL_SIZE: { W: 64, H: 64, W2: 32, H2: 32, W8: 16, H8: 16 },
@@ -32,12 +32,12 @@ export const Consts = {
 	RESET_BTN: "r",
 	
 	PRACTICE_DELAY: 180,
-	PATTERN_DELAY: cdbg ? 50 : 300,
+	PATTERN_DELAY: debug ? 50 : 300,
 	WEBS_INTERVAL: 180,
 	ROCK_SHAKE_AMOUNT: 2,
 	SUN_FINISH_COUNT: 400,
-	SUN_INTERVAL: 1280,
-	MOON_INTERVAL: 1280,
+	SUN_INTERVAL: debug ? 300 : 1280,
+	MOON_INTERVAL: debug ? 300 : 1280,
 	ROCK_SPEED: 1.8,
 	TRACING_TIMEOUT: 1000,
 
