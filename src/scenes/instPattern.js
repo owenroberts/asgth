@@ -74,6 +74,7 @@ export function instPattern(gm, player) {
 		trees.getTexture().locations.forEach(l => {
 			l.i = randomInt(25);
 		});
+		sun.reset();
 	};
 
 	scene.onUpdate = function() {

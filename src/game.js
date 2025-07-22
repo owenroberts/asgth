@@ -139,9 +139,6 @@ gm.start = function() {
 
 	gm.scenes.narration = narration(gm);
 	gm.scenes.narration.onKeyUp.x = function() {
-		console.trace();
-		// console.log('x key up');
-		console.log(player.input.x);
 		if (gm.scenes.narration.isDone()) {
 			sfx.play('next_button', true);
 			gm.sq.next();
@@ -149,7 +146,6 @@ gm.start = function() {
 			gm.scenes.narration.next();
 		}
 		player.resetInput(); // need this? 
-		console.log(player.input.x);
 	};
 	
 	const loadingSprite = gm.scenes.loading.addSprite(new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web));
@@ -428,16 +424,13 @@ gm.keyDown = function(key) {
 };
 
 gm.keyUp = function(key) {
-	console.log('key up', key);
 	switch (key) {
-
 
 		case Consts.RESET_BTN:
 		case Consts.PRIMARY_BTN:
 		case Consts.SECONDARY_BTN:
 			if (gm.scenes.current.onKeyUp[key]) {
 				gm.scenes.current.onKeyUp[key]();
-				console.log(gm.scenes.currentName, key);
 				return;
 			}
 			player.inputKey(key, false);
