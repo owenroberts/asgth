@@ -27,7 +27,7 @@ export function instPattern(gm, player) {
 		scene.add(sun.getSprite());
 
 		scene.addSprite([player, web, trees.getSprites()]);
-		
+
 		// not DRY ... idk
 		const start = { x: 4, y: 1 };
 		const ground = scene.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }, true));
@@ -69,14 +69,12 @@ export function instPattern(gm, player) {
 		], 'RIGHT');
 	};
 
-	function moreInstructions() {
+	scene.reset = function() {
 		web.clear();
-		gm.scenes.narration.add([Strings.INST_PATTERN_RESET]);
-		gm.scenes.narration.addCallback(() => {
-			gm.scenes.setCurrent("instPattern");
+		trees.getTexture().locations.forEach(l => {
+			l.i = randomInt(25);
 		});
-		gm.scenes.setCurrent("narration");
-	}
+	};
 
 	scene.onUpdate = function() {
 
@@ -112,11 +110,9 @@ export function instPattern(gm, player) {
 
 		sun.update();
 		if (sun.isDone()) {
-			if (gotMatch) {
-				gm.sq.next();
-			} else {
-				moreInstructions();
-			}
+			sfx.play('inter', true);
+			if (gotMatch) gm.props.isPracticePatternSolved = true;
+			gm.sq.next();
 		}
 
 	};

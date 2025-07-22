@@ -25,7 +25,7 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
 const gm = new Game({
-	debug: false,
+	debug: true,
 	drawInterval: 3,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
@@ -53,6 +53,8 @@ gm.props = {
 	repeatInst: false,
 	skipInst: false,
 	pattern: [], // sun extra time fix
+	isPracticePatternSolved: false,
+	isPracticeRestart: false,
 };
 
 let player; // can this be a component ... only if input moves to gm
@@ -125,7 +127,7 @@ gm.start = function() {
 	gm.setBounds('bottom', Consts.GRID_ROWS * Consts.CELL_SIZE.H);
 	
 	player = Spider(gm);
-	gm.sq = Sequencer();
+	gm.sq = new Sequencer();
 	
 	gm.scenes.splash = splash(gm);
 	gm.scenes.instMove = instMove(gm, player);
@@ -137,6 +139,9 @@ gm.start = function() {
 
 	gm.scenes.narration = narration(gm);
 	gm.scenes.narration.onKeyUp.x = function() {
+		console.trace();
+		// console.log('x key up');
+		console.log(player.input.x);
 		if (gm.scenes.narration.isDone()) {
 			sfx.play('next_button', true);
 			gm.sq.next();
@@ -144,6 +149,7 @@ gm.start = function() {
 			gm.scenes.narration.next();
 		}
 		player.resetInput(); // need this? 
+		console.log(player.input.x);
 	};
 	
 	const loadingSprite = gm.scenes.loading.addSprite(new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web));
@@ -153,7 +159,7 @@ gm.start = function() {
 	const patternMaker = createPatternMaker();
 
 	// debug start
-	gm.sq.add(() => { 
+	gm.sq.add({ fn: () => {
 		if (!gm.debug) return gm.sq.next();
 		gm.scenes.debug = new Scene();
 		console.log("%c *** debug hit X to start ***", "background: #000; color: #ff0;");
@@ -161,21 +167,20 @@ gm.start = function() {
 			gm.sq.next();	
 		};
 		gm.scenes.setCurrent("debug");
-	});
+	}});
 
 	// debug loading
-	gm.sq.add(() => {
+	gm.sq.add({ fn: () => {
 		if (!gm.debug) return gm.sq.next();
 
 		loadingSprite.animation.frame = 0;
 		gm.scenes.setCurrent("loading");
 		soundSetup(true);
-	});
+	}});
 
 	// splash
-	gm.sq.add(() => {
+	gm.sq.add({ fn: () => {
 		if (gm.debug) return gm.sq.next();
-
 		gm.scenes.splash.setup();
 		gm.scenes.splash.onKeyDown.x = function() {
 			gm.props.useSound = true;
@@ -186,19 +191,19 @@ gm.start = function() {
 			gm.sq.next();
 		};
 		gm.scenes.setCurrent("splash");
-	});
+	}});
 
 	// loading
-	gm.sq.add(() => {
+	gm.sq.add({ fn: () => {
 		if (gm.debug) return gm.sq.next();
 
 		loadingSprite.animation.frame = 0;
 		gm.scenes.setCurrent("loading");
 		soundSetup(gm.props.useSound);
-	});
+	}});
 
 	// choose instructions
-	gm.sq.add(() => {
+	gm.sq.add({ fn: () => {
 		if (gm.debug) return gm.sq.next();
 		if (!gm.props.completedInst) return gm.sq.next();
 
@@ -220,10 +225,10 @@ gm.start = function() {
 		};
 
 		gm.scenes.setCurrent("instChoose");
-	});
+	}});
 
 	// movement instructions
-	gm.sq.add(() => {
+	gm.sq.add({ fn: () => {
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 
@@ -235,28 +240,37 @@ gm.start = function() {
 			gm.sq.next();
 		};
 		gm.scenes.setCurrent("instMove");
-	});
+	}});
 
 	// web instructions
-	gm.sq.add(() => {
+	gm.sq.add({ fn: () => {
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 		
 		gm.scenes.instWeb.setup(sfx);
 		gm.scenes.setCurrent("instWeb");
-	});
+	}});
 
 	// pattern practice setup
-	gm.sq.add(() => {
+	gm.sq.add({ fn: () => {
 		// if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 
 		gm.scenes.narration.add([Strings.INST_PATTERN_PRACTICE, Strings.INST_SUN]);
 		gm.scenes.setCurrent("narration");
-	});
+	}});
+
+	// pattern practice restart
+	gm.sq.add({ label:"practice-pattern-restart", fn: () => {
+		if (gm.props.skipInst) return gm.sq.next();
+		if (!gm.props.isPracticeRestart) return gm.sq.next();
+
+		gm.scenes.narration.add([Strings.INST_PATTERN_RESET]);
+		gm.scenes.setCurrent("narration");
+	}});
 
 	// show pattern practice
-	gm.sq.add(() => {
+	gm.sq.add({ fn: () => {
 		// if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 
@@ -269,107 +283,110 @@ gm.start = function() {
 			}
 		};
 		gm.scenes.setCurrent('pattern');
-	});
+	}});
 
 	// solve pattern practice
-	gm.sq.add(() => {
+	gm.sq.add({ fn: () => {
 		// if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 
-		gm.scenes.instPattern.setup(sfx);
+		if (gm.props.isPracticeRestart) gm.scenes.instPattern.reset();
+		else gm.scenes.instPattern.setup(sfx);
 		gm.scenes.setCurrent("instPattern");
-	});
+	}});
 
+	gm.sq.add({ fn: () => {
+		console.log('solved?', gm.props.isPracticePatternSolved)
+		if (!gm.props.isPracticePatternSolved) {
+			gm.props.isPracticeRestart = true;
+			gm.sq.set("practice-pattern-restart");
+		}
+		gm.sq.next();	
+	}});
+	
 	// premise, edwards quotations
-	gm.sq.add(() => {
+	gm.sq.add({ fn: () => {
 		// if (gm.debug) return gm.sq.next();
 
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
 		gm.scenes.narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
 		gm.scenes.setCurrent("narration");
-	});
+	}});
 
 	// start game loop
-	gm.sq.add(() => { gameLoop(); });
+	// drawing instructions
+	gm.sq.add({ fn: () => {
+		// if (gm.debug) return gm.sq.next();
+		gm.scenes.narration.add([Strings.INST_PATTERN]);
+		gm.scenes.setCurrent("narration");
+	}});
 
-	function gameLoop() {
+	// pattern
+	gm.sq.add({ fn: () => {
+		gm.props.pattern = patternMaker.getPattern(gm.props.levelCount);
+		gm.props.patternBounds = patternMaker.getBounds();
+		gm.scenes.pattern = pattern(gm, sfx);
+		gm.scenes.pattern.onKeyDown.x = function() {
+			if (gm.scenes.pattern.canContinue) {
+				sfx.play("next_button", true);
+				gm.sq.next();
+			}
+		};
+		gm.scenes.setCurrent('pattern');
+	}});
 
-		// drawing instructions
-		gm.sq.add(() => {
-			// if (gm.debug) return gm.sq.next();
-			gm.scenes.narration.add([Strings.INST_PATTERN]);
-			gm.scenes.setCurrent("narration");
-		});
+	// walk level
+	gm.sq.add({ fn: () => {
+		if (gm.props.levelCount === 0) return gm.sq.next();
+		// if (gm.props.levelCount > Consts.NUM_LEVELS) {
+		// 	return gm.sq.next();
+		// }
+		gm.scenes.walkLevel = walkLevel(gm, player, sfx);
+		gm.scenes.walkLevel.setup();
+		gm.scenes.setCurrent("walkLevel");
+	}});
 
-		// pattern
-		gm.sq.add(() => {
-			gm.props.pattern = patternMaker.getPattern(gm.props.levelCount);
-			gm.props.patternBounds = patternMaker.getBounds();
-			gm.scenes.pattern = pattern(gm, sfx);
-			gm.scenes.pattern.onKeyDown.x = function() {
-				if (gm.scenes.pattern.canContinue) {
-					sfx.play("next_button", true);
-					gm.sq.next();
-				}
+	// rock level
+	gm.sq.add({ fn: () => {
+		gm.scenes.rockLevel = rockLevel(gm, player, sfx);
+		gm.scenes.rockLevel.setup();
+		gm.scenes.setCurrent("rockLevel");
+	}});
+
+	// webs or rock rolls based on score
+	gm.sq.add({ fn: () => {
+		if (gm.props.lastPointWinner === "SPIDER") {
+			sfx.play("inter");
+			gm.scenes.interWebs.setup();
+			gm.scenes.setCurrent("interWebs");
+		} else {
+			gm.scenes.rockLevel.rock();
+		}
+	}});
+
+	// score narration
+	gm.sq.add({ fn: () => {
+		gm.props.levelCount++;
+		gm.scenes.narration.add(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
+		gm.scenes.narration.setScore();
+		sfx.play('level_start', true);
+		gm.scenes.setCurrent("narration");
+	}});
+
+	// next loop or end
+	gm.sq.add({ fn: () => {
+		// sfx.play('level_start', true);
+		gm.scenes.narration.hideScore();
+		if (gm.props.levelCount > Consts.NUM_LEVELS) {
+			gm.scenes.end.onKeyUp[Strings.RESET_BTN] = function() {
+				sfx.play('next_button');
+				resetGame();
 			};
-			gm.scenes.setCurrent('pattern');
-		});
-
-		// walk level
-		gm.sq.add(() => {
-			if (gm.props.levelCount === 0) return gm.sq.next();
-			// if (gm.props.levelCount > Consts.NUM_LEVELS) {
-			// 	return gm.sq.next();
-			// }
-			gm.scenes.walkLevel = walkLevel(gm, player, sfx);
-			gm.scenes.walkLevel.setup();
-			gm.scenes.setCurrent("walkLevel");
-		});
-
-		// rock level
-		gm.sq.add(() => {
-			gm.scenes.rockLevel = rockLevel(gm, player, sfx);
-			gm.scenes.rockLevel.setup();
-			gm.scenes.setCurrent("rockLevel");
-		});
-
-		// webs or rock rolls based on score
-		gm.sq.add(() => {
-			if (gm.props.lastPointWinner === "SPIDER") {
-				sfx.play("inter");
-				gm.scenes.interWebs.setup();
-				gm.scenes.setCurrent("interWebs");
-			} else {
-				gm.scenes.rockLevel.rock();
-			}
-		});
-
-		// score narration
-		gm.sq.add(() => {
-			gm.props.levelCount++;
-			gm.scenes.narration.add(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
-			gm.scenes.narration.setScore();
-			sfx.play('level_start', true);
-			gm.scenes.setCurrent("narration");
-		});
-
-		// next loop or end
-		gm.sq.add(() => {
-			// sfx.play('level_start', true);
-			gm.scenes.narration.hideScore();
-			if (gm.props.levelCount > Consts.NUM_LEVELS) {
-				gm.scenes.end.onKeyUp[Strings.RESET_BTN] = function() {
-					sfx.play('next_button');
-					resetGame();
-				};
-				gm.scenes.setCurrent("end");
-			} else {
-				gameLoop();
-			}
-		});
-
-		gm.sq.next();
-	}
+			gm.scenes.setCurrent("end");
+		} else {
+			gameLoop();
+		}
+	}});
 
 	gm.sq.next(); // start ... clearer way to do this
 };
@@ -386,8 +403,9 @@ gm.draw = function() {
 gm.keyDown = function(key) {
 	switch (key) {
 
-		case 'x':
-		case 'z':
+		case Consts.RESET_BTN:
+		case Consts.PRIMARY_BTN:
+		case Consts.SECONDARY_BTN:
 			if (gm.scenes.current.onKeyDown[key]) {
 				gm.scenes.current.onKeyDown[key]();
 				return;
@@ -410,13 +428,16 @@ gm.keyDown = function(key) {
 };
 
 gm.keyUp = function(key) {
+	console.log('key up', key);
 	switch (key) {
 
-		case Strings.RESET_BTN:
-		case 'x':
-		case 'z':
+
+		case Consts.RESET_BTN:
+		case Consts.PRIMARY_BTN:
+		case Consts.SECONDARY_BTN:
 			if (gm.scenes.current.onKeyUp[key]) {
 				gm.scenes.current.onKeyUp[key]();
+				console.log(gm.scenes.currentName, key);
 				return;
 			}
 			player.inputKey(key, false);

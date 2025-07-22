@@ -45,6 +45,7 @@ export function narration(gm) {
 	};
 
 	scene.next = function() {
+		console.log('next');
 		if (text.isDone()) {
 			sfx.play('next_button', true);
 			if (dialogList.length > 0) {

@@ -41,5 +41,9 @@ export function Sun(gm) {
 		update, end,
 		isDone: () => { return counter.isDone(); },
 		getSprite: () => { return sprite; },
+		reset: () => {
+			counter.reset();
+			animation.reset();
+		},
 	};
 }
