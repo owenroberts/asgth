@@ -5,7 +5,7 @@ import { Consts } from '../Consts.js';
 import { Strings } from '../Strings.js';
 import { continueUI } from './continueUI.js';
 
-export function pattern(gm, sfx) {
+export function pattern(gm) {
 
 	const scene = new Scene();
 	const animation = new GameAnim();
@@ -44,7 +44,7 @@ export function pattern(gm, sfx) {
 	scene.canContinue = false;
 
 	const nextDelay = Counter(Consts.PATTERN_DELAY, () => {
-		sfx.play("continue", true);
+		gm.sfx.play("continue", { randomRate: true });
 		xToContinue.isActive = true;
 		xBtn.isActive = true;
 		scene.canContinue = true;

@@ -10,7 +10,7 @@ import level_bounds from '../data/level_bounds.json';
  * @param {Player} player player sprite
  * @returns Scene
  */
-export function walkLevel(gm, player, sfx) {
+export function walkLevel(gm, player) {
 
 	const scene = new Scene();
 	let colliders = [], doorColliders = [], exit;
@@ -135,7 +135,7 @@ export function walkLevel(gm, player, sfx) {
 					doorColliders[i].destination.y,
 				]);
 				player.resetInput();
-				sfx.play("walk", true);
+				gm.sfx.play("walk", { randomRate: true });
 			}
 		}
 
@@ -146,7 +146,7 @@ export function walkLevel(gm, player, sfx) {
 		
 		// exit.drawDebug("#ffbb00");
 		if (player.collide(exit)) {
-			sfx.play("walk", true);
+			gm.sfx.play("walk", { randomRate: true });
 			gm.sq.next();
 		}
 

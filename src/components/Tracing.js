@@ -51,11 +51,11 @@ export function Tracing(pattern, startTile, ignoreOffset=false) {
 	function activate(sfx) {
 		if (isActive) return;
 		isActive = true;
-		sfx.play("vis_on", true);
+		sfx.play("vis_on", { randomRate: true });
 		
 		setTimeout(() => {
 			isActive = false;
-			sfx.play("vis_off", true);
+			sfx.play("vis_off", { randomRate: true });
 		}, Consts.TRACING_TIMEOUT);
 	}
 

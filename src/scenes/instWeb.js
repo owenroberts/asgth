@@ -17,14 +17,11 @@ export function instWeb(gm, player) {
 	const scene = new Scene();
 	let instBtn, instText;
 	let trees, web, tracing;
-	let sfx;
 
-	scene.setup = function(_sfx) {
-
-		sfx = _sfx;
+	scene.setup = function() {
 
 		trees = Trees(gm);
-		web = Web(sfx);
+		web = Web();
 
 		scene.addSprite([player, web, trees.getSprites()]);
 		
@@ -108,12 +105,12 @@ export function instWeb(gm, player) {
 
 		if (player.input.v) {
 			player.input.v = false;
-			tracing.activate(sfx);
+			tracing.activate(gm.sfx);
 			conditions.visualizedWeb = true;
 		}
 
 		const treeLocation = trees.isColliding(player);
-		const connection = web.getConnection(player, treeLocation);
+		const connection = web.getConnection(player, treeLocation, gm.sfx);
 
 		if (connection === Consts.WEB_CONNECTS.STARTED) {
 			if (!conditions.firstTree && !conditions.secondTree && !conditions.releasedWeb) {

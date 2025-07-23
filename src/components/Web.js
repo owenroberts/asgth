@@ -25,15 +25,6 @@ export function Web(sfx) {
 	let treeList = []; // track connected trees, is this ever used? -- maybe just need tree count
 	let prevTreeLocation; // location of tree under player
 
-	/* testing (still?) continuous web vs segmented */
-	let continuousWeb = true;
-	document.addEventListener('keydown', ev => {
-		if (ev.code === 'KeyT') {
-			continuousWeb = !continuousWeb;
-			console.log('Continuous web toggled', continuousWeb);
-		}
-	});
-
 	/**
 	 * display web animation
 	 */
@@ -108,7 +99,7 @@ export function Web(sfx) {
 	 * @param  {Boolean|Array} location of tree spider is on or false
 	 * @returns {WEB_CONNECTION} type of web connection, NONE, STARTED, CONNECTED, RELEASED, CANCELED
 	 */
-	function getConnection(player, treeLocation) {
+	function getConnection(player, treeLocation, sfx) {
 
 		if (player.input.c) {
 			player.input.c = false;

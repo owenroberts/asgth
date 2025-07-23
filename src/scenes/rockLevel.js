@@ -10,7 +10,7 @@ import { Tracing } from '../components/Tracing.js';
 
 import { patternMatch } from '../patternMatch.js';
 
-export function rockLevel(gm, player, sfx) {
+export function rockLevel(gm, player) {
 	
 	const scene = new Scene();
 
@@ -75,7 +75,7 @@ export function rockLevel(gm, player, sfx) {
 		rock.isActive = false;
 		rock.animation.play();
 
-		web = Web(sfx);
+		web = Web();
 		scene.addSprite(web);		
 	};
 
@@ -84,15 +84,6 @@ export function rockLevel(gm, player, sfx) {
 		gm.props.lastPointWinner = gotMatch ? 'SPIDER' : 'ROCK';
 		gm.props.points[gm.props.lastPointWinner]++;
 	}
-
-	/* release web when a shape is made */
-	let checkUnfinished = true;
-	document.addEventListener('keydown', ev => {
-		if (ev.code === 'KeyY') {
-			checkUnfinished = !checkUnfinished;
-			console.log('Check unfinished toggled', checkUnfinished);
-		}
-	});
 
 	// dont kys on this, going to remove probably ... but also use in another scene ... 
 	scene.onUpdate = function() {
@@ -104,11 +95,11 @@ export function rockLevel(gm, player, sfx) {
 
 		if (player.input.v) {
 			player.input.v = false;
-			tracing.activate(sfx);
+			tracing.activate(gm.sfx);
 		}
 
 		const treeLocation = trees.isColliding(player);
-		const connection = web.getConnection(player, treeLocation);
+		const connection = web.getConnection(player, treeLocation, gm.sfx);
 		if ((connection === Consts.WEB_CONNECTS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTS.RELEASED) {
 
 			const points = structuredClone(web.getPoints({ trimmed: connection === Consts.WEB_CONNECTS.COMPLETED }));
@@ -119,16 +110,17 @@ export function rockLevel(gm, player, sfx) {
 				if (connection === Consts.WEB_CONNECTS.COMPLETED) {
 					web.cancel();
 				}
-				sfx.play('match', true, 0.9, 1.1);
+				gm.sfx.play('match', { randomRate: true });
 				sun.end();
 				gotMatch = true;
 			}
 		}
 
+
 		if (web.isActive() && player.isMoving()) {
-			sfx.play('web');
+			gm.sfx.play('web');
 		} else {
-			sfx.pause('web');
+			gm.sfx.pause('web');
 		}
 
 		sun.update();
@@ -142,7 +134,7 @@ export function rockLevel(gm, player, sfx) {
 	scene.rock = function() {
 		
 		web.end(); // unset web scene
-		sfx.pause('web');
+		gm.sfx.pause('web');
 		sun.getSprite().isActive = false; // yuck
 		player.isActive = false; // double yuck
 		
@@ -153,8 +145,8 @@ export function rockLevel(gm, player, sfx) {
 		trees.startRock();
 		web.startOverride();
 		
-		sfx.play('stone');
-		sfx.play('rock');
+		gm.sfx.play('stone');
+		gm.sfx.play('rock');
 		
 		rockRolled = true;
 	};
@@ -163,8 +155,8 @@ export function rockLevel(gm, player, sfx) {
 		rock.position[0] += random(2, 1) * dir * Consts.ROCK_SPEED;
 		rock.position[1] += random(-1, 2) * Consts.ROCK_SPEED;
 
-		sfx.loop('stone');
-		sfx.loop('rock');
+		gm.sfx.loop('stone');
+		gm.sfx.loop('rock');
 
 		if ((dir === -1 && rock.position[0] < -rock.width) || 
 			dir === 1 && rock.position[0] > gm.width) {

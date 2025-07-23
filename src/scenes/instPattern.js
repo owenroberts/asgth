@@ -14,15 +14,12 @@ export function instPattern(gm, player) {
 
 	const scene = new Scene();
 	let trees, web, tracing, sun;
-	let sfx;
-	let checkUnfinished = true;
 	let gotMatch = false;
 
-	scene.setup = function(_sfx) {
-		sfx = _sfx;
+	scene.setup = function() {
 
 		trees = Trees(gm);
-		web = Web(sfx);
+		web = Web();
 		sun = Sun(gm);
 		scene.add(sun.getSprite());
 
@@ -82,11 +79,11 @@ export function instPattern(gm, player) {
 		// not dry ...
 		if (player.input.v) {
 			player.input.v = false;
-			tracing.activate(sfx);
+			tracing.activate(gm.sfx);
 		}
 
 		const treeLocation = trees.isColliding(player);
-		const connection = web.getConnection(player, treeLocation);
+		const connection = web.getConnection(player, treeLocation, gm.sfx);
 		if ((connection === Consts.WEB_CONNECTS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTS.RELEASED) {
 
 			const points = structuredClone(web.getPoints({ trimmed: connection === Consts.WEB_CONNECTS.COMPLETED }));
@@ -97,21 +94,22 @@ export function instPattern(gm, player) {
 				if (connection === Consts.WEB_CONNECTS.COMPLETED) {
 					web.cancel();
 				}
-				sfx.play('match', true, 0.9, 1.1);
+				gm.sfx.play('match', { randomRate: true });
 				gotMatch = true;
 				sun.end();
 			}
 		}
 
 		if (web.isActive() && player.isMoving()) {
-			sfx.play('web');
+			console.log('play web');
+			gm.sfx.play('web');
 		} else {
-			sfx.pause('web');
+			gm.sfx.pause('web');
 		}
 
 		sun.update();
 		if (sun.isDone()) {
-			sfx.play('inter', true);
+			gm.sfx.play('inter', { randomRate: true });
 			if (gotMatch) gm.props.isPracticePatternSolved = true;
 			gm.sq.next();
 		}

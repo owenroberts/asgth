@@ -1,6 +1,6 @@
 import { Sequencer } from '../cool/cool.js';
 import { Doodoo } from '../doodoo/src/Doodoo.js';
-import { Game, Sprite, TextSprite, SoundProvider, Scene, generateBSPMap } from '../lines/src/Engine.js';
+import { Game, Sprite, TextSprite, Scene, generateBSPMap } from '../lines/src/Engine.js';
 
 import { Spider } from './components/Spider.js'; // not a scene?
 
@@ -58,12 +58,12 @@ gm.props = {
 };
 
 let player; // can this be a component ... only if input moves to gm
-let doodoo, sfx; // add sfx to gm
+let doodoo; // add sfx to gm
 
 /* debug */
 document.addEventListener('keydown', ev => {
 	if (ev.code === 'KeyN' && gm.debug) gm.sq.next();
-	if (ev.code === "KeyS" && gm.debug) sfx.play("next_button", true);
+	if (ev.code === "KeyS" && gm.debug) sfx.play("next_button", { randomRate: true });
 });
 
 function soundSetup(withSound) {
@@ -75,8 +75,8 @@ function soundSetup(withSound) {
 			autoStart: false // !debug
 		});
 
-		sfx = SoundProvider({
-			audioFiles: [
+		gm.sfx.load(
+			[
 				{ key: 'web', url: 'zip_lock.wav', },
 				{ key: 'connect', sequence: [1, 6] },
 				{ key: 'cancel', url: 'cancel.wav', },
@@ -93,15 +93,10 @@ function soundSetup(withSound) {
 				{ key: 'inter', sequence: [1, 4] },
 				{ key: 'walk', sequence: [1, 3] },
 				{ key: 'continue', url: "continue.wav" },
-
-			]
-		}, soundFiles => {
-			gm.scenes.narration.addSFX(sfx);
-			gm.sq.next(); // afterSetupOrSound();
-		});
+			],
+			() => { gm.sq.next(); }
+		);
 	} else {
-		sfx = SoundProvider(); // empty sound provider plays nothing
-		gm.scenes.narration.addSFX(sfx);
 		gm.sq.next(); // afterSetupOrSound();
 	}
 }
@@ -140,7 +135,7 @@ gm.start = function() {
 	gm.scenes.narration = narration(gm);
 	gm.scenes.narration.onKeyUp.x = function() {
 		if (gm.scenes.narration.isDone()) {
-			sfx.play('next_button', true);
+			gm.sfx.play('next_button', { randomRate: true });
 			gm.sq.next();
 		} else {
 			gm.scenes.narration.next();
@@ -149,7 +144,7 @@ gm.start = function() {
 	};
 	
 	const loadingSprite = gm.scenes.loading.addSprite(new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web));
-	loadingSprite.center = true;
+	loadingSprite.center = { randomRate: true };
 	loadingSprite.animation.play();
 
 	const patternMaker = createPatternMaker();
@@ -228,11 +223,11 @@ gm.start = function() {
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 
-		sfx.play("level_start", true);
+		gm.sfx.play("level_start", { randomRate: true });
 		gm.scenes.instMove.setup();
 		gm.scenes.instMove.onKeyDown.x = function() {
 			if (!gm.scenes.instMove.check()) return;
-			sfx.play("next_button");
+			gm.sfx.play("next_button");
 			gm.sq.next();
 		};
 		gm.scenes.setCurrent("instMove");
@@ -243,7 +238,7 @@ gm.start = function() {
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 		
-		gm.scenes.instWeb.setup(sfx);
+		gm.scenes.instWeb.setup(gm.sfx);
 		gm.scenes.setCurrent("instWeb");
 	}});
 
@@ -272,10 +267,10 @@ gm.start = function() {
 		if (gm.props.skipInst) return gm.sq.next();
 
 		gm.props.pattern = Consts.PRACTICE_PATTERN;
-		gm.scenes.pattern = pattern(gm, sfx);
+		gm.scenes.pattern = pattern(gm, gm.sfx);
 		gm.scenes.pattern.onKeyDown.x = function() {
 			if (gm.scenes.pattern.canContinue) {
-				sfx.play("next_button", true);
+				gm.sfx.play("next_button", { randomRate: true });
 				gm.sq.next();
 			}
 		};
@@ -288,7 +283,7 @@ gm.start = function() {
 		if (gm.props.skipInst) return gm.sq.next();
 
 		if (gm.props.isPracticeRestart) gm.scenes.instPattern.reset();
-		else gm.scenes.instPattern.setup(sfx);
+		else gm.scenes.instPattern.setup(gm.sfx);
 		gm.scenes.setCurrent("instPattern");
 	}});
 
@@ -323,10 +318,10 @@ gm.start = function() {
 	gm.sq.add({ fn: () => {
 		gm.props.pattern = patternMaker.getPattern(gm.props.levelCount);
 		gm.props.patternBounds = patternMaker.getBounds();
-		gm.scenes.pattern = pattern(gm, sfx);
+		gm.scenes.pattern = pattern(gm, gm.sfx);
 		gm.scenes.pattern.onKeyDown.x = function() {
 			if (gm.scenes.pattern.canContinue) {
-				sfx.play("next_button", true);
+				gm.sfx.play("next_button", { randomRate: true });
 				gm.sq.next();
 			}
 		};
@@ -339,14 +334,14 @@ gm.start = function() {
 		// if (gm.props.levelCount > Consts.NUM_LEVELS) {
 		// 	return gm.sq.next();
 		// }
-		gm.scenes.walkLevel = walkLevel(gm, player, sfx);
+		gm.scenes.walkLevel = walkLevel(gm, player, gm.sfx);
 		gm.scenes.walkLevel.setup();
 		gm.scenes.setCurrent("walkLevel");
 	}});
 
 	// rock level
 	gm.sq.add({ fn: () => {
-		gm.scenes.rockLevel = rockLevel(gm, player, sfx);
+		gm.scenes.rockLevel = rockLevel(gm, player, gm.sfx);
 		gm.scenes.rockLevel.setup();
 		gm.scenes.setCurrent("rockLevel");
 	}});
@@ -354,7 +349,7 @@ gm.start = function() {
 	// webs or rock rolls based on score
 	gm.sq.add({ fn: () => {
 		if (gm.props.lastPointWinner === "SPIDER") {
-			sfx.play("inter");
+			gm.sfx.play("inter");
 			gm.scenes.interWebs.setup();
 			gm.scenes.setCurrent("interWebs");
 		} else {
@@ -367,17 +362,16 @@ gm.start = function() {
 		gm.props.levelCount++;
 		gm.scenes.narration.add(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
 		gm.scenes.narration.setScore();
-		sfx.play('level_start', true);
+		gm.sfx.play('level_start', { randomRate: true });
 		gm.scenes.setCurrent("narration");
 	}});
 
 	// next loop or end
 	gm.sq.add({ fn: () => {
-		// sfx.play('level_start', true);
 		gm.scenes.narration.hideScore();
 		if (gm.props.levelCount > Consts.NUM_LEVELS) {
 			gm.scenes.end.onKeyUp[Strings.RESET_BTN] = function() {
-				sfx.play('next_button');
+				gm.sfx.play('next_button');
 				resetGame();
 			};
 			gm.scenes.setCurrent("end");

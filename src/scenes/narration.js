@@ -11,7 +11,6 @@ export function narration(gm) {
 
 	const scene = new Scene();
 
-	let sfx;
 	let dialogList = []
 	let isDone = true;
 
@@ -46,7 +45,7 @@ export function narration(gm) {
 
 	scene.next = function() {
 		if (text.isDone()) {
-			sfx.play('next_button', true);
+			gm.sfx.play('next_button', { randomRate: true });
 			if (dialogList.length > 0) {
 				text.setMsg(dialogList.shift());
 			} else {
@@ -54,7 +53,7 @@ export function narration(gm) {
 			}
 		} else {
 			text.skip();
-			sfx.play('skip_button', true);
+			gm.sfx.play('skip_button', { randomRate: true });
 			if (dialogList.length === 0) {
 				isDone = true;
 			}
@@ -74,10 +73,6 @@ export function narration(gm) {
 				isDone = true;
 			} 
 		}
-	};
-
-	scene.addSFX = function(_sfx) {
-		sfx = _sfx;
 	};
 
 	scene.setScore = function() {
