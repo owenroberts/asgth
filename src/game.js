@@ -249,7 +249,7 @@ gm.start = function() {
 
 	// pattern practice setup
 	gm.sq.add({ fn: () => {
-		// if (gm.debug) return gm.sq.next();
+		if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 
 		gm.scenes.narration.add([Strings.INST_PATTERN_PRACTICE, Strings.INST_SUN]);
@@ -258,6 +258,7 @@ gm.start = function() {
 
 	// pattern practice restart
 	gm.sq.add({ label:"practice-pattern-restart", fn: () => {
+		if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 		if (!gm.props.isPracticeRestart) return gm.sq.next();
 
@@ -267,7 +268,7 @@ gm.start = function() {
 
 	// show pattern practice
 	gm.sq.add({ fn: () => {
-		// if (gm.debug) return gm.sq.next();
+		if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 
 		gm.props.pattern = Consts.PRACTICE_PATTERN;
@@ -283,7 +284,7 @@ gm.start = function() {
 
 	// solve pattern practice
 	gm.sq.add({ fn: () => {
-		// if (gm.debug) return gm.sq.next();
+		if (gm.debug) return gm.sq.next();
 		if (gm.props.skipInst) return gm.sq.next();
 
 		if (gm.props.isPracticeRestart) gm.scenes.instPattern.reset();
@@ -292,7 +293,8 @@ gm.start = function() {
 	}});
 
 	gm.sq.add({ fn: () => {
-		console.log('solved?', gm.props.isPracticePatternSolved)
+		if (gm.debug) return gm.sq.next();
+		
 		if (!gm.props.isPracticePatternSolved) {
 			gm.props.isPracticeRestart = true;
 			gm.sq.set("practice-pattern-restart");
@@ -302,7 +304,7 @@ gm.start = function() {
 	
 	// premise, edwards quotations
 	gm.sq.add({ fn: () => {
-		// if (gm.debug) return gm.sq.next();
+		if (gm.debug) return gm.sq.next();
 
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
 		gm.scenes.narration.add([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
@@ -311,7 +313,7 @@ gm.start = function() {
 
 	// start game loop
 	// drawing instructions
-	gm.sq.add({ fn: () => {
+	gm.sq.add({ label: "game-loop-start", fn: () => {
 		// if (gm.debug) return gm.sq.next();
 		gm.scenes.narration.add([Strings.INST_PATTERN]);
 		gm.scenes.setCurrent("narration");
@@ -380,7 +382,9 @@ gm.start = function() {
 			};
 			gm.scenes.setCurrent("end");
 		} else {
-			gameLoop();
+			// gameLoop();
+			gm.sq.set("game-loop-start");
+			gm.sq.next();
 		}
 	}});
 
