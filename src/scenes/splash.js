@@ -8,7 +8,7 @@ export function splash(gm) {
 
 	scene.setup = function() {
 		
-		scene.addToDisplay(new TextSprite({
+		scene.add(new TextSprite({
 			countForward: true,
 			msg: Strings.TITLE,
 			wrap: Consts.TEXT_WRAP,
@@ -19,14 +19,14 @@ export function splash(gm) {
 			letters: gm.anims.sprites.letters_white,
 		}));
 
-		scene.addToDisplay(new TextSprite({
+		scene.add(new TextSprite({
 			msg: Consts.PRIMARY_BTN,
 			x: Consts.CELL_SIZE.W * (2 + 7),
 			y: Consts.CELL_SIZE.H * 3,
 			letters: gm.anims.sprites.letters_keyboard,
 		}));
 
-		scene.addToDisplay(new TextSprite({
+		scene.add(new TextSprite({
 			msg: Strings.START_SOUND,
 			countForward: true,
 			wrap: 24,
@@ -37,14 +37,14 @@ export function splash(gm) {
 			letters: gm.anims.sprites.letters,
 		}));
 
-		scene.addToDisplay(new TextSprite({
+		scene.add(new TextSprite({
 			msg: Consts.SECONDARY_BTN,
 			x: Consts.CELL_SIZE.W * (2 + 7),
 			y: Consts.CELL_SIZE.H * 4.5,
 			letters: gm.anims.sprites.letters_keyboard,
 		}));
 
-		scene.addToDisplay(new TextSprite({
+		scene.add(new TextSprite({
 			msg: Strings.START_SILENT,
 			countForward: true,
 			wrap: 14,

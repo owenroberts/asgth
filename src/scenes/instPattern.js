@@ -23,7 +23,7 @@ export function instPattern(gm, player) {
 		sun = Sun(gm);
 		scene.add(sun.getSprite());
 
-		scene.addSprite([player, web, trees.getSprites()]);
+		scene.add(player, web, trees.getSprites());
 
 		// not DRY ... idk
 		const start = { x: 4, y: 1 };
@@ -58,7 +58,7 @@ export function instPattern(gm, player) {
 		}
 
 		tracing = Tracing(gm.props.pattern, start, true);
-		scene.addToDisplay(tracing);
+		scene.add(tracing);
 
 		player.spawn([
 			start.x * Consts.CELL_SIZE.W,
@@ -74,7 +74,7 @@ export function instPattern(gm, player) {
 		sun.reset();
 	};
 
-	scene.onUpdate = function() {
+	scene.update = function() {
 
 		// not dry ...
 		if (player.input.v) {
@@ -84,7 +84,7 @@ export function instPattern(gm, player) {
 
 		const treeLocation = trees.isColliding(player);
 		const connection = web.getConnection(player, treeLocation, gm.sfx);
-		if ((connection === Consts.WEB_CONNECTS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTS.RELEASED) {
+		if ((connection === Consts.WEB_CONNECTS.COMPLETED) || connection === Consts.WEB_CONNECTS.RELEASED) {
 
 			const points = structuredClone(web.getPoints({ trimmed: connection === Consts.WEB_CONNECTS.COMPLETED }));
 

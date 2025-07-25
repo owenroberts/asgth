@@ -7,7 +7,7 @@ import { Consts } from '../Consts.js';
 export function interWebs(gm) {
 	
 	const scene = new Scene();
-	const sprite = scene.addSprite(new Sprite(0, 0, gm.anims.sprites.webs_2));
+	const sprite = scene.add(new Sprite(0, 0, gm.anims.sprites.webs_2));
 	sprite.animation.frame = randomInt(0, 6);
 	const counter = new Counter(Consts.WEBS_INTERVAL);
 	const animator = new Animator(sprite.animation, {
@@ -20,7 +20,7 @@ export function interWebs(gm) {
 		counter.reset();
 	};
 
-	scene.onUpdate = function() {
+	scene.update = function() {
 		counter.update();
 		if (counter.isDone()) {
 			gm.sq.next();

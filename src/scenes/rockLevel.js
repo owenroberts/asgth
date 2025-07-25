@@ -25,10 +25,10 @@ export function rockLevel(gm, player) {
 
 		const tracingStartTile = map.rooms.filter(r => r.name == "drawing")[0]
 		tracing = Tracing(gm.props.pattern, tracingStartTile);
-		scene.addToDisplay(tracing);
+		scene.add(tracing);
 
 		trees = Trees(gm);
-		scene.addSprite(trees.getSprites());
+		scene.add(trees.getSprites());
 		trees.clearAnimator();
 
 		let treeClusterSize = 3;
@@ -66,17 +66,17 @@ export function rockLevel(gm, player) {
 		]); // no spawn on edge ?
 
 		player.setCollider(...Consts.ROCK_COLLIDER);
-		scene.addSprite(player);
+		scene.add(player);
 
 		sun = Sun(gm);
 		scene.add(sun.getSprite());
 
-		rock = scene.addSprite(new Sprite(gm.width, -gm.anims.sprites.rock.height, gm.anims.sprites.rock));
+		rock = scene.add(new Sprite(gm.width, -gm.anims.sprites.rock.height, gm.anims.sprites.rock));
 		rock.isActive = false;
 		rock.animation.play();
 
 		web = Web();
-		scene.addSprite(web);		
+		scene.add(web);		
 	};
 
 	function updateScore() {
@@ -86,7 +86,7 @@ export function rockLevel(gm, player) {
 	}
 
 	// dont kys on this, going to remove probably ... but also use in another scene ... 
-	scene.onUpdate = function() {
+	scene.update = function() {
 		if (rockRolled) rockUpdate();
 		else webUpdate();
 	};
@@ -100,7 +100,7 @@ export function rockLevel(gm, player) {
 
 		const treeLocation = trees.isColliding(player);
 		const connection = web.getConnection(player, treeLocation, gm.sfx);
-		if ((connection === Consts.WEB_CONNECTS.COMPLETED && checkUnfinished) || connection === Consts.WEB_CONNECTS.RELEASED) {
+		if (connection === Consts.WEB_CONNECTS.COMPLETED || connection === Consts.WEB_CONNECTS.RELEASED) {
 
 			const points = structuredClone(web.getPoints({ trimmed: connection === Consts.WEB_CONNECTS.COMPLETED }));
 

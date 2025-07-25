@@ -115,7 +115,7 @@ export function Web(sfx) {
 		// cancel web
 		if (player.input.z) {
 			player.resetInput();
-			if (treeList.length > 1 && continuousWeb) {
+			if (treeList.length > 1) {
 				drawing.points.pop(); // last spider point
 				end();
 				treeList = [];
@@ -156,19 +156,14 @@ export function Web(sfx) {
 					]);
 					
 					sfx.play('connect');
-					if (!continuousWeb) {
-						end();
-						return Consts.WEB_CONNECTS.RELEASED;
-					} else {
-						drawing.insert(POINTS.END);
-						drawing.insert([
-							treeLocation[0] + Consts.CELL_SIZE.W2,
-							treeLocation[1] + Consts.CELL_SIZE.H2,
-						]);
-						prevTreeLocation = treeLocation;
-						treeList.push([...treeLocation]);
-						return Consts.WEB_CONNECTS.COMPLETED;
-					}
+					drawing.insert(POINTS.END);
+					drawing.insert([
+						treeLocation[0] + Consts.CELL_SIZE.W2,
+						treeLocation[1] + Consts.CELL_SIZE.H2,
+					]);
+					prevTreeLocation = treeLocation;
+					treeList.push([...treeLocation]);
+					return Consts.WEB_CONNECTS.COMPLETED;
 				} else {
 					sfx.play('cancel');
 					return Consts.WEB_CONNECTS.NONE;

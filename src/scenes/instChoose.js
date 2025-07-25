@@ -13,7 +13,7 @@ export function instChoose(gm) {
 	let instText;
 
 	scene.setup = function() {
-		instText = scene.addToDisplay(new TextSprite({
+		instText = scene.add(new TextSprite({
 			countForward: true,
 			msg: Strings.INST_CHOOSE,
 			wrap: 24,

@@ -143,7 +143,7 @@ gm.start = function() {
 		player.resetInput(); // need this? 
 	};
 	
-	const loadingSprite = gm.scenes.loading.addSprite(new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web));
+	const loadingSprite = gm.scenes.loading.add(new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web));
 	loadingSprite.center = { randomRate: true };
 	loadingSprite.animation.play();
 
@@ -387,7 +387,9 @@ gm.start = function() {
 
 gm.update = function(timeElapsed) {
 	player.update(timeElapsed, true);
-	gm.scenes.current.update();
+	if (gm.scenes.current.update) {
+		gm.scenes.current.update();
+	}
 };
 
 gm.draw = function() {

@@ -14,7 +14,7 @@ export function instMove(gm, player) {
 		scene.add(player);
 		player.spawn([Consts.CELL_SIZE.W * 5, Consts.CELL_SIZE.H * 3.5]);
 		
-		scene.addToDisplay(new TextSprite({
+		scene.add(new TextSprite({
 			countForward: true,
 			msg: Strings.INST_MOVE_YOU,
 			track: Consts.LETTERS_TRACK,
@@ -25,7 +25,7 @@ export function instMove(gm, player) {
 			wrap: 14,
 		}));
 
-		scene.addToDisplay(new TextSprite({
+		scene.add(new TextSprite({
 			countForward: true,
 			msg: Strings.INST_MOVE_KEYS,
 			track: Consts.LETTERS_TRACK,
@@ -37,11 +37,11 @@ export function instMove(gm, player) {
 		}));
 
 		const keyboardArrows = new Sprite(Consts.CELL_SIZE.W * 0.5, Consts.CELL_SIZE.H * 3, gm.anims.sprites.keyboard_arrows); 
-		scene.addToDisplay(keyboardArrows);
+		scene.add(keyboardArrows);
 
 		const ui = continueUI(gm);
-		xBtn = scene.addToDisplay(ui.xBtn);
-		xToContinue = scene.addToDisplay(ui.xToContinue);
+		xBtn = scene.add(ui.xBtn);
+		xToContinue = scene.add(ui.xToContinue);
 		
 	};
 
@@ -56,7 +56,7 @@ export function instMove(gm, player) {
 		return arrowsPressed.every(a => a);
 	};
 
-	scene.onUpdate = function() {
+	scene.update = function() {
 		if (player.input['up']) arrowsPressed[0] = true;
 		if (player.input['left']) arrowsPressed[1] = true;
 		if (player.input['right']) arrowsPressed[2] = true;

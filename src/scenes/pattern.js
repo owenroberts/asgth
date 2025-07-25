@@ -21,14 +21,14 @@ export function pattern(gm) {
 	animation.setFrames(); // needs this for game anim that isn't loaded...
 
 	// little sprite hack
-	scene.addToDisplay({
+	scene.add({
 		display() {
 			animation.draw();
 		}
 	});
 
 	// no add this to the narration
-	scene.addToDisplay(new TextSprite({
+	scene.add(new TextSprite({
 		msg: Strings.INST_DRAW_PATTERN,
 		track: Consts.LETTERS_TRACK,
 		lead: Consts.LETTERS_LEAD,
@@ -39,8 +39,8 @@ export function pattern(gm) {
 	}));
 
 	const { xBtn, xToContinue } = continueUI(gm);
-	scene.addToDisplay(xBtn);
-	scene.addToDisplay(xToContinue);
+	scene.add(xBtn);
+	scene.add(xToContinue);
 	scene.canContinue = false;
 
 	const nextDelay = Counter(Consts.PATTERN_DELAY, () => {
@@ -50,7 +50,7 @@ export function pattern(gm) {
 		scene.canContinue = true;
 	});
 
-	scene.onUpdate = function() {
+	scene.update = function() {
 		nextDelay.update();
 	};
 

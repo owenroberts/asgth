@@ -14,12 +14,12 @@ export function narration(gm) {
 	let dialogList = []
 	let isDone = true;
 
-	const score = scene.addSprite(new Texture({ 
+	const score = scene.add(new Texture({ 
 		animation: gm.anims.sprites.score,
 		isActive: false, 
 	}));
 
-	const text = scene.addSprite(new TextSprite({
+	const text = scene.add(new TextSprite({
 		x: Consts.CELL_SIZE.W2, // * Consts.TEXT_MARGIN.W,
 		y: Consts.CELL_SIZE.H2, //  * Consts.TEXT_MARGIN.H,
 		wrap: 24,
@@ -60,7 +60,7 @@ export function narration(gm) {
 		}
 	};
 
-	scene.onUpdate = function() {
+	scene.update = function() {
 		if (!text.isDone()) {
 			xBtn.isActive = false;
 			xToContinue.isActive = false;

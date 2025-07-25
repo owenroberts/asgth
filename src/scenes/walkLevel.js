@@ -37,14 +37,14 @@ export function walkLevel(gm, player) {
 			start.y * Consts.CELL_SIZE.H + player.halfHeight,
 		], "RIGHT");
 		player.setCollider(...Consts.WALK_COLLIDER);
-		scene.addSprite(player);
+		scene.add(player);
 
-		moon = scene.addToDisplay(new Sprite(13 * Consts.CELL_SIZE.W, 7 * Consts.CELL_SIZE.H, gm.anims.sprites.moon));
+		moon = scene.add(new Sprite(13 * Consts.CELL_SIZE.W, 7 * Consts.CELL_SIZE.H, gm.anims.sprites.moon));
 		moonAnim = new Counter(Consts.MOON_INTERVAL);
 
-		const ground = scene.addToDisplay(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_sparse_grass', 'tiles_dirt')] }));
+		const ground = scene.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_sparse_grass', 'tiles_dirt')] }));
 
-		const bgTexture = scene.addToDisplay(new Texture({ animation: gm.anims.sprites.walk_tiles }));
+		const bgTexture = scene.add(new Texture({ animation: gm.anims.sprites.walk_tiles }));
 		const bgIndex = randomInt(0, (bgTexture.animation.endFrame - 1) / 4) * 4;
 
 		exit = new ColliderEmpty(
@@ -123,7 +123,7 @@ export function walkLevel(gm, player) {
 		}
 	};
 
-	scene.onUpdate = function() {
+	scene.update = function() {
 
 		let isOnDoor = false;
 

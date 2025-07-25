@@ -23,9 +23,9 @@ export function instWeb(gm, player) {
 		trees = Trees(gm);
 		web = Web();
 
-		scene.addSprite([player, web, trees.getSprites()]);
+		scene.addSprite(player, web, trees.getSprites());
 		
-		instText = scene.addToDisplay(new TextSprite({
+		instText = scene.add(new TextSprite({
 			countForward: true,
 			msg: Strings.INST_WEB_1,
 			wrap: 22,
@@ -36,7 +36,7 @@ export function instWeb(gm, player) {
 			letters: gm.anims.sprites.letters,
 		}));
 
-		instBtn = scene.addToDisplay(new TextSprite({
+		instBtn = scene.add(new TextSprite({
 			msg: Consts.PRIMARY_BTN,
 			x: Consts.CELL_SIZE.W * Consts.INST_WEB_X1,
 			y: Consts.CELL_SIZE.H2,
@@ -101,7 +101,7 @@ export function instWeb(gm, player) {
 		gm.sq.next();
 	});
 
-	scene.onUpdate = function() {
+	scene.update = function() {
 
 		if (player.input.v) {
 			player.input.v = false;

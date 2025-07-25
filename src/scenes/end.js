@@ -5,7 +5,7 @@ export function end(gm) {
 
 	const scene = new Scene();
 
-	let sprite = scene.addSprite(new Sprite(0, 0, gm.anims.sprites.ending));
+	let sprite = scene.add(new Sprite(0, 0, gm.anims.sprites.ending));
 	sprite.animation.play();
 
 	sprite.animation.play();
@@ -13,14 +13,14 @@ export function end(gm) {
 		
 		sprite.animation.state = "still_frame";
 		
-		scene.addToDisplay(new TextSprite({
+		scene.add(new TextSprite({
 			msg: Strings.RESET_BTN,
 			x: Consts.CELL_SIZE.W * 2,
 			y: Consts.CELL_SIZE.H * 5.5,
 			letters: gm.anims.sprites.letters_keyboard,
 		}));
 		
-		scene.addToDisplay(new TextSprite({
+		scene.add(new TextSprite({
 			msg: Strings.INST_RESTART,
 			wrap: 24,
 			track: Consts.LETTERS_TRACK,
