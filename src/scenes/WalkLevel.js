@@ -1,53 +1,41 @@
 import { Counter, randomInt, choice, map } from '../../cool/cool.js';
 import { BlobMap, TileMap, TileTypes, ColliderSprite, ColliderEmpty, Scene, Texture, Sprite, generateBSPMap, BSPTileTypes } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
-
 import level_bounds from '../data/level_bounds.json';
 
-/**
- * generate walk level
- * @param {Object} gm     the game obj
- * @param {Player} player player sprite
- * @returns Scene
- */
-export function walkLevel(gm, player) {
+export class WalkLevel extends Scene {
 
-	const scene = new Scene();
-	let colliders = [], doorColliders = [], exit;
-	let moon, moonAnim;
+	constructor(gm, player) {
+		super();
 
-	scene.setup = function() {
+		this.sfx = gm.sfx;
+		this.sq = gm.sq;
+		this.props = gm.props;
+		this.height = gm.height;
 
-		doorColliders = [];
-		colliders = [];
-
-		// console.log(gm.props.levelCount) 
+		this.doorColliders = [];
+		this.colliders = [];
 		
 		const map = generateBSPMap({ cols: 13, rows: 7, minRoomSize: 2, minNodeSize: 2, maxNodeSize: 6 });
 		const start = map.paths[0];
 		const end = map.paths[map.paths.length - 1];
-		// console.log({ start, end });
-		// console.log(map) 
-
-		// console.log(map.tileMap.toString('roomIndex'));
-		// console.log(map.tileMap.toString('pathIndex'));
 		
 		player.spawn([
 			start.x * Consts.CELL_SIZE.W + player.halfWidth,
 			start.y * Consts.CELL_SIZE.H + player.halfHeight,
 		], "RIGHT");
 		player.setCollider(...Consts.WALK_COLLIDER);
-		scene.add(player);
+		this.add(player);
 
-		moon = scene.add(new Sprite(13 * Consts.CELL_SIZE.W, 7 * Consts.CELL_SIZE.H, gm.anims.sprites.moon));
-		moonAnim = new Counter(Consts.MOON_INTERVAL);
+		this.moon = this.add(new Sprite(13 * Consts.CELL_SIZE.W, 7 * Consts.CELL_SIZE.H, gm.anims.sprites.moon));
+		this.moonAnim = new Counter(Consts.MOON_INTERVAL);
 
-		const ground = scene.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_sparse_grass', 'tiles_dirt')] }));
+		const ground = this.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_sparse_grass', 'tiles_dirt')] }));
 
-		const bgTexture = scene.add(new Texture({ animation: gm.anims.sprites.walk_tiles }));
+		const bgTexture = this.add(new Texture({ animation: gm.anims.sprites.walk_tiles }));
 		const bgIndex = randomInt(0, (bgTexture.animation.endFrame - 1) / 4) * 4;
 
-		exit = new ColliderEmpty(
+		this.exit = new ColliderEmpty(
 			(end.x + end.w - 1) * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.25,
 			(end.y + end.h - 1) * Consts.CELL_SIZE.H + Consts.CELL_SIZE.W * 0.25,
 			Consts.CELL_SIZE.W * 0.5,
@@ -62,7 +50,6 @@ export function walkLevel(gm, player) {
 			const startTile = map.tileMap.getTile(pathStart.x, pathStart.y);
 			const endTile = map.tileMap.getTile(pathEnd.x, pathEnd.y);
 
-			// console.log({pathStart, pathEnd})
 
 			// if two paths collide, don't make the door
 			if (pathStart.x < pathEnd.x + pathEnd.w &&
@@ -72,15 +59,6 @@ export function walkLevel(gm, player) {
 				continue;
 			}
 
-			// if (pathStart.x + pathStart.w - 1 === pathEnd.x && pathStart.y + pathStart.h - 1 === pathEnd.y) {
-			// 	continue;
-			// }
-
-			// if (startTile.roomIndex === endTile.roomIndex) {
-			// 	continue;
-			// }
-
-			// console.log(path);
 			const d = new ColliderEmpty(
 				(pathStart.x + pathStart.w - 1) * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.32,
 				(pathStart.y + pathStart.h - 1) * Consts.CELL_SIZE.H + Consts.CELL_SIZE.H * 0.32,
@@ -91,9 +69,8 @@ export function walkLevel(gm, player) {
 				x: pathEnd.x * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.5, 
 				y: pathEnd.y * Consts.CELL_SIZE.H + Consts.CELL_SIZE.H * 0.5,
 			};
-			doorColliders.push(d);
+			this.doorColliders.push(d);
 		}
-		// console.log(doorColliders);
 
 		for (let i = 0; i < map.tileMap.tiles.length; i++) {
 			if (map.tileMap.tiles[i].type >= 2) {
@@ -102,7 +79,7 @@ export function walkLevel(gm, player) {
 			} 
 			const { x, y } = map.tileMap.getIndexPosition(i);
 			map.tileMap.tiles[i].type = TileTypes.OFF;
-			colliders.push(new ColliderEmpty(
+			this.colliders.push(new ColliderEmpty(
 				x * Consts.CELL_SIZE.W,
 				y * Consts.CELL_SIZE.H, 
 				Consts.CELL_SIZE.W, 
@@ -120,44 +97,42 @@ export function walkLevel(gm, player) {
 				const f = bgIndex + randomInt(0, 3);
 				bgTexture.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, f);
 			}
-		}
-	};
+	}
+	}
 
-	scene.update = function() {
+	update(player) {
 
 		let isOnDoor = false;
 
-		for (let i = 0; i < doorColliders.length; i++) {
+		for (let i = 0; i < this.doorColliders.length; i++) {
 			// doorColliders[i].drawDebug();
-			if (player.collide(doorColliders[i])) {
+			if (player.collide(this.doorColliders[i])) {
 				player.spawn([
-					doorColliders[i].destination.x,
-					doorColliders[i].destination.y,
+					this.doorColliders[i].destination.x,
+					this.doorColliders[i].destination.y,
 				]);
 				player.resetInput();
-				gm.sfx.play("walk", { randomRate: true });
+				this.sfx.play("walk", { randomRate: true });
 			}
 		}
 
-		for (let i = 0; i < colliders.length; i++) {
-			// colliders[i].drawDebug();
-			if (player.collide(colliders[i])) player.back();
+		for (let i = 0; i < this.colliders.length; i++) {
+			if (player.collide(this.colliders[i])) player.back();
 		}
 		
 		// exit.drawDebug("#ffbb00");
-		if (player.collide(exit)) {
-			gm.sfx.play("walk", { randomRate: true });
-			gm.sq.next();
+		if (player.collide(this.exit)) {
+			this.sfx.play("walk", { randomRate: true });
+			this.props.isWalkLevelExited = true;
+			this.sq.next();
 		}
 
-		moonAnim.update();
-		moon.position[1] = map(Math.sin(moonAnim.getProgress() * Math.PI), 0, 1, gm.height - 64, 0, true);
+		this.moonAnim.update();
+		this.moon.position[1] = map(Math.sin(this.moonAnim.getProgress() * Math.PI), 0, 1, this.height - 64, 0, true);
 		
-		if (moonAnim.isDone()) {
-			scene.clear();
-			scene.setup();
+		if (this.moonAnim.isDone()) {
+			this.sq.next();
 		}
-	};
+	}
 
-	return scene;
 }

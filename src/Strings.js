@@ -31,6 +31,8 @@ export const Strings = {
 
 	CONTINUE: "Continue",
 
+	INST_RESTART: "Play again",
+
 	EDWARDS_QUOTE_1: '"... and all your righteousness, would have no more influence to uphold you, and keep you out of hell ..."',
 	EDWARDS_QUOTE_2: '"... than a spider\'s web would have to stop a falling rock."',
 

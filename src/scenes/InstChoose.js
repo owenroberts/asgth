@@ -4,16 +4,12 @@ import { Consts } from '../Consts.js';
 
 /**
  * option to skip or repeat, if the player has previously completed instructions
- * @param {Object} sprites - game sprites
- * @returns scene
+ * @param {object} gm - game manager
  */
-export function instChoose(gm) {
+export class InstChoose extends Scene {
 
-	const scene = new Scene();
-	let instText;
-
-	scene.setup = function() {
-		instText = scene.add(new TextSprite({
+	setup(gm) {
+		this.text = this.add(new TextSprite({
 			countForward: true,
 			msg: Strings.INST_CHOOSE,
 			wrap: 24,
@@ -23,11 +19,9 @@ export function instChoose(gm) {
 			y: Consts.CELL_SIZE.H * 0.5,
 			letters: gm.anims.sprites.letters,
 		}));
-	};
+	}
 
-	scene.isDone = function() {
-		return instText.isDone();
-	};
-
-	return scene;
+	isDone() {
+		return this.text.isDone();
+	}
 }

@@ -24,29 +24,20 @@ function sortPoints(array) {
 
 export function patternMatch(pattern, drawing) {
 
-	// console.log('drawing', JSON.stringify(drawing));
-
 	// normalize pattern to start at 0,0
 	pattern = normalizeTopLeft(pattern);
-	// console.log('pattern', JSON.stringify(pattern));
 	// sort by sum, then x
-	// pattern = sortPattern(pattern);
-	// console.log('pattern', JSON.stringify(pattern));
 
 	// get segments of the drawing, normalize for top-left, drawing bounds
 	let points = drawing
 		.filter(p => p !== POINTS.END)
 		.map(p => p.map(c => (c - Consts.CELL_SIZE.W / 2) / Consts.CELL_SIZE.W));
 
-	// console.log('points', JSON.stringify(points));
-
 	// get lines from points pairs
 	let lines = [];
 	for (let i = 0; i < points.length; i += 2) {
 		lines.push(sortPoints([points[i], points[i + 1]]));
 	}
-
-	// console.log("lines", JSON.stringify(lines));
 
 	// break up lines into segments
 	for (let i = 0; i < lines.length; i++) {
@@ -74,8 +65,6 @@ export function patternMatch(pattern, drawing) {
 			}
 		}
 	}
-
-	// console.log('segments', JSON.stringify(lines));
 	
 	// remove duplicates
 	let nodupes = [];
