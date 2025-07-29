@@ -12,9 +12,10 @@ import { patternMatch } from '../patternMatch.js';
 
 export class RockLevel extends Scene {
 
-	constructor(gm, player) {
+	constructor(gm) {
 		super();
 
+		this.player = this.add(gm.player);
 		this.sfx = gm.sfx;
 		this.props = gm.props;
 		this.sq = gm.sq;
@@ -63,13 +64,12 @@ export class RockLevel extends Scene {
 		// get tile type method?
 		const spawnTile = choice(map.tileMap.tiles.filter(t => t.type === BSPTileTypes.WALL));
 		const spawnLocation = map.tileMap.getPosition(spawnTile);
-		player.spawn([
+		this.player.spawn([
 			spawnLocation.x * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.5, 
 			spawnLocation.y * Consts.CELL_SIZE.H + Consts.CELL_SIZE.H * 0.5,
 		]); // no spawn on edge ?
 
-		player.setCollider(...Consts.ROCK_COLLIDER);
-		this.add(player);
+		this.player.setCollider(...Consts.ROCK_COLLIDER);
 
 		this.sun = Sun(gm);
 		this.add(this.sun.getSprite());
@@ -87,20 +87,20 @@ export class RockLevel extends Scene {
 		this.props.points[this.props.lastPointWinner]++;
 	}
 
-	update(player) {
-		if (this.isRockRollwed) this.rockUpdate(player);
-		else this.webUpdate(player);
+	update() {
+		if (this.isRockRollwed) this.rockUpdate();
+		else this.webUpdate();
 	}
 
-	webUpdate(player) {
+	webUpdate() {
 
-		if (player.input.v) {
-			player.input.v = false;
+		if (this.player.input.v) {
+			this.player.input.v = false;
 			this.tracing.activate(this.sfx);
 		}
 
-		const treeLocation = this.trees.isColliding(player);
-		const connection = this.web.getConnection(player, treeLocation, this.sfx);
+		const treeLocation = this.trees.isColliding(this.player);
+		const connection = this.web.getConnection(this.player, treeLocation, this.sfx);
 		if (connection === Consts.WEB_CONNECTS.COMPLETED || connection === Consts.WEB_CONNECTS.RELEASED) {
 
 			const points = structuredClone(this.web.getPoints({ trimmed: connection === Consts.WEB_CONNECTS.COMPLETED }));
@@ -118,7 +118,7 @@ export class RockLevel extends Scene {
 		}
 
 
-		if (this.web.isActive() && player.isMoving()) {
+		if (this.web.isActive() && this.player.isMoving()) {
 			this.sfx.play('web');
 		} else {
 			this.sfx.pause('web');
@@ -132,12 +132,12 @@ export class RockLevel extends Scene {
 		}
 	}
 
-	rockSetup(player) {
+	rockSetup() {
 		
 		this.web.end(); // unset web scene
 		this.sfx.pause('web');
 		this.sun.getSprite().isActive = false; // yuck
-		player.isActive = false; // double yuck
+		this.player.isActive = false; // double yuck
 		
 		this.rock.position[0] = this.dir === 1 ? -this.rock.halfWidth : this.width;
 		this.rock.position[1] = -this.rock.halfHeight;
@@ -152,7 +152,7 @@ export class RockLevel extends Scene {
 		this.isRockRollwed = true;
 	};
 
-	rockUpdate(player) {
+	rockUpdate() {
 		this.rock.position[0] += random(2, 1) * this.dir * Consts.ROCK_SPEED;
 		this.rock.position[1] += random(-1, 2) * Consts.ROCK_SPEED;
 
@@ -163,7 +163,7 @@ export class RockLevel extends Scene {
 			this.dir === 1 && this.rock.position[0] > this.width) {
 			this.rock.isActive = false;
 			this.rock.displayFunc = undefined;
-			player.isActive = true;
+			this.player.isActive = true;
 			this.sq.next();
 		}
 		this.trees.shake();

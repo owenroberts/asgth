@@ -58,7 +58,6 @@ gm.props = {
 	isWalkLevelExited: false,
 };
 
-let player; // can this be a component ... only if input moves to gm
 let doodoo; // add sfx to gm
 
 /* debug */
@@ -122,14 +121,14 @@ gm.start = function() {
 	gm.setBounds('right', (Consts.GRID_COLS - 1) * Consts.CELL_SIZE.W);
 	gm.setBounds('bottom', Consts.GRID_ROWS * Consts.CELL_SIZE.H);
 	
-	player = Spider(gm);
+	gm.player = new Spider(gm);
 	gm.sq = new Sequencer();
 	
 	gm.scenes.splash = new Splash(gm);
 	gm.scenes.instMove = new InstMove(gm);
 	gm.scenes.instChoose = new InstChoose();
-	gm.scenes.instWeb = new InstWeb(gm, player);
-	gm.scenes.instPattern = new InstPattern(gm, player);
+	gm.scenes.instWeb = new InstWeb(gm);
+	gm.scenes.instPattern = new InstPattern(gm);
 	gm.scenes.interWebs = new InterWebs(gm);
 	gm.scenes.end = new End(gm);
 
@@ -141,7 +140,7 @@ gm.start = function() {
 		} else {
 			gm.scenes.narration.next();
 		}
-		player.resetInput(); // need this? 
+		gm.player.resetInput(); // need this? 
 	};
 	
 	const loadingSprite = gm.scenes.loading.add(new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web));
@@ -205,14 +204,14 @@ gm.start = function() {
 			if (!gm.scenes.instChoose.isDone()) return;
 			gm.props.isSkipInstructions = true;
 			gm.sq.next();
-			player.resetInput();
+			gm.player.resetInput();
 		};
 
 		// repeat instructions
 		gm.scenes.instChoose.onKeyDown.z = function() {
 			gm.props.isRepeatInstructions = true;
 			gm.sq.next();
-			player.resetInput();
+			gm.player.resetInput();
 		};
 
 		gm.scenes.setCurrent("instChoose");
@@ -224,7 +223,7 @@ gm.start = function() {
 		if (gm.props.isSkipInstructions) return gm.sq.next();
 
 		gm.sfx.play("level_start", { randomRate: true });
-		gm.scenes.instMove.setup(player);
+		gm.scenes.instMove.setup();
 		gm.scenes.instMove.onKeyDown.x = function() {
 			if (!gm.scenes.instMove.isNextReady) return;
 			gm.sfx.play("next_button");
@@ -238,7 +237,7 @@ gm.start = function() {
 		if (gm.debug) return gm.sq.next();
 		if (gm.props.isSkipInstructions) return gm.sq.next();
 		
-		gm.scenes.instWeb.setup(player);
+		gm.scenes.instWeb.setup();
 		gm.scenes.setCurrent("instWeb");
 	}});
 
@@ -283,7 +282,7 @@ gm.start = function() {
 		if (gm.props.isSkipInstructions) return gm.sq.next();
 
 		if (gm.props.isPracticeRestart) gm.scenes.instPattern.reset();
-		else gm.scenes.instPattern.setup(player);
+		else gm.scenes.instPattern.setup();
 		gm.scenes.setCurrent("instPattern");
 	}});
 
@@ -333,7 +332,7 @@ gm.start = function() {
 	gm.sq.add({ label: "walk-level", fn: () => {
 		if (gm.props.levelCount === 0) return gm.sq.next();
 		gm.props.isWalkLevelExited = false;
-		gm.scenes.walkLevel = new WalkLevel(gm, player);
+		gm.scenes.walkLevel = new WalkLevel(gm);
 		gm.scenes.setCurrent("walkLevel");
 	}});
 
@@ -346,7 +345,7 @@ gm.start = function() {
 
 	// rock level
 	gm.sq.add({ fn: () => {
-		gm.scenes.rockLevel = new RockLevel(gm, player);
+		gm.scenes.rockLevel = new RockLevel(gm);
 		gm.scenes.setCurrent("rockLevel");
 	}});
 
@@ -357,7 +356,7 @@ gm.start = function() {
 			gm.scenes.interWebs.setup();
 			gm.scenes.setCurrent("interWebs");
 		} else {
-			gm.scenes.rockLevel.rockSetup(player);
+			gm.scenes.rockLevel.rockSetup();
 		}
 	}});
 
@@ -394,15 +393,15 @@ gm.start = function() {
 		}
 	}});
 
-			gm.scenes.setCurrent("end");
+	gm.scenes.setCurrent("end");
 
 	// gm.sq.next(); // start ... clearer way to do this
 };
 
 gm.update = function(timeElapsed) {
-	player.update(timeElapsed, true);
+	gm.player.update(timeElapsed, true);
 	if (gm.scenes.current.update) {
-		gm.scenes.current.update(player);
+		gm.scenes.current.update();
 	}
 };
 
@@ -420,7 +419,7 @@ gm.keyDown = function(key) {
 				gm.scenes.current.onKeyDown[key]();
 				return;
 			}
-			player.inputKey(key, true);
+			gm.player.inputKey(key, true);
 		break;
 
 		case 'left':
@@ -432,7 +431,7 @@ gm.keyDown = function(key) {
 		case 'b':
 		case 'n':
 		case 'm':
-			player.inputKey(key, true);
+			gm.player.inputKey(key, true);
 		break;
 	}
 };
@@ -447,7 +446,7 @@ gm.keyUp = function(key) {
 				gm.scenes.current.onKeyUp[key]();
 				return;
 			}
-			player.inputKey(key, false);
+			gm.player.inputKey(key, false);
 		break;
 
 		case 'z':
@@ -460,10 +459,7 @@ gm.keyUp = function(key) {
 		case 'b':
 		case 'n':
 		case 'm':
-			player.inputKey(key, false);
+			gm.player.inputKey(key, false);
 		break;
-
-	case 'c':
-		gm
 	}
 };

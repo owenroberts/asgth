@@ -15,6 +15,7 @@ export class InstPattern extends Scene {
 	constructor(gm) {
 		super();
 
+		this.player = this.add(gm.player);
 		this.sfx = gm.sfx;
 		this.props = gm.props;
 		this.sq = gm.sq;
@@ -36,7 +37,6 @@ export class InstPattern extends Scene {
 
 		const tileMap = new TileMap(5, 5);
 		const treeLocations = [[1,1], [1,2], [1,3], [2,1], [2,2], [2,3], [3,1], [3,2], [3,3]];
-
 
 		for (let i = 0; i < treeLocations.length; i++) {
 			let [x, y] = treeLocations[i];
@@ -63,10 +63,8 @@ export class InstPattern extends Scene {
 		}
 	}
 
-	setup(player) {
-
-		this.add(player);
-		player.spawn([
+	setup() {
+		this.player.spawn([
 			this.start.x * Consts.CELL_SIZE.W,
 			(this.start.y + 1) * Consts.CELL_SIZE.H,
 		], 'RIGHT');
@@ -80,16 +78,16 @@ export class InstPattern extends Scene {
 		this.sun.reset();
 	}
 
-	update(player) {
+	update() {
 
 		// not dry ...
-		if (player.input.v) {
-			player.input.v = false;
+		if (this.player.input.v) {
+			this.player.input.v = false;
 			this.tracing.activate(this.sfx);
 		}
 
-		const treeLocation = this.trees.isColliding(player);
-		const connection = this.web.getConnection(player, treeLocation, this.sfx);
+		const treeLocation = this.trees.isColliding(this.player);
+		const connection = this.web.getConnection(this.player, treeLocation, this.sfx);
 		if ((connection === Consts.WEB_CONNECTS.COMPLETED) || connection === Consts.WEB_CONNECTS.RELEASED) {
 
 			const points = structuredClone(this.web.getPoints({ trimmed: connection === Consts.WEB_CONNECTS.COMPLETED }));

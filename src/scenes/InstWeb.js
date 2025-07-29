@@ -9,9 +9,10 @@ import { Tracing } from '../components/Tracing.js';
 
 export class InstWeb extends Scene {
 
-	constructor(gm, player) {
+	constructor(gm) {
 		super();
 
+		this.player = this.add(gm.player);
 		this.sfx = gm.sfx;
 
 		// after connecting trees and releasing web, go to practice symbol
@@ -89,27 +90,25 @@ export class InstWeb extends Scene {
 				blobIndex,
 			);
 		}
-
 	}
 
-	setup(player) {
-		this.add(player);
-		player.spawn([
+	setup() {
+		this.player.spawn([
 			(this.start.x + 1) * Consts.CELL_SIZE.W,
 			(this.start.y) * Consts.CELL_SIZE.H,
 		], 'DOWN');
 	}
 
-	update(player) {
+	update() {
 
-		if (player.input.v) {
-			player.input.v = false;
+		if (this.player.input.v) {
+			this.player.input.v = false;
 			this.tracing.activate(this.sfx);
 			this.conditions.visualizedWeb = true;
 		}
 
-		const treeLocation = this.trees.isColliding(player);
-		const connection = this.web.getConnection(player, treeLocation, this.sfx);
+		const treeLocation = this.trees.isColliding(this.player);
+		const connection = this.web.getConnection(this.player, treeLocation, this.sfx);
 
 		if (connection === Consts.WEB_CONNECTS.STARTED) {
 			if (!this.conditions.firstTree && !this.conditions.secondTree && !this.conditions.releasedWeb) {

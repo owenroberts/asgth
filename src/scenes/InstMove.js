@@ -8,6 +8,10 @@ export class InstMove extends Scene {
 
 	constructor(gm) {
 		super();
+
+		this.player = gm.player;
+
+		this.add(this.player);
 		
 		this.continue = this.add(new ContinueUI(gm));
 		this.continue.isActive = false;
@@ -45,15 +49,14 @@ export class InstMove extends Scene {
 		this.add(new Sprite(Consts.CELL_SIZE.W * 0.5, Consts.CELL_SIZE.H * 3, gm.anims.sprites.keyboard_arrows));
 	}
 
-	setup(player) {
-		this.add(player);
-		player.spawn([Consts.CELL_SIZE.W * 5, Consts.CELL_SIZE.H * 3.5]);
+	setup() {
+		this.player.spawn([Consts.CELL_SIZE.W * 5, Consts.CELL_SIZE.H * 3.5]);
 	}
 
-	update(player) {
-		if (player.input['up']) this.arrowsPressed[0] = true;
-		if (player.input['left']) this.arrowsPressed[1] = true;
-		if (player.input['right']) this.arrowsPressed[2] = true;
+	update() {
+		if (this.player.input.up) this.arrowsPressed[0] = true;
+		if (this.player.input.left) this.arrowsPressed[1] = true;
+		if (this.player.input.right) this.arrowsPressed[2] = true;
 
 		if (this.arrowsPressed.every(a => a)) {
 			this.nextDelay.update();

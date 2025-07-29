@@ -5,9 +5,10 @@ import level_bounds from '../data/level_bounds.json';
 
 export class WalkLevel extends Scene {
 
-	constructor(gm, player) {
+	constructor(gm) {
 		super();
 
+		this.player = this.add(gm.player);
 		this.sfx = gm.sfx;
 		this.sq = gm.sq;
 		this.props = gm.props;
@@ -20,12 +21,11 @@ export class WalkLevel extends Scene {
 		const start = map.paths[0];
 		const end = map.paths[map.paths.length - 1];
 		
-		player.spawn([
-			start.x * Consts.CELL_SIZE.W + player.halfWidth,
-			start.y * Consts.CELL_SIZE.H + player.halfHeight,
+		this.player.spawn([
+			start.x * Consts.CELL_SIZE.W + this.player.halfWidth,
+			start.y * Consts.CELL_SIZE.H + this.player.halfHeight,
 		], "RIGHT");
-		player.setCollider(...Consts.WALK_COLLIDER);
-		this.add(player);
+		this.player.setCollider(...Consts.WALK_COLLIDER);
 
 		this.moon = this.add(new Sprite(13 * Consts.CELL_SIZE.W, 7 * Consts.CELL_SIZE.H, gm.anims.sprites.moon));
 		this.moonAnim = new Counter(Consts.MOON_INTERVAL);
@@ -100,28 +100,28 @@ export class WalkLevel extends Scene {
 	}
 	}
 
-	update(player) {
+	update() {
 
 		let isOnDoor = false;
 
 		for (let i = 0; i < this.doorColliders.length; i++) {
 			// doorColliders[i].drawDebug();
-			if (player.collide(this.doorColliders[i])) {
-				player.spawn([
+			if (this.player.collide(this.doorColliders[i])) {
+				this.player.spawn([
 					this.doorColliders[i].destination.x,
 					this.doorColliders[i].destination.y,
 				]);
-				player.resetInput();
+				this.player.resetInput();
 				this.sfx.play("walk", { randomRate: true });
 			}
 		}
 
 		for (let i = 0; i < this.colliders.length; i++) {
-			if (player.collide(this.colliders[i])) player.back();
+			if (this.player.collide(this.colliders[i])) this.player.back();
 		}
 		
 		// exit.drawDebug("#ffbb00");
-		if (player.collide(this.exit)) {
+		if (this.player.collide(this.exit)) {
 			this.sfx.play("walk", { randomRate: true });
 			this.props.isWalkLevelExited = true;
 			this.sq.next();

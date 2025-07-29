@@ -8,6 +8,9 @@ export class End extends Scene {
 		
 		let sprite = this.add(new Sprite(0, 0, gm.anims.sprites.ending));
 		sprite.animation.play();
+
+		console.log('ending anim', sprite.animation);
+
 		sprite.animation.onPlayedOnce = () => {
 
 			sprite.animation.state = "still_frame";
