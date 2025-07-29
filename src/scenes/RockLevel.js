@@ -28,8 +28,7 @@ export class RockLevel extends Scene {
 		const map = generateBSPMap({ cols: 13, rows: 7, minNodeSize: 2, maxNodeSize: 6, createPaths: false, inject: [{ type: "room", w: gm.props.patternBounds.width, h: gm.props.patternBounds.height, name: 'drawing' }] });
 
 		const tracingStartTile = map.rooms.filter(r => r.name == "drawing")[0]
-		this.tracing = Tracing(gm.props.pattern, tracingStartTile);
-		this.add(this.tracing);
+		this.tracing = this.add(new Tracing(gm, gm.props.pattern, tracingStartTile));
 
 		this.trees = Trees(gm);
 		this.add(this.trees.getSprites());
@@ -93,10 +92,7 @@ export class RockLevel extends Scene {
 
 	webUpdate() {
 
-		if (this.player.input.v) {
-			this.player.input.v = false;
-			this.tracing.activate(this.sfx);
-		}
+		this.tracing.update();
 
 		const treeLocation = this.trees.isColliding(this.player);
 		const connection = this.web.getConnection(this.player, treeLocation, this.sfx);

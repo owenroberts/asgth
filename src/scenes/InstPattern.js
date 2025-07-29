@@ -31,8 +31,7 @@ export class InstPattern extends Scene {
 		// not DRY ... idk
 		this.start = { x: 4, y: 1 };
 		
-		this.tracing = Tracing(gm.props.pattern, this.start, true);
-		this.add(this.tracing);
+		this.tracing = this.add(new Tracing(gm, gm.props.pattern, this.start, true));
 		
 		const ground = this.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }, true));
 
@@ -81,11 +80,7 @@ export class InstPattern extends Scene {
 
 	update() {
 
-		// not dry ...
-		if (this.player.input.v) {
-			this.player.input.v = false;
-			this.tracing.activate(this.sfx);
-		}
+		this.tracing.update();
 
 		const treeLocation = this.trees.isColliding(this.player);
 		const connection = this.web.getConnection(this.player, treeLocation, this.sfx);

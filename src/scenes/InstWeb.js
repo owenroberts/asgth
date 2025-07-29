@@ -75,8 +75,7 @@ export class InstWeb extends Scene {
 			tileMap.setTileProperty(x, y, 'type', 1); // default type is 0
 		}
 
-		this.tracing = Tracing([treeLocations], this.start, true);
-		this.add(this.tracing);
+		this.tracing = this.add(new Tracing(gm, [treeLocations], this.start, true));
 		
 		const blobMap = new BlobMap(tileMap);
 		for (let i = 0; i < tileMap.tiles.length; i++) {
@@ -101,11 +100,11 @@ export class InstWeb extends Scene {
 
 	update() {
 
+
 		if (this.player.input.v) {
-			this.player.input.v = false;
-			this.tracing.activate(this.sfx);
 			this.conditions.visualizedWeb = true;
 		}
+		this.tracing.update();
 
 		const treeLocation = this.trees.isColliding(this.player);
 		const connection = this.web.getConnection(this.player, treeLocation, this.sfx);
