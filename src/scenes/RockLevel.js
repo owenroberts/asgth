@@ -71,8 +71,7 @@ export class RockLevel extends Scene {
 
 		this.player.setCollider(...Consts.ROCK_COLLIDER);
 
-		this.sun = Sun(gm);
-		this.add(this.sun.getSprite());
+		this.sun = this.add(new Sun(gm));
 
 		this.rock = this.add(new Sprite(gm.width, -gm.anims.sprites.rock.height, gm.anims.sprites.rock));
 		this.rock.isActive = false;
@@ -80,7 +79,7 @@ export class RockLevel extends Scene {
 
 		this.web = Web();
 		this.add(this.web);		
-	};
+	}
 
 	updateScore() {
 		this.props.lastPointWinner = this.gotMatch ? 'SPIDER' : 'ROCK';
@@ -136,8 +135,8 @@ export class RockLevel extends Scene {
 		
 		this.web.end(); // unset web scene
 		this.sfx.pause('web');
-		this.sun.getSprite().isActive = false; // yuck
-		this.player.isActive = false; // double yuck
+		this.sun.isActive = false;
+		this.player.isActive = false;
 		
 		this.rock.position[0] = this.dir === 1 ? -this.rock.halfWidth : this.width;
 		this.rock.position[1] = -this.rock.halfHeight;

@@ -393,9 +393,7 @@ gm.start = function() {
 		}
 	}});
 
-	gm.scenes.setCurrent("end");
-
-	// gm.sq.next(); // start ... clearer way to do this
+	gm.sq.next(); // start ... clearer way to do this
 };
 
 gm.update = function(timeElapsed) {

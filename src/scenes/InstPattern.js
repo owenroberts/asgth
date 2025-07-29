@@ -24,8 +24,9 @@ export class InstPattern extends Scene {
 
 		this.trees = Trees(gm);
 		this.web = Web();
-		this.sun = Sun(gm);
-		this.add(this.web, this.trees.getSprites(), this.sun.getSprite());
+		this.sun = this.add(new Sun(gm));
+		
+		this.add(this.web, this.trees.getSprites());
 
 		// not DRY ... idk
 		this.start = { x: 4, y: 1 };
