@@ -30,13 +30,12 @@ export class RockLevel extends Scene {
 		const tracingStartTile = map.rooms.filter(r => r.name == "drawing")[0]
 		this.tracing = this.add(new Tracing(gm, gm.props.pattern, tracingStartTile));
 
-		this.trees = Trees(gm);
-		this.add(this.trees.getSprites());
+		this.trees = this.add(new Trees(gm));
 		this.trees.clearAnimator();
 
 		let treeClusterSize = 3;
 		// don't like mixing getTexture() with .animation ... 
-		let numTrees = this.trees.getTexture().animation.endFrame;
+		let numTrees = this.trees.texture.animation.endFrame;
 		for (let i = 0; i < map.rooms.length; i++) {
 			const treeClusterIndex = randomInt(numTrees - treeClusterSize);
 			const r = map.rooms[i];
@@ -76,8 +75,7 @@ export class RockLevel extends Scene {
 		this.rock.isActive = false;
 		this.rock.animation.play();
 
-		this.web = Web();
-		this.add(this.web);		
+		this.web = this.add(new Web(gm));
 	}
 
 	updateScore() {
@@ -94,7 +92,7 @@ export class RockLevel extends Scene {
 
 		this.tracing.update();
 
-		const treeLocation = this.trees.isColliding(this.player);
+		const treeLocation = this.trees.getTreeLocation(this.player);
 		const connection = this.web.getConnection(this.player, treeLocation, this.sfx);
 		if (connection === Consts.WEB_CONNECTS.COMPLETED || connection === Consts.WEB_CONNECTS.RELEASED) {
 
@@ -113,7 +111,7 @@ export class RockLevel extends Scene {
 		}
 
 
-		if (this.web.isActive() && this.player.isMoving()) {
+		if (this.web.isActive && this.player.isMoving()) {
 			this.sfx.play('web');
 		} else {
 			this.sfx.pause('web');

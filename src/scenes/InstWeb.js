@@ -17,6 +17,7 @@ export class InstWeb extends Scene {
 
 		// after connecting trees and releasing web, go to practice symbol
 		// conditions? some kind of condition manager?
+		// isFirstTreeConnected? yikes
 		this.conditions = {
 			firstTree: false,
 			secondTree: false,
@@ -29,10 +30,8 @@ export class InstWeb extends Scene {
 			gm.sq.next();
 		});
 
-		this.trees = Trees(gm);
-		this.web = Web();
-
-		this.add(this.web, this.trees.getSprites());
+		this.trees = this.add(new Trees(gm));
+		this.web = this.add(new Web(gm));
 		
 		this.instText = this.add(new TextSprite({
 			countForward: true,
@@ -106,7 +105,7 @@ export class InstWeb extends Scene {
 		}
 		this.tracing.update();
 
-		const treeLocation = this.trees.isColliding(this.player);
+		const treeLocation = this.trees.getTreeLocation(this.player);
 		const connection = this.web.getConnection(this.player, treeLocation, this.sfx);
 
 		if (connection === Consts.WEB_CONNECTS.STARTED) {

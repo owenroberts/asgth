@@ -381,13 +381,12 @@ gm.start = function() {
 	gm.sq.add({ fn: () => {
 		gm.scenes.narration.hideScore();
 		if (gm.props.levelCount >= Consts.NUM_LEVELS) {
-			gm.scenes.end.onKeyUp[Strings.RESET_BTN] = function() {
+			gm.scenes.end.onKeyUp[Consts.RESET_BTN] = function() {
 				gm.sfx.play('next_button');
 				resetGame();
 			};
 			gm.scenes.setCurrent("end");
 		} else {
-			// gameLoop();
 			gm.sq.set("game-loop-start");
 			gm.sq.next();
 		}

@@ -22,11 +22,9 @@ export class InstPattern extends Scene {
 
 		this.gotMatch = false;
 
-		this.trees = Trees(gm);
-		this.web = Web();
+		this.trees = this.add(new Trees(gm));
+		this.web = this.add(new Web(gm));
 		this.sun = this.add(new Sun(gm));
-		
-		this.add(this.web, this.trees.getSprites());
 
 		// not DRY ... idk
 		this.start = { x: 4, y: 1 };
@@ -72,7 +70,7 @@ export class InstPattern extends Scene {
 
 	reset() {
 		this.web.clear();
-		this.trees.getTexture().locations.forEach(l => {
+		this.trees.locations.forEach(l => {
 			l.i = randomInt(25);
 		});
 		this.sun.reset();
@@ -82,7 +80,7 @@ export class InstPattern extends Scene {
 
 		this.tracing.update();
 
-		const treeLocation = this.trees.isColliding(this.player);
+		const treeLocation = this.trees.getTreeLocation(this.player);
 		const connection = this.web.getConnection(this.player, treeLocation, this.sfx);
 		if ((connection === Consts.WEB_CONNECTS.COMPLETED) || connection === Consts.WEB_CONNECTS.RELEASED) {
 
@@ -100,7 +98,7 @@ export class InstPattern extends Scene {
 			}
 		}
 
-		if (this.web.isActive() && player.isMoving()) {
+		if (this.web.isActive && player.isMoving()) {
 			this.sfx.play('web');
 		} else {
 			this.sfx.pause('web');

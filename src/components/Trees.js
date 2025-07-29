@@ -1,72 +1,77 @@
 import { randomInt, Counter } from '../../cool/cool.js';
-import { Texture, Sprite } from '../../lines/src/Engine.js';
+import { Texture, Sprite, SpriteCollection } from '../../lines/src/Engine.js';
 import { Animator } from '../../lines/src/Lines.js';
 import { Consts } from '../Consts.js';
 
 /**
- * Draw and manage trees for walk and draw levels
- * @param {Game} gm - game manager {}
+ * SpriteCollection with trees Texture and select circle Sprite
  */
-export function Trees(gm) {
+export class Trees extends SpriteCollection {
+	
+	constructor(gm) {
+		super();
 
-	// turn trees into a scene?
-	const texture = new Texture({ animation: gm.anims.sprites.trees });
-	const animator = Animator(texture.animation, {
-		jiggleRange: [1, 1],
-		segmentNum: [2, 3],
-	});
-	// animator.set();
-	const animCounter = Counter(24, () => { 
-		animator.set(); 
-	});
-	animCounter.setLoop(true);
-	const select = new Sprite(0, 0, gm.anims.sprites.select);
-	select.isActive = false;
-	select.animation.play();
+		this.texture = this.add(new Texture({ animation: gm.anims.sprites.trees }));
+		
+		this.animator = new Animator(this.texture.animation, {
+			jiggleRange: [1, 1],
+			segmentNum: [2, 3],
+		});
+		
+		this.animCounter = Counter(24, () => { 
+			this.animator.set(); 
+		});
+		
+		this.animCounter.setLoop(true);
+	
+		this.select = this.add(new Sprite(0, 0, gm.anims.sprites.select));
+		this.select.isActive = false;
+		this.select.animation.play();
+	}
 	
 	/**
-	 * Detect if player is colliding with a tree
-	 * @param  {Object}  player
-	 * @return {(boolean|Array)}	either false, or colliding tree position array
+	 * detect if player is colliding with a tree
+	 * @param  {object}  player
+	 * @return {boolean|[x, y]}	either false, or colliding tree position array
 	 */
-	function isColliding(player) {
-		// return this.collide(player);
-		for (let i = 0; i < texture.locations.length; i++) {
-			let x = texture.locations[i][0];
-			let y = texture.locations[i][1];
+	getTreeLocation(player) {
+		for (let i = 0; i < this.texture.locations.length; i++) {
+			let x = this.texture.locations[i][0];
+			let y = this.texture.locations[i][1];
 			if (player.tap(x + 32, y + 32)) {
-				select.position = [x, y];
-				select.isActive = true;
+				this.select.position = [x, y];
+				this.select.isActive = true;
 				return [x, y];
 			}
 		}
-		select.isActive = false;
+		this.select.isActive = false;
 		return false;
 	}
 
 	/**
 	 * animate trees shaking while rock is moving in scene.
 	 */
-	function shake() {
-		texture.offset[0] = randomInt(-Consts.ROCK_SHAKE_AMOUNT, Consts.ROCK_SHAKE_AMOUNT); 
-		texture.offset[1] = randomInt(-Consts.ROCK_SHAKE_AMOUNT, Consts.ROCK_SHAKE_AMOUNT);
-		animCounter.update();
+	shake() {
+		this.texture.offset[0] = randomInt(-Consts.ROCK_SHAKE_AMOUNT, Consts.ROCK_SHAKE_AMOUNT); 
+		this.texture.offset[1] = randomInt(-Consts.ROCK_SHAKE_AMOUNT, Consts.ROCK_SHAKE_AMOUNT);
+		this.animCounter.update();
 	}
 
-	function startRock() {
-		select.isActive = false;
-		animator.set(); 
+	addLocation(x, y, i) {
+		this.texture.addLocation(x, y, i);
 	}
 
-	return { 
-		isColliding, shake, startRock,
-		getSprites: () => { return [texture, select]; },
-		getTexture: () => { return texture; },
-		addLocation: (x, y, frameIndex) => { texture.addLocation(x, y, frameIndex); },
-		clear: () => { texture.clear(); },
-		clearAnimator: () => { 
-			animator.clear();
-			texture.offset = [0, 0];
-		},
-	};
+	startRock() {
+		this.select.isActive = false;
+		this.animator.set(); 
+	}
+
+	clearTrees() { 
+		this.texture.clear(); 
+	}
+
+	clearAnimator() { 
+		this.animator.clear();
+		this.texture.offset = [0, 0];
+	}
 }
