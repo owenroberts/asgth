@@ -1,6 +1,6 @@
 import { Consts } from '../Consts.js';
 import { GameAnim, Sprite } from '../../lines/src/Engine.js';
-import { Drawing, Layer, Style, POINTS, Animator } from '../../lines/src/Lines.js';
+import { Drawing, Layer, Style, Points, Animator } from '../../lines/src/Lines.js';
 
 /**
  * draw the spiders web
@@ -10,11 +10,10 @@ export class Web extends Sprite {
 	constructor(gm) {
 		super();
 
-		this.debug = true;
-		this.isDrawing = false;
-
 		this.sfx = gm.sfx;
-	
+
+		this.isDrawing = false; // toggle for starting web drawing
+
 		this.animation = new GameAnim();
 		this.animation.width = gm.width;
 		this.animation.height = gm.height
@@ -41,8 +40,8 @@ export class Web extends Sprite {
 	end() {
 		this.drawing.points.pop();
 		this.isDrawing = false;
-		if (this.drawing.points.slice(-1) !== POINTS.END) {
-			this.drawing.add(POINTS.END);
+		if (this.drawing.points.slice(-1) !== Points.END) {
+			this.drawing.add(Points.END);
 		}
 	}
 
@@ -81,7 +80,7 @@ export class Web extends Sprite {
 	getPoints(trimmed=false) {
 		const points = structuredClone(this.drawing.points);
 		if (trimmed) {
-			while (points.slice(-1)[0] !== POINTS.END && points.length > 0) {
+			while (points.slice(-1)[0] !== Points.END && points.length > 0) {
 				points.pop();
 			}
 		}
@@ -169,7 +168,7 @@ export class Web extends Sprite {
 					]);
 					
 					this.sfx.play('connect');
-					this.drawing.insert(POINTS.END);
+					this.drawing.insert(Points.END);
 					this.drawing.insert([
 						treeLocation[0] + Consts.CELL_SIZE.W2,
 						treeLocation[1] + Consts.CELL_SIZE.H2,

@@ -1,6 +1,6 @@
 import { random, shuffle, coinFlip, Counter } from '../../cool/cool.js';
 import { Sprite, Scene, GameAnim, TextSprite } from '../../lines/src/Engine.js';
-import { Drawing, Layer, Style, POINTS, Animator } from '../../lines/src/Lines.js';
+import { Drawing, Layer, Style, Points, Animator } from '../../lines/src/Lines.js';
 import { Consts } from '../Consts.js';
 import { Strings } from '../Strings.js';
 import { ContinueUI } from '../components/ContinueUI.js';
@@ -67,7 +67,7 @@ export class Pattern extends Scene {
 				sX + gm.props.pattern[i][1][0] * w, 
 				sY + gm.props.pattern[i][1][1] * h,
 			]);
-			drawing.add(POINTS.END);
+			drawing.add(Points.END);
 		}
 	}
 

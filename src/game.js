@@ -94,7 +94,9 @@ function soundSetup(withSound) {
 				{ key: 'walk', sequence: [1, 3] },
 				{ key: 'continue', url: "continue.wav" },
 			],
-			() => { gm.sq.next(); }
+			() => { 
+				gm.sq.next(); 
+			}
 		);
 	} else {
 		gm.sq.next(); // afterSetupOrSound();

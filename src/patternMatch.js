@@ -1,5 +1,5 @@
 import { Consts } from './Consts.js';
-import { POINTS } from '../lines/src/Lines.js';
+import { Points } from '../lines/src/Lines.js';
 
 // move top left to 0,0
 function normalizeTopLeft(array) {
@@ -30,7 +30,7 @@ export function patternMatch(pattern, drawing) {
 
 	// get segments of the drawing, normalize for top-left, drawing bounds
 	let points = drawing
-		.filter(p => p !== POINTS.END)
+		.filter(p => p !== Points.END)
 		.map(p => p.map(c => (c - Consts.CELL_SIZE.W / 2) / Consts.CELL_SIZE.W));
 
 	// get lines from points pairs

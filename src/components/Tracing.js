@@ -1,6 +1,6 @@
 import { Consts } from '../Consts.js';
 import { GameAnim, Sprite } from '../../lines/src/Engine.js';
-import { Drawing, Layer, Style, POINTS } from '../../lines/src/Lines.js';
+import { Drawing, Layer, Style, Points } from '../../lines/src/Lines.js';
 
 export class Tracing extends Sprite {
 
@@ -48,7 +48,7 @@ export class Tracing extends Sprite {
 				(line[1][0] + startTile.x) * Consts.CELL_SIZE.W + offset.w,
 				(line[1][1] + startTile.y) * Consts.CELL_SIZE.H + offset.h,
 			]);
-			drawing.add(POINTS.END);
+			drawing.add(Points.END);
 		}
 	}
 
