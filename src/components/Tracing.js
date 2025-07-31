@@ -8,7 +8,7 @@ export class Tracing extends Sprite {
 		super(0, 0);
 
 		this.sfx = gm.sfx;
-		this.player = gm.player;
+		this.input = gm.input;
 
 		this.isActive = false;
 
@@ -53,8 +53,7 @@ export class Tracing extends Sprite {
 	}
 
 	update() {
-		if (this.player.input.v) {
-			this.player.input.v = false;
+		if (this.input.triggerKey('v')) {
 			this.activate();
 		}
 	}

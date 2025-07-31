@@ -9,9 +9,8 @@ export class InstMove extends Scene {
 	constructor(gm) {
 		super();
 
-		this.player = gm.player;
-
-		this.add(this.player);
+		this.input = gm.input;
+		this.player = this.add(gm.player);
 		
 		this.continue = this.add(new ContinueUI(gm));
 		this.continue.isActive = false;
@@ -54,9 +53,9 @@ export class InstMove extends Scene {
 	}
 
 	update() {
-		if (this.player.input.up) this.arrowsPressed[0] = true;
-		if (this.player.input.left) this.arrowsPressed[1] = true;
-		if (this.player.input.right) this.arrowsPressed[2] = true;
+		if (this.input.getKey('up')) this.arrowsPressed[0] = true;
+		if (this.input.getKey('left')) this.arrowsPressed[1] = true;
+		if (this.input.getKey('right')) this.arrowsPressed[2] = true;
 
 		if (this.arrowsPressed.every(a => a)) {
 			this.nextDelay.update();

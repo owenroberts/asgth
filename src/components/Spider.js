@@ -33,10 +33,10 @@ export class Spider extends ColliderSprite {
 		super(0, 0, gm.anims.sprites.spider);
 
 		this.bounds = gm.bounds;
+		this.input = gm.input;
 		
 		this.center = true;
 		this.prevPosition = [0, 0];
-		this.input = { right: false, up: false, left: false, down: false, x: false, z: false, c: false };
 
 		this.direction = Directions.UP;
 
@@ -63,17 +63,9 @@ export class Spider extends ColliderSprite {
 		this.position[1] = this.prevPosition[1];
 	}
 
-	inputKey(key, state) {
-		this.input[key] = state;
-	}
-
-	resetInput() {
-		this.input = { right: false, up: false, left: false, down: false, x: false, z: false, c: false, v: false, b: false, n: false, m: false };
-	}
-
 	// getter?
 	isMoving() {
-		return this.input.up || this.input.down || this.input.right || this.input.left;
+		return this.input.getKey('up') || this.input.getKey('down') || this.input.getKey('left') || this.input.getKey('right');
 	}
 
 	update(time) {
@@ -82,12 +74,12 @@ export class Spider extends ColliderSprite {
 		this.prevPosition[0] = this.position[0];
 		this.prevPosition[1] = this.position[1];
 		
-		if (this.input.right && !this.input.left && this.rightCounter.isDone()) {
+		if (this.input.getKey('right') && !this.input.getKey('left') && this.rightCounter.isDone()) {
 			this.direction = (this.direction + 1) % 8;
 			this.rightCounter.reset();
 		}
 
-		if (this.input.left && !this.input.right && this.leftCounter.isDone()) {
+		if (this.input.getKey('left') && !this.input.getKey('right') && this.leftCounter.isDone()) {
 			this.direction = (8 + (this.direction - 1) % 8) % 8;
 			this.leftCounter.reset();
 		}
@@ -95,7 +87,7 @@ export class Spider extends ColliderSprite {
 		this.rightCounter.update();
 		this.leftCounter.update();
 
-		const speed = this.input.up ? 
+		const speed = this.input.getKey('up') ? 
 			[
 				directionSpeeds[this.direction][0],
 				directionSpeeds[this.direction][1],

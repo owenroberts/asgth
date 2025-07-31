@@ -11,6 +11,7 @@ export class Web extends Sprite {
 		super();
 
 		this.sfx = gm.sfx;
+		this.input = gm.input;
 
 		this.isDrawing = false; // toggle for starting web drawing
 
@@ -112,9 +113,7 @@ export class Web extends Sprite {
 
 		// console.log(treeLocation);
 
-		if (player.input.c) {
-			player.input.c = false;
-			// better than player.resetInput('c') ?
+		if (this.input.triggerKey('c')) {
 			if (this.drawing.length > 0) {
 				this.sfx.play("web_clear");
 				this.sfx.play("web_clear_web");
@@ -124,8 +123,7 @@ export class Web extends Sprite {
 		}
 
 		// cancel web
-		if (player.input.z) {
-			player.resetInput();
+		if (this.input.triggerKey('z')) {
 			if (this.treeList.length > 1) {
 				this.drawing.points.pop(); // last spider point
 				this.end();
@@ -142,8 +140,8 @@ export class Web extends Sprite {
 
 
 		if (treeLocation) {
-			if (player.input.x) {
-				player.resetInput();
+			if (this.input.triggerKey('x')) {
+
 				if (!this.isDrawing) {
 					this.isDrawing = true;
 

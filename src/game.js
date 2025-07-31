@@ -38,6 +38,7 @@ const gm = new Game({
 	suspend: true,
 	events: ["keyboard"],
 	scenes: ["loading", "walkLevel", "rockLevel"],
+	keys: ["right", "left", "up", "down", "x", "c", "m", "v", "r"],
 	// testPerformance: true,
 });
 gm.load({ animations: { sprites: spritePaths }, }, false);
@@ -58,7 +59,7 @@ gm.props = {
 	isWalkLevelExited: false,
 };
 
-let doodoo; // add sfx to gm
+let doodoo;
 
 /* debug */
 document.addEventListener('keydown', ev => {
@@ -116,7 +117,7 @@ function resetGame() {
 	gm.scenes.setCurrent("splash");
 }
 
-gm.start = function() {
+gm.onSetup = function() {
 
 	gm.setBounds('left', 0);
 	gm.setBounds('top', 0);
@@ -142,11 +143,11 @@ gm.start = function() {
 		} else {
 			gm.scenes.narration.next();
 		}
-		gm.player.resetInput(); // need this? 
+		gm.input.reset();
 	};
 	
 	const loadingSprite = gm.scenes.loading.add(new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web));
-	loadingSprite.center = { randomRate: true };
+	loadingSprite.center = true;
 	loadingSprite.animation.play();
 
 	const patternMaker = createPatternMaker();
@@ -206,14 +207,14 @@ gm.start = function() {
 			if (!gm.scenes.instChoose.isDone()) return;
 			gm.props.isSkipInstructions = true;
 			gm.sq.next();
-			gm.player.resetInput();
+			gm.input.reset();
 		};
 
 		// repeat instructions
 		gm.scenes.instChoose.onKeyDown.z = function() {
 			gm.props.isRepeatInstructions = true;
 			gm.sq.next();
-			gm.player.resetInput();
+			gm.input.reset();
 		};
 
 		gm.scenes.setCurrent("instChoose");
@@ -397,18 +398,18 @@ gm.start = function() {
 	gm.sq.next(); // start ... clearer way to do this
 };
 
-gm.update = function(timeElapsed) {
+gm.onUpdate = function(timeElapsed) {
 	gm.player.update(timeElapsed, true);
 	if (gm.scenes.current.update) {
 		gm.scenes.current.update();
 	}
 };
 
-gm.draw = function() {
+gm.onDraw = function() {
 	gm.scenes.current.display();
 };
 
-gm.keyDown = function(key) {
+gm.onKeyDown = function(key) {
 	switch (key) {
 
 		case Consts.RESET_BTN:
@@ -418,7 +419,7 @@ gm.keyDown = function(key) {
 				gm.scenes.current.onKeyDown[key]();
 				return;
 			}
-			gm.player.inputKey(key, true);
+			gm.input.setKey(key, true);
 		break;
 
 		case 'left':
@@ -427,15 +428,12 @@ gm.keyDown = function(key) {
 		case 'down':
 		case 'c':
 		case 'v':
-		case 'b':
-		case 'n':
-		case 'm':
-			gm.player.inputKey(key, true);
+			gm.input.setKey(key, true);
 		break;
 	}
 };
 
-gm.keyUp = function(key) {
+gm.onKeyUp = function(key) {
 	switch (key) {
 
 		case Consts.RESET_BTN:
@@ -445,20 +443,16 @@ gm.keyUp = function(key) {
 				gm.scenes.current.onKeyUp[key]();
 				return;
 			}
-			gm.player.inputKey(key, false);
+			gm.input.setKey(key, false);
 		break;
 
-		case 'z':
 		case 'left':
 		case 'up':
 		case 'right':
 		case 'down':
 		case 'c':
 		case 'v':
-		case 'b':
-		case 'n':
-		case 'm':
-			gm.player.inputKey(key, false);
+			gm.input.setKey(key, false);
 		break;
 	}
 };

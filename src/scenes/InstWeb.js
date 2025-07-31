@@ -14,6 +14,7 @@ export class InstWeb extends Scene {
 
 		this.player = this.add(gm.player);
 		this.sfx = gm.sfx;
+		this.input = gm.input;
 
 		// after connecting trees and releasing web, go to practice symbol
 		// conditions? some kind of condition manager?
@@ -100,7 +101,7 @@ export class InstWeb extends Scene {
 	update() {
 
 
-		if (this.player.input.v) {
+		if (this.input.triggerKey('v')) {
 			this.conditions.visualizedWeb = true;
 		}
 		this.tracing.update();
