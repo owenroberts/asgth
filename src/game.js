@@ -24,6 +24,17 @@ import { Consts } from './Consts.js';
 import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
+const keyMap = {
+	BTN_1: "KeyX",
+	BTN_2: "KeyZ",
+	BTN_3: "KeyC", 
+	BTN_4: "KeyV",
+	UP: "ArrowUp",
+	DOWN: "ArrowDown",
+	RIGHT: "ArrowRight",
+	LEFT: "ArrowLeft",
+};
+
 const gm = new Game({
 	debug: true,
 	drawInterval: 3,
@@ -38,7 +49,7 @@ const gm = new Game({
 	suspend: true,
 	events: ["keyboard"],
 	scenes: ["loading", "walkLevel", "rockLevel"],
-	keys: ["right", "left", "up", "down", "x", "c", "m", "v", "r"],
+	keys: ["right", "left", "up", "down", "x", "z", "c", "v", "r"],
 	// testPerformance: true,
 });
 gm.load({ animations: { sprites: spritePaths }, }, false);
@@ -410,49 +421,15 @@ gm.onDraw = function() {
 };
 
 gm.onKeyDown = function(key) {
-	switch (key) {
-
-		case Consts.RESET_BTN:
-		case Consts.PRIMARY_BTN:
-		case Consts.SECONDARY_BTN:
-			if (gm.scenes.current.onKeyDown[key]) {
-				gm.scenes.current.onKeyDown[key]();
-				return;
-			}
-			gm.input.setKey(key, true);
-		break;
-
-		case 'left':
-		case 'up':
-		case 'right':
-		case 'down':
-		case 'c':
-		case 'v':
-			gm.input.setKey(key, true);
-		break;
+	if (gm.scenes.current.onKeyDown[key]) {
+		gm.scenes.current.onKeyDown[key]();
+		gm.input.setKey(key, false);
 	}
 };
 
 gm.onKeyUp = function(key) {
-	switch (key) {
-
-		case Consts.RESET_BTN:
-		case Consts.PRIMARY_BTN:
-		case Consts.SECONDARY_BTN:
-			if (gm.scenes.current.onKeyUp[key]) {
-				gm.scenes.current.onKeyUp[key]();
-				return;
-			}
-			gm.input.setKey(key, false);
-		break;
-
-		case 'left':
-		case 'up':
-		case 'right':
-		case 'down':
-		case 'c':
-		case 'v':
-			gm.input.setKey(key, false);
-		break;
+	if (gm.scenes.current.onKeyUp[key]) {
+		gm.scenes.current.onKeyUp[key]();
+		gm.input.setKey(key, false);
 	}
 };
