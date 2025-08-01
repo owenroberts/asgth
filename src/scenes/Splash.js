@@ -19,7 +19,7 @@ export class Splash extends Scene {
 		}));
 
 		this.add(new TextSprite({
-			msg: Consts.PRIMARY_BTN,
+			msg: Consts.KEY_DISPLAY.BTN_1,
 			x: Consts.CELL_SIZE.W * (2 + 7),
 			y: Consts.CELL_SIZE.H * 3,
 			letters: gm.anims.sprites.letters_keyboard,
@@ -37,7 +37,7 @@ export class Splash extends Scene {
 		}));
 
 		this.add(new TextSprite({
-			msg: Consts.SECONDARY_BTN,
+			msg: Consts.KEY_DISPLAY.BTN_2,
 			x: Consts.CELL_SIZE.W * (2 + 7),
 			y: Consts.CELL_SIZE.H * 4.5,
 			letters: gm.anims.sprites.letters_keyboard,

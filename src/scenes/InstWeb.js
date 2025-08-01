@@ -46,7 +46,7 @@ export class InstWeb extends Scene {
 		}));
 
 		this.instBtn = this.add(new TextSprite({
-			msg: Consts.PRIMARY_BTN,
+			msg: Consts.KEY_DISPLAY.BTN_1,
 			x: Consts.CELL_SIZE.W * Consts.INST_WEB_X1,
 			y: Consts.CELL_SIZE.H2,
 			letters: gm.anims.sprites.letters_keyboard,
@@ -101,7 +101,7 @@ export class InstWeb extends Scene {
 	update() {
 
 
-		if (this.input.triggerKey('v')) {
+		if (this.input.triggerKey('BTN_4')) {
 			this.conditions.visualizedWeb = true;
 		}
 		this.tracing.update();

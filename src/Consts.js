@@ -25,11 +25,25 @@ export const Consts = {
 	INST_WEB_X4: 7,
 	INST_WEB_X5: 10,
 
-	PRIMARY_BTN: "x", // primary and secondary button?
-	SECONDARY_BTN: "z",
-	CLEAR_BTN: "c", // this is stupid naming
-	VIZ_BTN: "v",
-	RESET_BTN: "r",
+	KEY_MAP: {
+		"KeyX": "BTN_1",
+		"KeyZ": "BTN_2",
+		"KeyC":  "BTN_3",
+		"KeyV": "BTN_4",
+		"KeyR": "RESET",
+		"ArrowUp": "UP",
+		"ArrowDown": "DOWN",
+		"ArrowRight": "RIGHT",
+		"ArrowLeft": "LEFT",
+	},
+
+	KEY_DISPLAY: {
+		"BTN_1": "x",
+		"BTN_2": "z",
+		"BTN_3": "c",
+		"BTN_4": "v",
+		"RESET": "r",
+	},
 	
 	PRACTICE_DELAY: 180,
 	PATTERN_DELAY: debug ? 50 : 300,

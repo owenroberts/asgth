@@ -113,7 +113,7 @@ export class Web extends Sprite {
 
 		// console.log(treeLocation);
 
-		if (this.input.triggerKey('c')) {
+		if (this.input.triggerKey('BTN_3')) {
 			if (this.drawing.length > 0) {
 				this.sfx.play("web_clear");
 				this.sfx.play("web_clear_web");
@@ -123,7 +123,7 @@ export class Web extends Sprite {
 		}
 
 		// cancel web
-		if (this.input.triggerKey('z')) {
+		if (this.input.triggerKey('BTN_2')) {
 			if (this.treeList.length > 1) {
 				this.drawing.points.pop(); // last spider point
 				this.end();
@@ -140,7 +140,7 @@ export class Web extends Sprite {
 
 
 		if (treeLocation) {
-			if (this.input.triggerKey('x')) {
+			if (this.input.triggerKey('BTN_1')) {
 
 				if (!this.isDrawing) {
 					this.isDrawing = true;

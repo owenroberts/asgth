@@ -53,9 +53,9 @@ export class InstMove extends Scene {
 	}
 
 	update() {
-		if (this.input.getKey('up')) this.arrowsPressed[0] = true;
-		if (this.input.getKey('left')) this.arrowsPressed[1] = true;
-		if (this.input.getKey('right')) this.arrowsPressed[2] = true;
+		if (this.input.getKey('UP')) this.arrowsPressed[0] = true;
+		if (this.input.getKey('LEFT')) this.arrowsPressed[1] = true;
+		if (this.input.getKey('RIGHT')) this.arrowsPressed[2] = true;
 
 		if (this.arrowsPressed.every(a => a)) {
 			this.nextDelay.update();

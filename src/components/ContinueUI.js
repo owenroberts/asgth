@@ -8,7 +8,7 @@ export class ContinueUI extends SpriteCollection {
 		super();
 		
 		this.add(new TextSprite({
-			msg: Consts.PRIMARY_BTN,
+			msg: Consts.KEY_DISPLAY.BTN_1,
 			x: Consts.CELL_SIZE.W * 4,
 			y: Consts.CELL_SIZE.H * 5.5,
 			letters: gm.anims.sprites.letters_keyboard,

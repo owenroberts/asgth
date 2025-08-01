@@ -53,7 +53,7 @@ export class Tracing extends Sprite {
 	}
 
 	update() {
-		if (this.input.triggerKey('v')) {
+		if (this.input.triggerKey('BTN_4')) {
 			this.activate();
 		}
 	}

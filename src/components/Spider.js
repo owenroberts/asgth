@@ -65,7 +65,7 @@ export class Spider extends ColliderSprite {
 
 	// getter?
 	isMoving() {
-		return this.input.getKey('up') || this.input.getKey('down') || this.input.getKey('left') || this.input.getKey('right');
+		return this.input.getKey('UP') || this.input.getKey('DOWN') || this.input.getKey('LEFT') || this.input.getKey('RIGHT');
 	}
 
 	update(time) {
@@ -73,13 +73,15 @@ export class Spider extends ColliderSprite {
 		// for back, collision with walls
 		this.prevPosition[0] = this.position[0];
 		this.prevPosition[1] = this.position[1];
+
+		// console.log(this.input.getKey('RIGHT'))
 		
-		if (this.input.getKey('right') && !this.input.getKey('left') && this.rightCounter.isDone()) {
+		if (this.input.getKey('RIGHT') && !this.input.getKey('LEFT') && this.rightCounter.isDone()) {
 			this.direction = (this.direction + 1) % 8;
 			this.rightCounter.reset();
 		}
 
-		if (this.input.getKey('left') && !this.input.getKey('right') && this.leftCounter.isDone()) {
+		if (this.input.getKey('LEFT') && !this.input.getKey('RIGHT') && this.leftCounter.isDone()) {
 			this.direction = (8 + (this.direction - 1) % 8) % 8;
 			this.leftCounter.reset();
 		}
@@ -87,7 +89,7 @@ export class Spider extends ColliderSprite {
 		this.rightCounter.update();
 		this.leftCounter.update();
 
-		const speed = this.input.getKey('up') ? 
+		const speed = this.input.getKey('UP') ? 
 			[
 				directionSpeeds[this.direction][0],
 				directionSpeeds[this.direction][1],

@@ -24,17 +24,6 @@ import { Consts } from './Consts.js';
 import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
-const keyMap = {
-	BTN_1: "KeyX",
-	BTN_2: "KeyZ",
-	BTN_3: "KeyC", 
-	BTN_4: "KeyV",
-	UP: "ArrowUp",
-	DOWN: "ArrowDown",
-	RIGHT: "ArrowRight",
-	LEFT: "ArrowLeft",
-};
-
 const gm = new Game({
 	debug: true,
 	drawInterval: 3,
@@ -49,7 +38,7 @@ const gm = new Game({
 	suspend: true,
 	events: ["keyboard"],
 	scenes: ["loading", "walkLevel", "rockLevel"],
-	keys: ["right", "left", "up", "down", "x", "z", "c", "v", "r"],
+	keyMap: Consts.KEY_MAP,
 	// testPerformance: true,
 });
 gm.load({ animations: { sprites: spritePaths }, }, false);
@@ -147,7 +136,7 @@ gm.onSetup = function() {
 	gm.scenes.end = new End(gm);
 
 	gm.scenes.narration = new Narration(gm);
-	gm.scenes.narration.onKeyUp.x = function() {
+	gm.scenes.narration.onKeyUp["BTN_1"] = function() {
 		if (gm.scenes.narration.isDone) {
 			gm.sfx.play('next_button', { randomRate: true });
 			gm.sq.next();
@@ -168,9 +157,10 @@ gm.onSetup = function() {
 		if (!gm.debug) return gm.sq.next();
 		gm.scenes.debug = new Scene();
 		console.log("%c *** debug hit X to start ***", "background: #000; color: #ff0;");
-		gm.scenes.debug.onKeyDown.x = function() {
+		gm.scenes.debug.onKeyDown['BTN_1'] = function() {
 			gm.sq.next();	
 		};
+		console.log(gm.scenes.debug);
 		gm.scenes.setCurrent("debug");
 	}});
 
@@ -186,11 +176,11 @@ gm.onSetup = function() {
 	// splash
 	gm.sq.add({ fn: () => {
 		if (gm.debug) return gm.sq.next();
-		gm.scenes.splash.onKeyDown.x = function() {
+		gm.scenes.splash.onKeyDown['BTN_1'] = function() {
 			gm.props.isSoundActive = true;
 			gm.sq.next();
 		};
-		gm.scenes.splash.onKeyUp.z = function() {
+		gm.scenes.splash.onKeyUp['BTN_2'] = function() {
 			gm.props.isSoundActive = false;
 			gm.sq.next();
 		};
@@ -214,7 +204,7 @@ gm.onSetup = function() {
 		gm.scenes.instChoose.setup(gm);
 
 		// skip instructions
-		gm.scenes.instChoose.onKeyDown.x = function() {
+		gm.scenes.instChoose.onKeyDown["BTN_1"] = function() {
 			if (!gm.scenes.instChoose.isDone()) return;
 			gm.props.isSkipInstructions = true;
 			gm.sq.next();
@@ -222,7 +212,7 @@ gm.onSetup = function() {
 		};
 
 		// repeat instructions
-		gm.scenes.instChoose.onKeyDown.z = function() {
+		gm.scenes.instChoose.onKeyDown["BTN_2"] = function() {
 			gm.props.isRepeatInstructions = true;
 			gm.sq.next();
 			gm.input.reset();
@@ -238,7 +228,7 @@ gm.onSetup = function() {
 
 		gm.sfx.play("level_start", { randomRate: true });
 		gm.scenes.instMove.setup();
-		gm.scenes.instMove.onKeyDown.x = function() {
+		gm.scenes.instMove.onKeyDown["BTN_1"] = function() {
 			if (!gm.scenes.instMove.isNextReady) return;
 			gm.sfx.play("next_button");
 			gm.sq.next();
@@ -281,7 +271,7 @@ gm.onSetup = function() {
 
 		gm.props.pattern = Consts.PRACTICE_PATTERN;
 		gm.scenes.pattern = new Pattern(gm);
-		gm.scenes.pattern.onKeyDown.x = function() {
+		gm.scenes.pattern.onKeyDown["BTN_1"] = function() {
 			if (gm.scenes.pattern.isNextReady) {
 				gm.sfx.play("next_button", { randomRate: true });
 				gm.sq.next();
@@ -333,7 +323,7 @@ gm.onSetup = function() {
 		gm.props.pattern = patternMaker.getPattern(gm.props.levelCount);
 		gm.props.patternBounds = patternMaker.getBounds();
 		gm.scenes.pattern = new Pattern(gm, gm.sfx);
-		gm.scenes.pattern.onKeyDown.x = function() {
+		gm.scenes.pattern.onKeyDown["BTN_1"] = function() {
 			if (gm.scenes.pattern.isNextReady) {
 				gm.sfx.play("next_button", { randomRate: true });
 				gm.sq.next();
@@ -395,7 +385,7 @@ gm.onSetup = function() {
 	gm.sq.add({ fn: () => {
 		gm.scenes.narration.hideScore();
 		if (gm.props.levelCount >= Consts.NUM_LEVELS) {
-			gm.scenes.end.onKeyUp[Consts.RESET_BTN] = function() {
+			gm.scenes.end.onKeyUp["RESET"] = function() {
 				gm.sfx.play('next_button');
 				resetGame();
 			};
@@ -423,13 +413,13 @@ gm.onDraw = function() {
 gm.onKeyDown = function(key) {
 	if (gm.scenes.current.onKeyDown[key]) {
 		gm.scenes.current.onKeyDown[key]();
-		gm.input.setKey(key, false);
+		// gm.input.setKey(key, false);
 	}
 };
 
 gm.onKeyUp = function(key) {
 	if (gm.scenes.current.onKeyUp[key]) {
 		gm.scenes.current.onKeyUp[key]();
-		gm.input.setKey(key, false);
+		// gm.input.setKey(key, false);
 	}
 };
