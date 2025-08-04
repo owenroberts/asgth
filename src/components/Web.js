@@ -113,11 +113,12 @@ export class Web extends Sprite {
 	 */
 	getConnection(player, treeLocation) {
 
-		this.playerPosition[0] = player.bbox.xywh[0] + player.bbox.halfWidth;
-		this.playerPosition[1] = player.bbox.xywh[1] + player.bbox.halfHeight;
+		// don't rewrite reference
+		this.playerPosition[0] = player.bbox.centeredPosition[0];
+		this.playerPosition[1] = player.bbox.centeredPosition[1];
 
-		// console.log(treeLocation);
 
+		// clear web
 		if (this.input.triggerKey('BTN_3')) {
 			if (this.drawing.length > 0) {
 				this.sfx.play("web_clear");

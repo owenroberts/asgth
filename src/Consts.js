@@ -12,6 +12,8 @@ export const Consts = {
 	
 	NUM_LEVELS: debug ? 2 : 7,
 
+	SPEED_TIME: 0.01,
+
 	PRACTICE_PATTERN: [
 		[[1,1],[2,2]],
 		[[1,3],[2,2]],

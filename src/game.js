@@ -154,11 +154,11 @@ gm.onSetup = function() {
 
 	const patternMaker = createPatternMaker();
 
-	// debug start
+	// debug start -- put some of this in gm
 	gm.sq.add({ fn: () => {
 		if (!gm.debug) return gm.sq.next();
 		gm.scenes.debug = new Scene();
-		console.log("%c *** debug hit X to start ***", "background: #000; color: #ff0;");
+		console.log("%c *** debug hit x to start ***", "background: #000; color: #ff0;");
 		gm.scenes.debug.onKeyDown['BTN_1'] = function() {
 			gm.sq.next();
 		};
@@ -291,6 +291,7 @@ gm.onSetup = function() {
 		gm.scenes.setCurrent("instPattern");
 	}});
 
+	// practice pattern try again or next
 	gm.sq.add({ fn: () => {
 		if (gm.debug) return gm.sq.next();
 		
@@ -367,6 +368,7 @@ gm.onSetup = function() {
 
 	// score narration
 	gm.sq.add({ fn: () => {
+		gm.scenes.narration.continue.isActive = false;
 		gm.scenes.narration.addDialog(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
 		gm.scenes.narration.setScore();
 		gm.sfx.play('level_start', { randomRate: true });

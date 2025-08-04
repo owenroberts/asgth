@@ -63,8 +63,8 @@ export class RockLevel extends Scene {
 		const spawnTile = choice(map.tileMap.tiles.filter(t => t.type === BSPTileTypes.WALL));
 		const spawnLocation = map.tileMap.getPosition(spawnTile);
 		this.player.spawn(
-			spawnLocation.x * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.5, 
-			spawnLocation.y * Consts.CELL_SIZE.H + Consts.CELL_SIZE.H * 0.5,
+			spawnLocation.x * Consts.CELL_SIZE.W, 
+			spawnLocation.y * Consts.CELL_SIZE.H,
 		); // no spawn on edge ?
 
 		this.player.setCollider(...Consts.ROCK_COLLIDER);
@@ -76,6 +76,7 @@ export class RockLevel extends Scene {
 		this.rock.animation.play();
 
 		this.web = this.add(new Web(gm));
+		this.web.clear();
 	}
 
 	updateScore() {
@@ -132,8 +133,8 @@ export class RockLevel extends Scene {
 		this.sun.isActive = false;
 		this.player.isActive = false;
 		
-		this.rock.bbox.xywh[0] = this.dir === 1 ? -this.rock.bbox.halfWidth : this.width;
-		this.rock.bbox.xywh[1] = -this.rock.bbox.halfHeight;
+		this.rock.bbox.x = this.dir === 1 ? -this.rock.bbox.halfWidth : this.width;
+		this.rock.bbox.y = -this.rock.bbox.halfHeight;
 		this.rock.isActive = true;
 
 		this.trees.startRock();
@@ -143,17 +144,17 @@ export class RockLevel extends Scene {
 		this.sfx.play('rock');
 		
 		this.isRockRollwed = true;
-	};
+	}
 
 	rockUpdate() {
-		this.rock.bbox.xywh[0] += random(2, 1) * this.dir * Consts.ROCK_SPEED;
-		this.rock.bbox.xywh[1] += random(-1, 2) * Consts.ROCK_SPEED;
+		this.rock.bbox.x += random(2, 1) * this.dir * Consts.ROCK_SPEED;
+		this.rock.bbox.y += random(-1, 2) * Consts.ROCK_SPEED;
 
 		this.sfx.loop('stone');
 		this.sfx.loop('rock');
 
-		if ((this.dir === -1 && this.rock.bbox.xywh[0] < -this.rock.bbox.width) || 
-			this.dir === 1 && this.rock.bbox.xywh[0] > this.width) {
+		if ((this.dir === -1 && this.rock.bbox.x < -this.rock.bbox.width) || 
+			this.dir === 1 && this.rock.bbox.x > this.width) {
 			this.rock.isActive = false;
 			this.rock.displayFunc = undefined;
 			this.player.isActive = true;

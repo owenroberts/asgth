@@ -32,10 +32,10 @@ export class Spider extends Sprite {
 	constructor(gm) {
 		super(0, 0, gm.anims.sprites.spider);
 
-		this.debug = true;
-
 		this.bounds = gm.bounds;
 		this.input = gm.input;
+
+		this.debug = true;
 		
 		this.prevPosition = [0, 0];
 		this.direction = Directions.UP;
@@ -51,6 +51,7 @@ export class Spider extends Sprite {
 	}
 
 	spawn(x, y, dir) {
+		console.log('spawn', x, y, dir);
 		assert(Number.isFinite(x), "x is not a number");
 		assert(Number.isFinite(y), "y is not a number");
 		this.bbox.setPosition(x, y);
@@ -68,9 +69,7 @@ export class Spider extends Sprite {
 	update(time) {
 
 		// for back, collision with walls
-		this.prevPosition[0] = this.bbox.xywh[0];
-		this.prevPosition[1] = this.bbox.xywh[1];
-
+		this.prevPosition = this.bbox.position;
 		// console.log(this.input.getKey('RIGHT'))
 		
 		if (this.input.getKey('RIGHT') && !this.input.getKey('LEFT') && this.rightCounter.isDone()) {
@@ -99,11 +98,11 @@ export class Spider extends Sprite {
 
 		this.animation.state = state;
 
-		speed[0] *= time / 100;
-		speed[1] *= time / 100;
+		speed[0] *= time * Consts.SPEED_TIME;
+		speed[1] *= time * Consts.SPEED_TIME;
 
 		this.bbox.addPosition(speed[0], speed[1]);
-		this.collider.setPosition(this.bbox.xywh[0] + this.colliderOffset[0], this.bbox.xywh[1] + this.colliderOffset[1]);
+		this.collider.setPosition(this.bbox.x + this.colliderOffset[0], this.bbox.y + this.colliderOffset[1]);
 
 		if (!this.bbox.isColliding(this.bounds)) {
 			this.moveBack();

@@ -68,8 +68,8 @@ export class WalkLevel extends Scene {
 				Consts.CELL_SIZE.H * 0.25,
 			);
 			d.destination = {
-				x: pathEnd.x * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.5, 
-				y: pathEnd.y * Consts.CELL_SIZE.H + Consts.CELL_SIZE.H * 0.5,
+				x: pathEnd.x * Consts.CELL_SIZE.W, 
+				y: pathEnd.y * Consts.CELL_SIZE.H,
 			};
 			this.doors.push(d);
 		}
@@ -133,7 +133,7 @@ export class WalkLevel extends Scene {
 		}
 
 		this.moonAnim.update();
-		this.moon.bbox.xywh[1] = map(Math.sin(this.moonAnim.getProgress() * Math.PI), 0, 1, this.height - 64, 0, true);
+		this.moon.bbox.y = map(Math.sin(this.moonAnim.getProgress() * Math.PI), 0, 1, this.height - 64, 0, true);
 		
 		if (this.moonAnim.isDone()) {
 			this.sq.next();

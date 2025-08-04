@@ -17,7 +17,7 @@ export class Sun extends Sprite {
 		this.counter.update();
 		this.animator.update();
 		const progress = Math.sin(this.animator.getProgress() * Math.PI);
-		this.bbox.xywh[1] = map(progress, 0, 1, 5.75 * Consts.CELL_SIZE.H, Consts.CELL_SIZE.H / 4, true);
+		this.bbox.y = map(progress, 0, 1, 5.75 * Consts.CELL_SIZE.H, Consts.CELL_SIZE.H / 4, true);
 	}
 
 	end() {
