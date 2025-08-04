@@ -36,7 +36,7 @@ export class Spider extends Sprite {
 		this.input = gm.input;
 
 		this.debug = true;
-		
+
 		this.prevPosition = [0, 0];
 		this.direction = Directions.UP;
 
@@ -51,7 +51,6 @@ export class Spider extends Sprite {
 	}
 
 	spawn(x, y, dir) {
-		console.log('spawn', x, y, dir);
 		assert(Number.isFinite(x), "x is not a number");
 		assert(Number.isFinite(y), "y is not a number");
 		this.bbox.setPosition(x, y);

@@ -15,7 +15,7 @@ export class Web extends Sprite {
 
 		this.isDrawing = false; // toggle for starting web drawing
 
-		this.animation = new GameAnim();
+		this.animation = new GameAnim(gm);
 		this.animation.width = gm.window.width;
 		this.animation.height = gm.window.height
 		this.addAnimation(this.animation);

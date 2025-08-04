@@ -84,12 +84,14 @@ export class RockLevel extends Scene {
 		this.props.points[this.props.lastPointWinner]++;
 	}
 
-	update() {
+	update(timeElapsed) {
 		if (this.isRockRollwed) this.rockUpdate();
-		else this.webUpdate();
+		else this.webUpdate(timeElapsed);
 	}
 
-	webUpdate() {
+	webUpdate(timeElapsed) {
+
+		this.player.update(timeElapsed);
 
 		this.tracing.update();
 

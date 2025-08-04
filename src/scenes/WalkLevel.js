@@ -102,7 +102,9 @@ export class WalkLevel extends Scene {
 	}
 	}
 
-	update() {
+	update(timeElapsed) {
+
+		this.player.update(timeElapsed);
 
 		let isOnDoor = false;
 

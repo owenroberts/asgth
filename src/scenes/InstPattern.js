@@ -77,7 +77,9 @@ export class InstPattern extends Scene {
 		this.sun.reset();
 	}
 
-	update() {
+	update(timeElapsed) {
+
+		this.player.update(timeElapsed);
 
 		this.tracing.update();
 

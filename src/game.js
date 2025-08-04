@@ -1,6 +1,6 @@
 import { Sequencer } from '../cool/cool.js';
 import { Doodoo } from '../doodoo/src/Doodoo.js';
-import { Game, Sprite, TextSprite, Scene, generateBSPMap } from '../lines/src/Engine.js';
+import { Game, Sprite, TextSprite, Scene } from '../lines/src/Engine.js';
 
 import { Spider } from './components/Spider.js'; // not a scene?
 
@@ -67,41 +67,37 @@ document.addEventListener('keydown', ev => {
 	if (ev.code === "KeyS" && gm.debug) sfx.play("next_button", { randomRate: true });
 });
 
-function soundSetup(withSound) {
-	if (withSound) {
-		doodoo = new Doodoo({
-			...themeFile,
-			samplesURL: './doodoo/samples/',
-			volume: -12,
-			autoStart: false // !debug
-		});
+function soundSetup() {
+	doodoo = new Doodoo({
+		...themeFile,
+		samplesURL: './doodoo/samples/',
+		volume: -12,
+		autoStart: false // !debug
+	});
 
-		gm.sfx.load(
-			[
-				{ key: 'web', url: 'zip_lock.wav', },
-				{ key: 'connect', sequence: [1, 6] },
-				{ key: 'cancel', url: 'cancel.wav', },
-				{ key: 'skip_button', url: 'button_2.wav' },
-				{ key: 'next_button', url: 'button_3.wav' },
-				{ key: 'stone',  sequence: [1, 9] },
-				{ key: 'rock',  sequence: [1, 9] },
-				{ key: 'match', sequence: [1, 7] },
-				{ key: 'level_start', sequence: [1, 3] },
-				{ key: 'web_clear', sequence: [1, 3] },
-				{ key: 'web_clear_web', url: "web_clear_web_fade.wav" },
-				{ key: 'vis_on', url: "vis_on.wav" },
-				{ key: 'vis_off', url: "vis_off.wav" },
-				{ key: 'inter', sequence: [1, 4] },
-				{ key: 'walk', sequence: [1, 3] },
-				{ key: 'continue', url: "continue.wav" },
-			],
-			() => { 
-				gm.sq.next(); 
-			}
-		);
-	} else {
-		gm.sq.next(); // afterSetupOrSound();
-	}
+	gm.sfx.load(
+		[
+			{ key: 'web', url: 'zip_lock.wav', },
+			{ key: 'connect', sequence: [1, 6] },
+			{ key: 'cancel', url: 'cancel.wav', },
+			{ key: 'skip_button', url: 'button_2.wav' },
+			{ key: 'next_button', url: 'button_3.wav' },
+			{ key: 'stone',  sequence: [1, 9] },
+			{ key: 'rock',  sequence: [1, 9] },
+			{ key: 'match', sequence: [1, 7] },
+			{ key: 'level_start', sequence: [1, 3] },
+			{ key: 'web_clear', sequence: [1, 3] },
+			{ key: 'web_clear_web', url: "web_clear_web_fade.wav" },
+			{ key: 'vis_on', url: "vis_on.wav" },
+			{ key: 'vis_off', url: "vis_off.wav" },
+			{ key: 'inter', sequence: [1, 4] },
+			{ key: 'walk', sequence: [1, 3] },
+			{ key: 'continue', url: "continue.wav" },
+		],
+		() => { 
+			gm.sq.next(); 
+		}
+	);
 }
 
 function resetGame() {
@@ -192,9 +188,13 @@ gm.onSetup = function() {
 	gm.sq.add({ fn: () => {
 		if (gm.debug) return gm.sq.next();
 
-		loadingSprite.animation.frame = 0;
-		gm.scenes.setCurrent("loading");
-		soundSetup(gm.props.isSoundActive);
+		if (gm.props.isSoundActive) {
+			loadingSprite.animation.frame = 0;
+			gm.scenes.setCurrent("loading");
+			soundSetup();
+		} else {
+			gm.sq.next();
+		}
 	}});
 
 	// choose instructions
@@ -399,30 +399,5 @@ gm.onSetup = function() {
 		}
 	}});
 
-	gm.sq.next(); // start ... clearer way to do this
-};
-
-gm.onUpdate = function(timeElapsed) {
-	gm.player.update(timeElapsed, true);
-	if (gm.scenes.current.update) {
-		gm.scenes.current.update();
-	}
-};
-
-gm.onDraw = function() {
-	gm.scenes.current.display();
-};
-
-gm.onKeyDown = function(key) {
-	if (gm.scenes.current.onKeyDown[key]) {
-		gm.scenes.current.onKeyDown[key]();
-		// gm.input.setKey(key, false);
-	}
-};
-
-gm.onKeyUp = function(key) {
-	if (gm.scenes.current.onKeyUp[key]) {
-		gm.scenes.current.onKeyUp[key]();
-		// gm.input.setKey(key, false);
-	}
+	gm.sq.next(); // start ... clearer way to do this?
 };

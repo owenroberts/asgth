@@ -10,7 +10,7 @@ import { Tracing } from '../components/Tracing.js';
 export class InstWeb extends Scene {
 
 	constructor(gm) {
-		super();
+		super(gm);
 
 		this.player = this.add(gm.player);
 		this.sfx = gm.sfx;
@@ -99,7 +99,9 @@ export class InstWeb extends Scene {
 		 );
 	}
 
-	update() {
+	update(timeElapsed) {
+
+		this.player.update(timeElapsed);
 
 		if (this.input.getKey('BTN_4')) {
 			this.conditions.visualizedWeb = true;

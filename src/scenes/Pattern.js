@@ -10,7 +10,7 @@ export class Pattern extends Scene {
 	constructor(gm) {
 		super();
 
-		const animation = new GameAnim();
+		const animation = new GameAnim(gm);
 		const drawing = new Drawing();
 		animation.drawings.push(drawing);
 		animation.layers.push(new Layer());
