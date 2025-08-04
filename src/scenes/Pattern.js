@@ -29,7 +29,6 @@ export class Pattern extends Scene {
 			}
 		});
 
-		// no add this to the narration
 		this.add(new TextSprite({
 			msg: Strings.INST_DRAW_PATTERN,
 			track: Consts.LETTERS_TRACK,

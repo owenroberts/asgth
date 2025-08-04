@@ -16,8 +16,8 @@ export class Web extends Sprite {
 		this.isDrawing = false; // toggle for starting web drawing
 
 		this.animation = new GameAnim();
-		this.animation.width = gm.width;
-		this.animation.height = gm.height
+		this.animation.width = gm.window.width;
+		this.animation.height = gm.window.height
 		this.addAnimation(this.animation);
 
 		this.drawing = new Drawing();
@@ -33,6 +33,8 @@ export class Web extends Sprite {
 
 		this.treeList = []; // track connected trees
 		this.prevTreeLocation; // location of tree under player
+
+		this.playerPosition = [0, 0];
 	}
 
 	/**
@@ -111,6 +113,9 @@ export class Web extends Sprite {
 	 */
 	getConnection(player, treeLocation) {
 
+		this.playerPosition[0] = player.bbox.xywh[0] + player.bbox.halfWidth;
+		this.playerPosition[1] = player.bbox.xywh[1] + player.bbox.halfHeight;
+
 		// console.log(treeLocation);
 
 		if (this.input.triggerKey('BTN_3')) {
@@ -151,7 +156,7 @@ export class Web extends Sprite {
 					]);
 					
 					// pass by reference, tracks player
-					this.drawing.add(player.position);
+					this.drawing.add(this.playerPosition);
 
 					this.treeList.push(structuredClone(treeLocation));
 					this.prevTreeLocation = structuredClone(treeLocation);

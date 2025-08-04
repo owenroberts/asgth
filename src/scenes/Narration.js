@@ -9,7 +9,6 @@ export class Narration extends Scene {
 		super();
 
 		this.sfx = gm.sfx;
-		this.width = gm.width;
 		this.props = gm.props;
 
 		this.dialogList = []; // sequencer?
@@ -21,8 +20,8 @@ export class Narration extends Scene {
 		}));
 
 		this.text = this.add(new TextSprite({
-			x: Consts.CELL_SIZE.W2, // * Consts.TEXT_MARGIN.W,
-			y: Consts.CELL_SIZE.H2, //  * Consts.TEXT_MARGIN.H,
+			x: Consts.CELL_SIZE.W * Consts.TEXT_MARGIN.W,
+			y: Consts.CELL_SIZE.H * Consts.TEXT_MARGIN.H,
 			wrap: 24,
 			letters: gm.anims.sprites.letters,
 			track: Consts.LETTERS_TRACK,
@@ -77,7 +76,7 @@ export class Narration extends Scene {
 	setScore() {
 		this.score.isActive = true;
 
-		let scoreX = this.width - Consts.CELL_SIZE.W * 1;
+		let scoreX = Consts.CELL_SIZE.W * 13;
 		let scoreY = Consts.CELL_SIZE.H * (this.props.points.SPIDER + this.props.points.ROCK - 1);
 
 		let point = this.props.lastPointWinner === 'SPIDER' ? 1 : 0;

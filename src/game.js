@@ -119,14 +119,16 @@ function resetGame() {
 
 gm.onSetup = function() {
 
-	gm.setBounds('left', 0);
-	gm.setBounds('top', 0);
-	gm.setBounds('right', (Consts.GRID_COLS - 1) * Consts.CELL_SIZE.W);
-	gm.setBounds('bottom', Consts.GRID_ROWS * Consts.CELL_SIZE.H);
-	
 	gm.player = new Spider(gm);
-	gm.sq = new Sequencer();
+
+	gm.bounds.set(
+		gm.player.bbox.halfWidth,
+		gm.player.bbox.halfHeight,
+		((Consts.GRID_COLS - 1) * Consts.CELL_SIZE.W) - gm.player.bbox.width,
+		(Consts.GRID_ROWS * Consts.CELL_SIZE.H) - gm.player.bbox.height,
+	);
 	
+	gm.sq = new Sequencer();
 	gm.scenes.splash = new Splash(gm);
 	gm.scenes.instMove = new InstMove(gm);
 	gm.scenes.instChoose = new InstChoose();
@@ -146,8 +148,8 @@ gm.onSetup = function() {
 		gm.input.reset();
 	};
 	
-	const loadingSprite = gm.scenes.loading.add(new Sprite(gm.halfWidth, gm.halfHeight, gm.anims.sprites.loading_web));
-	loadingSprite.center = true;
+	const loadingSprite = gm.scenes.loading.add(new Sprite(gm.window.halfWidth, gm.window.halfHeight, gm.anims.sprites.loading_web));
+	loadingSprite.bbox.center();
 	loadingSprite.animation.play();
 
 	const patternMaker = createPatternMaker();
@@ -158,9 +160,8 @@ gm.onSetup = function() {
 		gm.scenes.debug = new Scene();
 		console.log("%c *** debug hit X to start ***", "background: #000; color: #ff0;");
 		gm.scenes.debug.onKeyDown['BTN_1'] = function() {
-			gm.sq.next();	
+			gm.sq.next();
 		};
-		console.log(gm.scenes.debug);
 		gm.scenes.setCurrent("debug");
 	}});
 

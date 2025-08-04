@@ -1,5 +1,5 @@
 import { Counter, randomInt, choice, map } from '../../cool/cool.js';
-import { BlobMap, TileMap, TileTypes, ColliderSprite, ColliderEmpty, Scene, Texture, Sprite, generateBSPMap, BSPTileTypes } from '../../lines/src/Engine.js';
+import { BlobMap, TileMap, TileTypes, BBox, Scene, Texture, Sprite, generateBSPMap, BSPTileTypes } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 import level_bounds from '../data/level_bounds.json';
 
@@ -12,20 +12,22 @@ export class WalkLevel extends Scene {
 		this.sfx = gm.sfx;
 		this.sq = gm.sq;
 		this.props = gm.props;
-		this.height = gm.height;
+		this.height = gm.window.height;
+		this.input = gm.input;
 
-		this.doorColliders = [];
-		this.colliders = [];
+		this.doors = [];
+		this.walls = [];
 		
 		const map = generateBSPMap({ cols: 13, rows: 7, minRoomSize: 2, minNodeSize: 2, maxNodeSize: 6 });
 		const start = map.paths[0];
 		const end = map.paths[map.paths.length - 1];
 		
-		this.player.spawn([
-			start.x * Consts.CELL_SIZE.W + this.player.halfWidth,
-			start.y * Consts.CELL_SIZE.H + this.player.halfHeight,
-		], "RIGHT");
-		this.player.setCollider(...Consts.WALK_COLLIDER);
+		this.player.spawn(
+			start.x * Consts.CELL_SIZE.W,
+			start.y * Consts.CELL_SIZE.H,
+			"RIGHT"
+		);
+		this.player.collider.set(...Consts.WALK_COLLIDER);
 
 		this.moon = this.add(new Sprite(13 * Consts.CELL_SIZE.W, 7 * Consts.CELL_SIZE.H, gm.anims.sprites.moon));
 		this.moonAnim = new Counter(Consts.MOON_INTERVAL);
@@ -35,7 +37,7 @@ export class WalkLevel extends Scene {
 		const bgTexture = this.add(new Texture({ animation: gm.anims.sprites.walk_tiles }));
 		const bgIndex = randomInt(0, (bgTexture.animation.endFrame - 1) / 4) * 4;
 
-		this.exit = new ColliderEmpty(
+		this.exit = new BBox(
 			(end.x + end.w - 1) * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.25,
 			(end.y + end.h - 1) * Consts.CELL_SIZE.H + Consts.CELL_SIZE.W * 0.25,
 			Consts.CELL_SIZE.W * 0.5,
@@ -59,7 +61,7 @@ export class WalkLevel extends Scene {
 				continue;
 			}
 
-			const d = new ColliderEmpty(
+			const d = new BBox(
 				(pathStart.x + pathStart.w - 1) * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.32,
 				(pathStart.y + pathStart.h - 1) * Consts.CELL_SIZE.H + Consts.CELL_SIZE.H * 0.32,
 				Consts.CELL_SIZE.W * 0.25,
@@ -69,7 +71,7 @@ export class WalkLevel extends Scene {
 				x: pathEnd.x * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.5, 
 				y: pathEnd.y * Consts.CELL_SIZE.H + Consts.CELL_SIZE.H * 0.5,
 			};
-			this.doorColliders.push(d);
+			this.doors.push(d);
 		}
 
 		for (let i = 0; i < map.tileMap.tiles.length; i++) {
@@ -79,7 +81,7 @@ export class WalkLevel extends Scene {
 			} 
 			const { x, y } = map.tileMap.getIndexPosition(i);
 			map.tileMap.tiles[i].type = TileTypes.OFF;
-			this.colliders.push(new ColliderEmpty(
+			this.walls.push(new BBox(
 				x * Consts.CELL_SIZE.W,
 				y * Consts.CELL_SIZE.H, 
 				Consts.CELL_SIZE.W, 
@@ -104,31 +106,34 @@ export class WalkLevel extends Scene {
 
 		let isOnDoor = false;
 
-		for (let i = 0; i < this.doorColliders.length; i++) {
+		for (let i = 0; i < this.doors.length; i++) {
 			// doorColliders[i].drawDebug();
-			if (this.player.collide(this.doorColliders[i])) {
-				this.player.spawn([
-					this.doorColliders[i].destination.x,
-					this.doorColliders[i].destination.y,
-				]);
-				this.player.resetInput();
+			if (this.player.isColliding(this.doors[i])) {
+				this.player.spawn(
+					this.doors[i].destination.x,
+					this.doors[i].destination.y,
+				);
+				this.input.reset();
 				this.sfx.play("walk", { randomRate: true });
 			}
 		}
 
-		for (let i = 0; i < this.colliders.length; i++) {
-			if (this.player.collide(this.colliders[i])) this.player.back();
+		for (let i = 0; i < this.walls.length; i++) {
+			if (this.player.isColliding(this.walls[i])) {
+				this.player.moveBack();
+			}
 		}
 		
 		// exit.drawDebug("#ffbb00");
-		if (this.player.collide(this.exit)) {
+		if (this.player.isColliding(this.exit)) {
 			this.sfx.play("walk", { randomRate: true });
 			this.props.isWalkLevelExited = true;
+			this.input.reset();
 			this.sq.next();
 		}
 
 		this.moonAnim.update();
-		this.moon.position[1] = map(Math.sin(this.moonAnim.getProgress() * Math.PI), 0, 1, this.height - 64, 0, true);
+		this.moon.bbox.xywh[1] = map(Math.sin(this.moonAnim.getProgress() * Math.PI), 0, 1, this.height - 64, 0, true);
 		
 		if (this.moonAnim.isDone()) {
 			this.sq.next();

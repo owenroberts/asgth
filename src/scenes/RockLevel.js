@@ -19,7 +19,7 @@ export class RockLevel extends Scene {
 		this.sfx = gm.sfx;
 		this.props = gm.props;
 		this.sq = gm.sq;
-		this.width = gm.width;
+		this.width = gm.window.width;
 
 		this.dir = choice(-1, 1); // rock starts animating
 		this.isRockRolled = false;
@@ -62,16 +62,16 @@ export class RockLevel extends Scene {
 		// get tile type method?
 		const spawnTile = choice(map.tileMap.tiles.filter(t => t.type === BSPTileTypes.WALL));
 		const spawnLocation = map.tileMap.getPosition(spawnTile);
-		this.player.spawn([
+		this.player.spawn(
 			spawnLocation.x * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.5, 
 			spawnLocation.y * Consts.CELL_SIZE.H + Consts.CELL_SIZE.H * 0.5,
-		]); // no spawn on edge ?
+		); // no spawn on edge ?
 
 		this.player.setCollider(...Consts.ROCK_COLLIDER);
 
 		this.sun = this.add(new Sun(gm));
 
-		this.rock = this.add(new Sprite(gm.width, -gm.anims.sprites.rock.height, gm.anims.sprites.rock));
+		this.rock = this.add(new Sprite(gm.window.width, -gm.anims.sprites.rock.height, gm.anims.sprites.rock));
 		this.rock.isActive = false;
 		this.rock.animation.play();
 
@@ -132,8 +132,8 @@ export class RockLevel extends Scene {
 		this.sun.isActive = false;
 		this.player.isActive = false;
 		
-		this.rock.position[0] = this.dir === 1 ? -this.rock.halfWidth : this.width;
-		this.rock.position[1] = -this.rock.halfHeight;
+		this.rock.bbox.xywh[0] = this.dir === 1 ? -this.rock.bbox.halfWidth : this.width;
+		this.rock.bbox.xywh[1] = -this.rock.bbox.halfHeight;
 		this.rock.isActive = true;
 
 		this.trees.startRock();
@@ -146,14 +146,14 @@ export class RockLevel extends Scene {
 	};
 
 	rockUpdate() {
-		this.rock.position[0] += random(2, 1) * this.dir * Consts.ROCK_SPEED;
-		this.rock.position[1] += random(-1, 2) * Consts.ROCK_SPEED;
+		this.rock.bbox.xywh[0] += random(2, 1) * this.dir * Consts.ROCK_SPEED;
+		this.rock.bbox.xywh[1] += random(-1, 2) * Consts.ROCK_SPEED;
 
 		this.sfx.loop('stone');
 		this.sfx.loop('rock');
 
-		if ((this.dir === -1 && this.rock.position[0] < -this.rock.width) || 
-			this.dir === 1 && this.rock.position[0] > this.width) {
+		if ((this.dir === -1 && this.rock.bbox.xywh[0] < -this.rock.bbox.width) || 
+			this.dir === 1 && this.rock.bbox.xywh[0] > this.width) {
 			this.rock.isActive = false;
 			this.rock.displayFunc = undefined;
 			this.player.isActive = true;

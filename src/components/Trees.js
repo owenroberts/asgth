@@ -35,17 +35,15 @@ export class Trees extends SpriteCollection {
 	 * @return {boolean|[x, y]}	either false, or colliding tree position array
 	 */
 	getTreeLocation(player) {
-		for (let i = 0; i < this.texture.locations.length; i++) {
-			let x = this.texture.locations[i][0];
-			let y = this.texture.locations[i][1];
-			if (player.tap(x + 32, y + 32)) {
-				this.select.position = [x, y];
-				this.select.isActive = true;
-				return [x, y];
-			}
+		const treeLocation = this.texture.getCollisionLocation(player.collider);
+		if (treeLocation) {
+			this.select.setPosition(treeLocation[0], treeLocation[1]);
+			this.select.isActive = true;
+			return treeLocation;
+		} else {
+			this.select.isActive = false;
+			return false;
 		}
-		this.select.isActive = false;
-		return false;
 	}
 
 	/**

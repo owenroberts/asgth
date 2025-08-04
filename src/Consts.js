@@ -10,7 +10,7 @@ export const Consts = {
 	GRID_ROWS: 7,
 	BG_COLOR: '#aeaaa6', //'#4a4047',
 	
-	NUM_LEVELS: debug ? 1 : 7,
+	NUM_LEVELS: debug ? 2 : 7,
 
 	PRACTICE_PATTERN: [
 		[[1,1],[2,2]],

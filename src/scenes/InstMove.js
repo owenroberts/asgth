@@ -49,7 +49,7 @@ export class InstMove extends Scene {
 	}
 
 	setup() {
-		this.player.spawn([Consts.CELL_SIZE.W * 5, Consts.CELL_SIZE.H * 3.5]);
+		this.player.spawn(Consts.CELL_SIZE.W * 5, Consts.CELL_SIZE.H * 3.5);
 	}
 
 	update() {

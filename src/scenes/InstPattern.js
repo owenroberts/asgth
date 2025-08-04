@@ -62,16 +62,17 @@ export class InstPattern extends Scene {
 	}
 
 	setup() {
-		this.player.spawn([
+		this.player.spawn(
 			this.start.x * Consts.CELL_SIZE.W,
 			(this.start.y + 1) * Consts.CELL_SIZE.H,
-		], 'RIGHT');
+		 	'RIGHT'
+		 );
 	}
 
 	reset() {
 		this.web.clear();
 		this.trees.locations.forEach(l => {
-			l.i = randomInt(25);
+			l[2] = randomInt(25);
 		});
 		this.sun.reset();
 	}

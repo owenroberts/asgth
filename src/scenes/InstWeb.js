@@ -92,21 +92,22 @@ export class InstWeb extends Scene {
 	}
 
 	setup() {
-		this.player.spawn([
+		this.player.spawn(
 			(this.start.x + 1) * Consts.CELL_SIZE.W,
 			(this.start.y) * Consts.CELL_SIZE.H,
-		], 'DOWN');
+		 	'DOWN',
+		 );
 	}
 
 	update() {
 
-
-		if (this.input.triggerKey('BTN_4')) {
+		if (this.input.getKey('BTN_4')) {
 			this.conditions.visualizedWeb = true;
 		}
 		this.tracing.update();
 
 		const treeLocation = this.trees.getTreeLocation(this.player);
+		// console.log({treeLocation})
 		const connection = this.web.getConnection(this.player, treeLocation, this.sfx);
 
 		if (connection === Consts.WEB_CONNECTS.STARTED) {
@@ -120,7 +121,7 @@ export class InstWeb extends Scene {
 		if (connection === Consts.WEB_CONNECTS.COMPLETED) {
 			if (this.conditions.firstTree && !this.conditions.releasedWeb) {
 				this.conditions.secondTree = true;
-				this.instBtn.setMsg(Consts.SECONDARY_BTN);
+				this.instBtn.setMsg(Consts.KEY_DISPLAY.BTN_2);
 				this.instBtn.x = Consts.INST_WEB_X3 * Consts.CELL_SIZE.W;
 				this.instText.setMsg(Strings.INST_WEB_3);
 			}
@@ -130,7 +131,7 @@ export class InstWeb extends Scene {
 			connection === Consts.WEB_CONNECTS.CANCELED) {
 			if (this.conditions.firstTree && this.conditions.secondTree) {
 				this.conditions.releasedWeb = true;
-				this.instBtn.setMsg(Consts.CLEAR_BTN);
+				this.instBtn.setMsg(Consts.KEY_DISPLAY.BTN_3);
 				this.instBtn.x = Consts.INST_WEB_X4 * Consts.CELL_SIZE.W;
 				this.instText.setMsg(Strings.INST_WEB_4);
 			}
@@ -139,7 +140,7 @@ export class InstWeb extends Scene {
 		if (connection === Consts.WEB_CONNECTS.CLEARED) {
 			if (this.conditions.firstTree && this.conditions.secondTree && this.conditions.releasedWeb) {
 				this.conditions.clearedWeb = true;
-				this.instBtn.setMsg(Consts.VIZ_BTN);
+				this.instBtn.setMsg(Consts.KEY_DISPLAY.BTN_4);
 				this.instBtn.x = Consts.INST_WEB_X5 * Consts.CELL_SIZE.W;
 				this.instText.setMsg(Strings.INST_WEB_5);
 			}

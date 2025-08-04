@@ -13,8 +13,8 @@ export class Tracing extends Sprite {
 		this.isActive = false;
 
 		const animation = new GameAnim();
-		animation.width = gm.width;
-		animation.height = gm.height;
+		animation.width = gm.window.width;
+		animation.height = gm.window.height;
 		this.addAnimation(animation);
 		
 		const drawing = new Drawing();

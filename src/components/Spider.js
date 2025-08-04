@@ -1,5 +1,5 @@
 import { Counter, assert } from '../../cool/cool.js';
-import { ColliderSprite } from '../../lines/src/Engine.js';
+import { Sprite } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 
 const Directions = {
@@ -27,17 +27,17 @@ const directionSpeeds = [
 	[-speed * 0.71, -speed * 0.71],
 ];
 
-export class Spider extends ColliderSprite {
+export class Spider extends Sprite {
 	
 	constructor(gm) {
 		super(0, 0, gm.anims.sprites.spider);
 
+		this.debug = true;
+
 		this.bounds = gm.bounds;
 		this.input = gm.input;
 		
-		this.center = true;
 		this.prevPosition = [0, 0];
-
 		this.direction = Directions.UP;
 
 		this.rightCounter = new Counter(8);
@@ -46,24 +46,21 @@ export class Spider extends ColliderSprite {
 		this.leftCounter.end();
 
 		this.animation.state = "idle_right";
+		this.colliderOffset = [16, 16];
 		this.setCollider(16, 16, 32, 32);
 	}
 
-	spawn(location, dir) {
-		assert(Number.isFinite(location[0]), "x is not a number");
-		assert(Number.isFinite(location[1]), "y is not a number");
-		this.position[0] = location[0];
-		this.position[1] = location[1];
+	spawn(x, y, dir) {
+		assert(Number.isFinite(x), "x is not a number");
+		assert(Number.isFinite(y), "y is not a number");
+		this.bbox.setPosition(x, y);
 		if (dir) this.direction = Directions[dir];
 	}
 
-	// better name for this ... 
-	back() {
-		this.position[0] = this.prevPosition[0];
-		this.position[1] = this.prevPosition[1];
+	moveBack() {
+		this.bbox.setPosition(this.prevPosition[0], this.prevPosition[1]);
 	}
 
-	// getter?
 	isMoving() {
 		return this.input.getKey('UP') || this.input.getKey('DOWN') || this.input.getKey('LEFT') || this.input.getKey('RIGHT');
 	}
@@ -71,8 +68,8 @@ export class Spider extends ColliderSprite {
 	update(time) {
 
 		// for back, collision with walls
-		this.prevPosition[0] = this.position[0];
-		this.prevPosition[1] = this.position[1];
+		this.prevPosition[0] = this.bbox.xywh[0];
+		this.prevPosition[1] = this.bbox.xywh[1];
 
 		// console.log(this.input.getKey('RIGHT'))
 		
@@ -105,14 +102,11 @@ export class Spider extends ColliderSprite {
 		speed[0] *= time / 100;
 		speed[1] *= time / 100;
 
-		if (this.position[0] + speed[0] > this.bounds.left &&
-			this.position[0] + speed[0] < this.bounds.right) {
-			this.position[0] += speed[0];
-		}
+		this.bbox.addPosition(speed[0], speed[1]);
+		this.collider.setPosition(this.bbox.xywh[0] + this.colliderOffset[0], this.bbox.xywh[1] + this.colliderOffset[1]);
 
-		if (this.position[1] + speed[1] > this.bounds.top &&
-			this.position[1] + speed[1] < this.bounds.bottom) {
-			this.position[1] += speed[1];
+		if (!this.bbox.isColliding(this.bounds)) {
+			this.moveBack();
 		}
 	}
 }
