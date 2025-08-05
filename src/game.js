@@ -25,27 +25,27 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
 const gm = new Game({
-	debug: true,
+	isDebug: true,
 	drawInterval: 3,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
 	width: Consts.CELL_SIZE.W * Consts.GRID_COLS,
 	height: Consts.CELL_SIZE.H * Consts.GRID_ROWS,
-	multiColor: true,
-	retina: true,
 	bgColor: Consts.BG_COLOR,
-	stats: true,
-	suspend: true,
-	events: ["keyboard"],
+	isMultiColor: true,
+	useRetina: true,
+	useStats: true,
+	useSuspend: true,
+	useKeyboardEvents: true,
 	scenes: ["loading", "walkLevel", "rockLevel"],
 	keyMap: Consts.KEY_MAP,
 	// testPerformance: true,
 });
 gm.load({ animations: { sprites: spritePaths }, }, false);
-if (gm.debug) console.log('game', gm);
+if (gm.isDebug) console.log('game', gm);
 
 // props that need to be tracked
-gm.props = {
+gm.states = {
 	levelCount: 0,
 	points: { ROCK: 0, SPIDER: 0 },
 	lastPointWinner: '',
@@ -61,18 +61,18 @@ gm.props = {
 
 let doodoo;
 
-/* debug */
-document.addEventListener('keydown', ev => {
-	if (ev.code === 'KeyN' && gm.debug) gm.sq.next();
-	if (ev.code === "KeyS" && gm.debug) sfx.play("next_button", { randomRate: true });
-});
+if (gm.isDebug) {
+	document.addEventListener('keydown', ev => {
+		if (ev.code === 'KeyN') gm.sq.next();
+	});
+}
 
 function soundSetup() {
 	doodoo = new Doodoo({
 		...themeFile,
 		samplesURL: './doodoo/samples/',
 		volume: -12,
-		autoStart: false // !debug
+		autoStart: !gm.isDebug,
 	});
 
 	gm.sfx.load(
@@ -101,11 +101,11 @@ function soundSetup() {
 }
 
 function resetGame() {
-	gm.props.levelCount = 0;
-	gm.props.pattern = [];
-	gm.props.lastPointWinner = "";
-	gm.props.isRepeatInstructions = false;
-	gm.props.isSkipInstructions = false;
+	gm.states.levelCount = 0;
+	gm.states.pattern = [];
+	gm.states.lastPointWinner = "";
+	gm.states.isRepeatInstructions = false;
+	gm.states.isSkipInstructions = false;
 	if (doodoo) {
 		doodoo.stop();
 		doodoo.play();
@@ -116,6 +116,7 @@ function resetGame() {
 gm.onSetup = function() {
 
 	gm.player = new Spider(gm);
+	gm.sq = new Sequencer();
 
 	gm.bounds.set(
 		gm.player.bbox.halfWidth,
@@ -124,7 +125,6 @@ gm.onSetup = function() {
 		(Consts.GRID_ROWS * Consts.CELL_SIZE.H) - gm.player.bbox.height,
 	);
 	
-	gm.sq = new Sequencer();
 	gm.scenes.splash = new Splash(gm);
 	gm.scenes.instMove = new InstMove(gm);
 	gm.scenes.instChoose = new InstChoose();
@@ -152,9 +152,9 @@ gm.onSetup = function() {
 
 	// debug start -- put some of this in gm
 	gm.sq.add({ fn: () => {
-		if (!gm.debug) return gm.sq.next();
+		if (!gm.isDebug) return gm.sq.next();
 		gm.scenes.debug = new Scene();
-		console.log("%c *** debug hit x to start ***", "background: #000; color: #ff0;");
+		console.log("%c *** debug mode ~ hit x to start ***", "background: #000; color: #ff0;");
 		gm.scenes.debug.onKeyDown['BTN_1'] = function() {
 			gm.sq.next();
 		};
@@ -163,7 +163,7 @@ gm.onSetup = function() {
 
 	// debug loading
 	gm.sq.add({ fn: () => {
-		if (!gm.debug) return gm.sq.next();
+		if (!gm.isDebug) return gm.sq.next();
 
 		loadingSprite.animation.frame = 0;
 		gm.scenes.setCurrent("loading");
@@ -172,13 +172,13 @@ gm.onSetup = function() {
 
 	// splash
 	gm.sq.add({ fn: () => {
-		if (gm.debug) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
 		gm.scenes.splash.onKeyDown['BTN_1'] = function() {
-			gm.props.isSoundActive = true;
+			gm.states.isSoundActive = true;
 			gm.sq.next();
 		};
 		gm.scenes.splash.onKeyUp['BTN_2'] = function() {
-			gm.props.isSoundActive = false;
+			gm.states.isSoundActive = false;
 			gm.sq.next();
 		};
 		gm.scenes.setCurrent("splash");
@@ -186,9 +186,9 @@ gm.onSetup = function() {
 
 	// loading
 	gm.sq.add({ fn: () => {
-		if (gm.debug) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
 
-		if (gm.props.isSoundActive) {
+		if (gm.states.isSoundActive) {
 			loadingSprite.animation.frame = 0;
 			gm.scenes.setCurrent("loading");
 			soundSetup();
@@ -199,22 +199,22 @@ gm.onSetup = function() {
 
 	// choose instructions
 	gm.sq.add({ fn: () => {
-		if (gm.debug) return gm.sq.next();
-		if (!gm.props.isInstructionsCompleted) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
+		if (!gm.states.isInstructionsCompleted) return gm.sq.next();
 
 		gm.scenes.instChoose.setup(gm);
 
 		// skip instructions
 		gm.scenes.instChoose.onKeyDown["BTN_1"] = function() {
 			if (!gm.scenes.instChoose.isDone()) return;
-			gm.props.isSkipInstructions = true;
+			gm.states.isSkipInstructions = true;
 			gm.sq.next();
 			gm.input.reset();
 		};
 
 		// repeat instructions
 		gm.scenes.instChoose.onKeyDown["BTN_2"] = function() {
-			gm.props.isRepeatInstructions = true;
+			gm.states.isRepeatInstructions = true;
 			gm.sq.next();
 			gm.input.reset();
 		};
@@ -224,8 +224,8 @@ gm.onSetup = function() {
 
 	// movement instructions
 	gm.sq.add({ fn: () => {
-		if (gm.debug) return gm.sq.next();
-		if (gm.props.isSkipInstructions) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
+		if (gm.states.isSkipInstructions) return gm.sq.next();
 
 		gm.sfx.play("level_start", { randomRate: true });
 		gm.scenes.instMove.setup();
@@ -239,8 +239,8 @@ gm.onSetup = function() {
 
 	// web instructions
 	gm.sq.add({ fn: () => {
-		if (gm.debug) return gm.sq.next();
-		if (gm.props.isSkipInstructions) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
+		if (gm.states.isSkipInstructions) return gm.sq.next();
 		
 		gm.scenes.instWeb.setup();
 		gm.scenes.setCurrent("instWeb");
@@ -248,8 +248,8 @@ gm.onSetup = function() {
 
 	// pattern practice setup
 	gm.sq.add({ fn: () => {
-		if (gm.debug) return gm.sq.next();
-		if (gm.props.isSkipInstructions) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
+		if (gm.states.isSkipInstructions) return gm.sq.next();
 
 		gm.scenes.narration.addDialog([Strings.INST_PATTERN_PRACTICE, Strings.INST_SUN]);
 		gm.scenes.setCurrent("narration");
@@ -257,9 +257,9 @@ gm.onSetup = function() {
 
 	// pattern practice restart
 	gm.sq.add({ label: "practice-pattern-restart", fn: () => {
-		if (gm.debug) return gm.sq.next();
-		if (gm.props.isSkipInstructions) return gm.sq.next();
-		if (!gm.props.isPracticeRestart) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
+		if (gm.states.isSkipInstructions) return gm.sq.next();
+		if (!gm.states.isPracticeRestart) return gm.sq.next();
 
 		gm.scenes.narration.addDialog([Strings.INST_PATTERN_RESET]);
 		gm.scenes.setCurrent("narration");
@@ -267,10 +267,10 @@ gm.onSetup = function() {
 
 	// show pattern practice
 	gm.sq.add({ fn: () => {
-		if (gm.debug) return gm.sq.next();
-		if (gm.props.isSkipInstructions) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
+		if (gm.states.isSkipInstructions) return gm.sq.next();
 
-		gm.props.pattern = Consts.PRACTICE_PATTERN;
+		gm.states.pattern = Consts.PRACTICE_PATTERN;
 		gm.scenes.pattern = new Pattern(gm);
 		gm.scenes.pattern.onKeyDown["BTN_1"] = function() {
 			if (gm.scenes.pattern.isNextReady) {
@@ -283,20 +283,20 @@ gm.onSetup = function() {
 
 	// solve pattern practice
 	gm.sq.add({ fn: () => {
-		if (gm.debug) return gm.sq.next();
-		if (gm.props.isSkipInstructions) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
+		if (gm.states.isSkipInstructions) return gm.sq.next();
 
-		if (gm.props.isPracticeRestart) gm.scenes.instPattern.reset();
+		if (gm.states.isPracticeRestart) gm.scenes.instPattern.reset();
 		else gm.scenes.instPattern.setup();
 		gm.scenes.setCurrent("instPattern");
 	}});
 
 	// practice pattern try again or next
 	gm.sq.add({ fn: () => {
-		if (gm.debug) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
 		
-		if (!gm.props.isPracticePatternSolved) {
-			gm.props.isPracticeRestart = true;
+		if (!gm.states.isPracticePatternSolved) {
+			gm.states.isPracticeRestart = true;
 			gm.sq.set("practice-pattern-restart");
 		}
 		gm.sq.next();	
@@ -304,7 +304,7 @@ gm.onSetup = function() {
 	
 	// premise, edwards quotations
 	gm.sq.add({ fn: () => {
-		if (gm.debug) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
 
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
 		gm.scenes.narration.addDialog([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
@@ -315,15 +315,15 @@ gm.onSetup = function() {
 	
 	// drawing instructions
 	gm.sq.add({ label: "game-loop-start", fn: () => {
-		// if (gm.debug) return gm.sq.next();
+		// if (gm.isDebug) return gm.sq.next();
 		gm.scenes.narration.addDialog([Strings.INST_PATTERN]);
 		gm.scenes.setCurrent("narration");
 	}});
 
 	// pattern
 	gm.sq.add({ fn: () => {
-		gm.props.pattern = patternMaker.getPattern(gm.props.levelCount);
-		gm.props.patternBounds = patternMaker.getBounds();
+		gm.states.pattern = patternMaker.getPattern(gm.states.levelCount);
+		gm.states.patternBounds = patternMaker.getBounds();
 		gm.scenes.pattern = new Pattern(gm, gm.sfx);
 		gm.scenes.pattern.onKeyDown["BTN_1"] = function() {
 			if (gm.scenes.pattern.isNextReady) {
@@ -336,16 +336,16 @@ gm.onSetup = function() {
 
 	// walk level
 	gm.sq.add({ label: "walk-level", fn: () => {
-		if (gm.props.levelCount === 0) return gm.sq.next();
-		gm.props.isWalkLevelExited = false;
+		if (gm.states.levelCount === 0) return gm.sq.next();
+		gm.states.isWalkLevelExited = false;
 		gm.scenes.walkLevel = new WalkLevel(gm);
 		gm.scenes.setCurrent("walkLevel");
 	}});
 
 	// repeat walk level
 	gm.sq.add({ fn: () => {
-		if (gm.props.levelCount === 0) return gm.sq.next();
-		if (!gm.props.isWalkLevelExited) gm.sq.set("walk-level");
+		if (gm.states.levelCount === 0) return gm.sq.next();
+		if (!gm.states.isWalkLevelExited) gm.sq.set("walk-level");
 		gm.sq.next();
 	}});
 
@@ -357,7 +357,7 @@ gm.onSetup = function() {
 
 	// webs or rock rolls based on score
 	gm.sq.add({ fn: () => {
-		if (gm.props.lastPointWinner === "SPIDER") {
+		if (gm.states.lastPointWinner === "SPIDER") {
 			gm.sfx.play("inter");
 			gm.scenes.interWebs.setup();
 			gm.scenes.setCurrent("interWebs");
@@ -369,17 +369,17 @@ gm.onSetup = function() {
 	// score narration
 	gm.sq.add({ fn: () => {
 		gm.scenes.narration.continue.isActive = false;
-		gm.scenes.narration.addDialog(Strings.NARRATIVE[gm.props.lastPointWinner][gm.props.levelCount]);
+		gm.scenes.narration.addDialog(Strings.NARRATIVE[gm.states.lastPointWinner][gm.states.levelCount]);
 		gm.scenes.narration.setScore();
 		gm.sfx.play('level_start', { randomRate: true });
-		gm.props.levelCount++;
+		gm.states.levelCount++;
 		gm.scenes.setCurrent("narration");
 	}});
 
 	// end dialog
 	gm.sq.add({ fn: () => {
-		if (gm.props.levelCount < Consts.NUM_LEVELS) return gm.sq.next();
-		const winner = gm.props.points.SPIDER > gm.props.points.ROCK ? "SPIDER" : "ROCK"; 
+		if (gm.states.levelCount < Consts.NUM_LEVELS) return gm.sq.next();
+		const winner = gm.states.points.SPIDER > gm.states.points.ROCK ? "SPIDER" : "ROCK"; 
 		gm.scenes.narration.addDialog(Strings.NARRATIVE.END[winner]);
 		gm.scenes.setCurrent("narration");
 	}});
@@ -387,7 +387,7 @@ gm.onSetup = function() {
 	// next loop or end
 	gm.sq.add({ fn: () => {
 		gm.scenes.narration.hideScore();
-		if (gm.props.levelCount >= Consts.NUM_LEVELS) {
+		if (gm.states.levelCount >= Consts.NUM_LEVELS) {
 			gm.scenes.end.onKeyUp["RESET"] = function() {
 				gm.sfx.play('next_button');
 				resetGame();

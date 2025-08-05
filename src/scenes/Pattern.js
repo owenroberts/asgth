@@ -57,14 +57,14 @@ export class Pattern extends Scene {
 
 		// pattern[lines[points[xy]]]
 		// [[[x1, y1], [x2, y2]]]
-		for (let i = 0; i < gm.props.pattern.length; i++) {
+		for (let i = 0; i < gm.states.pattern.length; i++) {
 			drawing.add([
-				sX + gm.props.pattern[i][0][0] * w, 
-				sY + gm.props.pattern[i][0][1] * h,
+				sX + gm.states.pattern[i][0][0] * w, 
+				sY + gm.states.pattern[i][0][1] * h,
 			]);
 			drawing.add([
-				sX + gm.props.pattern[i][1][0] * w, 
-				sY + gm.props.pattern[i][1][1] * h,
+				sX + gm.states.pattern[i][1][0] * w, 
+				sY + gm.states.pattern[i][1][1] * h,
 			]);
 			drawing.add(Points.END);
 		}

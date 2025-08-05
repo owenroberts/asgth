@@ -7,7 +7,7 @@ export class Sun extends Sprite {
 	constructor(gm) {
 		super(12.85 * Consts.CELL_SIZE.W, 6 * Consts.CELL_SIZE.H, gm.anims.sprites.sun);
 
-		const extraTime = gm.props.levelCount * 300 + gm.props.pattern.length * 100;
+		const extraTime = gm.states.levelCount * 300 + gm.states.pattern.length * 100;
 	
 		this.counter = new Counter(Consts.SUN_INTERVAL + extraTime);
 		this.animator = new Counter(Consts.SUN_INTERVAL + extraTime);

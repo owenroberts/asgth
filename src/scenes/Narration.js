@@ -9,7 +9,7 @@ export class Narration extends Scene {
 		super();
 
 		this.sfx = gm.sfx;
-		this.props = gm.props;
+		this.states = gm.states;
 
 		this.dialogList = []; // sequencer?
 		this.isDone = true;
@@ -77,9 +77,9 @@ export class Narration extends Scene {
 		this.score.isActive = true;
 
 		let scoreX = Consts.CELL_SIZE.W * 13;
-		let scoreY = Consts.CELL_SIZE.H * (this.props.points.SPIDER + this.props.points.ROCK - 1);
+		let scoreY = Consts.CELL_SIZE.H * (this.states.points.SPIDER + this.states.points.ROCK - 1);
 
-		let point = this.props.lastPointWinner === 'SPIDER' ? 1 : 0;
+		let point = this.states.lastPointWinner === 'SPIDER' ? 1 : 0;
 		this.score.addLocation(scoreX, scoreY,  point);
 	}
 

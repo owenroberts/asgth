@@ -35,7 +35,7 @@ export class Spider extends Sprite {
 		this.bounds = gm.bounds;
 		this.input = gm.input;
 
-		this.debug = true;
+		// this.isDebug = true;
 
 		this.prevPosition = [0, 0];
 		this.direction = Directions.UP;

@@ -17,7 +17,7 @@ export class RockLevel extends Scene {
 
 		this.player = this.add(gm.player);
 		this.sfx = gm.sfx;
-		this.props = gm.props;
+		this.states = gm.states;
 		this.sq = gm.sq;
 		this.width = gm.window.width;
 
@@ -25,10 +25,10 @@ export class RockLevel extends Scene {
 		this.isRockRolled = false;
 		this.gotMatch = false;
 		
-		const map = generateBSPMap({ cols: 13, rows: 7, minNodeSize: 2, maxNodeSize: 6, createPaths: false, inject: [{ type: "room", w: gm.props.patternBounds.width, h: gm.props.patternBounds.height, name: 'drawing' }] });
+		const map = generateBSPMap({ cols: 13, rows: 7, minNodeSize: 2, maxNodeSize: 6, createPaths: false, inject: [{ type: "room", w: gm.states.patternBounds.width, h: gm.states.patternBounds.height, name: 'drawing' }] });
 
 		const tracingStartTile = map.rooms.filter(r => r.name == "drawing")[0]
-		this.tracing = this.add(new Tracing(gm, gm.props.pattern, tracingStartTile));
+		this.tracing = this.add(new Tracing(gm, gm.states.pattern, tracingStartTile));
 
 		this.trees = this.add(new Trees(gm));
 		this.trees.clearAnimator();
@@ -80,8 +80,8 @@ export class RockLevel extends Scene {
 	}
 
 	updateScore() {
-		this.props.lastPointWinner = this.gotMatch ? 'SPIDER' : 'ROCK';
-		this.props.points[this.props.lastPointWinner]++;
+		this.states.lastPointWinner = this.gotMatch ? 'SPIDER' : 'ROCK';
+		this.states.points[this.states.lastPointWinner]++;
 	}
 
 	update(timeElapsed) {
@@ -101,7 +101,7 @@ export class RockLevel extends Scene {
 
 			const points = structuredClone(this.web.getPoints({ trimmed: connection === Consts.WEB_CONNECTS.COMPLETED }));
 
-			const isMatch = patternMatch(this.props.pattern, points);
+			const isMatch = patternMatch(this.states.pattern, points);
 			
 			if (isMatch) {
 				if (connection === Consts.WEB_CONNECTS.COMPLETED) {

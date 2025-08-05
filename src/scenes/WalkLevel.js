@@ -11,7 +11,7 @@ export class WalkLevel extends Scene {
 		this.player = this.add(gm.player);
 		this.sfx = gm.sfx;
 		this.sq = gm.sq;
-		this.props = gm.props;
+		this.states = gm.states;
 		this.height = gm.window.height;
 		this.input = gm.input;
 
@@ -129,7 +129,7 @@ export class WalkLevel extends Scene {
 		// exit.drawDebug("#ffbb00");
 		if (this.player.isColliding(this.exit)) {
 			this.sfx.play("walk", { randomRate: true });
-			this.props.isWalkLevelExited = true;
+			this.states.isWalkLevelExited = true;
 			this.input.reset();
 			this.sq.next();
 		}

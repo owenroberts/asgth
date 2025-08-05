@@ -2,7 +2,7 @@
  * game constants
  * @type {Object}
  */
-const debug = import.meta.env.DEV; // consts debug
+const isDebug = import.meta.env.DEV; // consts isDebug
 
 export const Consts = {
 	CELL_SIZE: { W: 64, H: 64, W2: 32, H2: 32, W8: 16, H8: 16 },
@@ -10,7 +10,7 @@ export const Consts = {
 	GRID_ROWS: 7,
 	BG_COLOR: '#aeaaa6', //'#4a4047',
 	
-	NUM_LEVELS: debug ? 2 : 7,
+	NUM_LEVELS: isDebug ? 2 : 7,
 
 	SPEED_TIME: 0.01,
 
@@ -48,12 +48,12 @@ export const Consts = {
 	},
 	
 	PRACTICE_DELAY: 180,
-	PATTERN_DELAY: debug ? 50 : 300,
+	PATTERN_DELAY: isDebug ? 50 : 300,
 	WEBS_INTERVAL: 180,
 	ROCK_SHAKE_AMOUNT: 2,
 	SUN_FINISH_COUNT: 400,
-	SUN_INTERVAL: debug ? 300 : 1280,
-	MOON_INTERVAL: debug ? 300 : 1280,
+	SUN_INTERVAL: isDebug ? 300 : 1280,
+	MOON_INTERVAL: isDebug ? 300 : 1280,
 	ROCK_SPEED: 1.8,
 	TRACING_TIMEOUT: 1000,
 

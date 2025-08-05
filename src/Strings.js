@@ -8,7 +8,6 @@ export const Strings = {
 	START_SOUND: "Start with sound",
 	START_SILENT: "Start slient",
 
-	DEBUG_START: "x to start debug",
 	LOCAL_STORAGE: "spider-instructions-complete",
 	
 	INST_MOVE_YOU: "You are the spider.",

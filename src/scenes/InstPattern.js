@@ -17,7 +17,7 @@ export class InstPattern extends Scene {
 
 		this.player = this.add(gm.player);
 		this.sfx = gm.sfx;
-		this.props = gm.props;
+		this.states = gm.states;
 		this.sq = gm.sq;
 
 		this.gotMatch = false;
@@ -29,7 +29,7 @@ export class InstPattern extends Scene {
 		// not DRY ... idk
 		this.start = { x: 4, y: 1 };
 		
-		this.tracing = this.add(new Tracing(gm, gm.props.pattern, this.start, true));
+		this.tracing = this.add(new Tracing(gm, gm.states.pattern, this.start, true));
 		
 		const ground = this.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }, true));
 
@@ -89,7 +89,7 @@ export class InstPattern extends Scene {
 
 			const points = structuredClone(this.web.getPoints({ trimmed: connection === Consts.WEB_CONNECTS.COMPLETED }));
 
-			const isMatch = patternMatch(this.props.pattern, points);
+			const isMatch = patternMatch(this.states.pattern, points);
 			
 			if (isMatch) {
 				if (connection === Consts.WEB_CONNECTS.COMPLETED) {
@@ -111,7 +111,7 @@ export class InstPattern extends Scene {
 		if (this.sun.isDone()) {
 			this.sfx.play('inter', { randomRate: true });
 			if (this.gotMatch) {
-				this.props.isPracticePatternSolved = true;
+				this.states.isPracticePatternSolved = true;
 			}
 			this.sq.next();
 		}
