@@ -29,9 +29,10 @@ export class InstPattern extends Scene {
 		// not DRY ... idk
 		this.start = { x: 4, y: 1 };
 		
-		this.tracing = this.add(new Tracing(gm, gm.states.pattern, this.start, true));
+		console.log(gm.states.pattern);
+		this.tracing = this.add(new Tracing(gm, Consts.PRACTICE_PATTERN, this.start, true));
 		
-		const ground = this.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }, true));
+		const ground = this.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }));
 
 		const tileMap = new TileMap(5, 5);
 		const treeLocations = [[1,1], [1,2], [1,3], [2,1], [2,2], [2,3], [3,1], [3,2], [3,3]];
@@ -101,7 +102,7 @@ export class InstPattern extends Scene {
 			}
 		}
 
-		if (this.web.isActive && player.isMoving()) {
+		if (this.web.isActive && this.player.isMoving()) {
 			this.sfx.play('web');
 		} else {
 			this.sfx.pause('web');

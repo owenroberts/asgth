@@ -1,6 +1,6 @@
 /**
  * all the strings for the game
- * @type {Object}
+ * @type {object}
  */
 export const Strings = {
 

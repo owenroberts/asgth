@@ -28,6 +28,7 @@ export class RockLevel extends Scene {
 		const map = generateBSPMap({ cols: 13, rows: 7, minNodeSize: 2, maxNodeSize: 6, createPaths: false, inject: [{ type: "room", w: gm.states.patternBounds.width, h: gm.states.patternBounds.height, name: 'drawing' }] });
 
 		const tracingStartTile = map.rooms.filter(r => r.name == "drawing")[0]
+		
 		this.tracing = this.add(new Tracing(gm, gm.states.pattern, tracingStartTile));
 
 		this.trees = this.add(new Trees(gm));

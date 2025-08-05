@@ -1,6 +1,6 @@
 /**
  * game constants
- * @type {Object}
+ * @type {object}
  */
 const isDebug = import.meta.env.DEV; // consts isDebug
 

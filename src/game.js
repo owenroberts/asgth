@@ -16,7 +16,7 @@ import { Narration } from './scenes/Narration.js';
 import { End } from './scenes/End.js';
 import { Pattern } from './scenes/Pattern.js';
 
-import { createPatternMaker } from './patternMaker.js';
+import { getPattern, getBounds } from './patternMaker.js';
 import { patternMatch } from './patternMatch.js';
 import { Strings } from './Strings.js';
 import { Consts } from './Consts.js';
@@ -148,8 +148,6 @@ gm.onSetup = function() {
 	loadingSprite.bbox.center();
 	loadingSprite.animation.play();
 
-	const patternMaker = createPatternMaker();
-
 	// debug start -- put some of this in gm
 	gm.sq.add({ fn: () => {
 		if (!gm.isDebug) return gm.sq.next();
@@ -269,8 +267,6 @@ gm.onSetup = function() {
 	gm.sq.add({ fn: () => {
 		if (gm.isDebug) return gm.sq.next();
 		if (gm.states.isSkipInstructions) return gm.sq.next();
-
-		gm.states.pattern = Consts.PRACTICE_PATTERN;
 		gm.scenes.pattern = new Pattern(gm);
 		gm.scenes.pattern.onKeyDown["BTN_1"] = function() {
 			if (gm.scenes.pattern.isNextReady) {
@@ -322,9 +318,9 @@ gm.onSetup = function() {
 
 	// pattern
 	gm.sq.add({ fn: () => {
-		gm.states.pattern = patternMaker.getPattern(gm.states.levelCount);
-		gm.states.patternBounds = patternMaker.getBounds();
-		gm.scenes.pattern = new Pattern(gm, gm.sfx);
+		gm.states.pattern = getPattern(gm.states.levelCount);
+		gm.states.patternBounds = getBounds(gm.states.pattern);
+		gm.scenes.pattern = new Pattern(gm);
 		gm.scenes.pattern.onKeyDown["BTN_1"] = function() {
 			if (gm.scenes.pattern.isNextReady) {
 				gm.sfx.play("next_button", { randomRate: true });
