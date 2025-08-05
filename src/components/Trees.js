@@ -18,11 +18,10 @@ export class Trees extends SpriteCollection {
 			segmentNum: [2, 3],
 		});
 		
-		this.animCounter = Counter(24, () => { 
+		this.animCounter = new Counter(24, () => { 
 			this.animator.set(); 
 		});
-		
-		this.animCounter.setLoop(true);
+		this.animCounter.isLoop = true;
 	
 		this.select = this.add(new Sprite(0, 0, gm.anims.sprites.select));
 		this.select.isActive = false;

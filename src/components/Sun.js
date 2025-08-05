@@ -31,7 +31,7 @@ export class Sun extends Sprite {
 		this.animator.setCount(progress * a);
 	}
 
-	isDone() { return this.counter.isDone(); }
+	isDone() { return this.counter.isDone; }
 
 	reset() {
 		this.counter.reset();

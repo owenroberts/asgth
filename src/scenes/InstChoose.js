@@ -11,7 +11,7 @@ export class InstChoose extends Scene {
 	setup(gm) {
 		this.text = this.add(new TextSprite({
 			countForward: true,
-			msg: Strings.INST_CHOOSE,
+			message: Strings.INST_CHOOSE,
 			wrap: 24,
 			track: Consts.LETTERS_TRACK,
 			lead: Consts.LETTERS_LEAD,

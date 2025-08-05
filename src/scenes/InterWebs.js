@@ -27,7 +27,7 @@ export class InterWebs extends Scene {
 
 	update() {
 		this.counter.update();
-		if (this.counter.isDone()) {
+		if (this.counter.isDone) {
 			this.sq.next();
 		}
 	}

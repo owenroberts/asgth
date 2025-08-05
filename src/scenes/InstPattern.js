@@ -29,7 +29,6 @@ export class InstPattern extends Scene {
 		// not DRY ... idk
 		this.start = { x: 4, y: 1 };
 		
-		console.log(gm.states.pattern);
 		this.tracing = this.add(new Tracing(gm, Consts.PRACTICE_PATTERN, this.start, true));
 		
 		const ground = this.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }));

@@ -36,7 +36,7 @@ export class InstWeb extends Scene {
 		
 		this.instText = this.add(new TextSprite({
 			countForward: true,
-			msg: Strings.INST_WEB_1,
+			message: Strings.INST_WEB_1,
 			wrap: 22,
 			track: Consts.LETTERS_TRACK,
 			lead: Consts.LETTERS_LEAD,
@@ -46,7 +46,7 @@ export class InstWeb extends Scene {
 		}));
 
 		this.instBtn = this.add(new TextSprite({
-			msg: Consts.KEY_DISPLAY.BTN_1,
+			message: Consts.KEY_DISPLAY.BTN_1,
 			x: Consts.CELL_SIZE.W * Consts.INST_WEB_X1,
 			y: Consts.CELL_SIZE.H2,
 			letters: gm.anims.sprites.letters_keyboard,
@@ -116,16 +116,16 @@ export class InstWeb extends Scene {
 			if (!this.conditions.firstTree && !this.conditions.secondTree && !this.conditions.releasedWeb) {
 				this.conditions.firstTree = true;
 				this.instBtn.x = Consts.INST_WEB_X2 * Consts.CELL_SIZE.W;
-				this.instText.setMsg(Strings.INST_WEB_2);
+				this.instText.setMessage(Strings.INST_WEB_2);
 			}
 		}
 
 		if (connection === Consts.WEB_CONNECTS.COMPLETED) {
 			if (this.conditions.firstTree && !this.conditions.releasedWeb) {
 				this.conditions.secondTree = true;
-				this.instBtn.setMsg(Consts.KEY_DISPLAY.BTN_2);
+				this.instBtn.setMessage(Consts.KEY_DISPLAY.BTN_2);
 				this.instBtn.x = Consts.INST_WEB_X3 * Consts.CELL_SIZE.W;
-				this.instText.setMsg(Strings.INST_WEB_3);
+				this.instText.setMessage(Strings.INST_WEB_3);
 			}
 		}
 
@@ -133,18 +133,18 @@ export class InstWeb extends Scene {
 			connection === Consts.WEB_CONNECTS.CANCELED) {
 			if (this.conditions.firstTree && this.conditions.secondTree) {
 				this.conditions.releasedWeb = true;
-				this.instBtn.setMsg(Consts.KEY_DISPLAY.BTN_3);
+				this.instBtn.setMessage(Consts.KEY_DISPLAY.BTN_3);
 				this.instBtn.x = Consts.INST_WEB_X4 * Consts.CELL_SIZE.W;
-				this.instText.setMsg(Strings.INST_WEB_4);
+				this.instText.setMessage(Strings.INST_WEB_4);
 			}
 		}
 
 		if (connection === Consts.WEB_CONNECTS.CLEARED) {
 			if (this.conditions.firstTree && this.conditions.secondTree && this.conditions.releasedWeb) {
 				this.conditions.clearedWeb = true;
-				this.instBtn.setMsg(Consts.KEY_DISPLAY.BTN_4);
+				this.instBtn.setMessage(Consts.KEY_DISPLAY.BTN_4);
 				this.instBtn.x = Consts.INST_WEB_X5 * Consts.CELL_SIZE.W;
-				this.instText.setMsg(Strings.INST_WEB_5);
+				this.instText.setMessage(Strings.INST_WEB_5);
 			}
 		}
 

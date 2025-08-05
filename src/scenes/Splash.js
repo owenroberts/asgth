@@ -9,7 +9,7 @@ export class Splash extends Scene {
 
 		this.add(new TextSprite({
 			countForward: true,
-			msg: Strings.TITLE,
+			message: Strings.TITLE,
 			wrap: Consts.TEXT_WRAP,
 			track: Consts.LETTERS_TRACK,
 			lead: Consts.LETTERS_LEAD,
@@ -19,14 +19,14 @@ export class Splash extends Scene {
 		}));
 
 		this.add(new TextSprite({
-			msg: Consts.KEY_DISPLAY.BTN_1,
+			message: Consts.KEY_DISPLAY.BTN_1,
 			x: Consts.CELL_SIZE.W * (2 + 7),
 			y: Consts.CELL_SIZE.H * 3,
 			letters: gm.anims.sprites.letters_keyboard,
 		}));
 
 		this.add(new TextSprite({
-			msg: Strings.START_SOUND,
+			message: Strings.START_SOUND,
 			countForward: true,
 			wrap: 24,
 			track: Consts.LETTERS_TRACK,
@@ -37,14 +37,14 @@ export class Splash extends Scene {
 		}));
 
 		this.add(new TextSprite({
-			msg: Consts.KEY_DISPLAY.BTN_2,
+			message: Consts.KEY_DISPLAY.BTN_2,
 			x: Consts.CELL_SIZE.W * (2 + 7),
 			y: Consts.CELL_SIZE.H * 4.5,
 			letters: gm.anims.sprites.letters_keyboard,
 		}));
 
 		this.add(new TextSprite({
-			msg: Strings.START_SILENT,
+			message: Strings.START_SILENT,
 			countForward: true,
 			wrap: 14,
 			track: Consts.LETTERS_TRACK,

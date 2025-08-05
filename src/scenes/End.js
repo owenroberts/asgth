@@ -14,14 +14,14 @@ export class End extends Scene {
 			sprite.animation.state = "still_frame";
 			
 			this.add(new TextSprite({
-				msg: Consts.KEY_DISPLAY.RESET,
+				message: Consts.KEY_DISPLAY.RESET,
 				x: Consts.CELL_SIZE.W * 5.5,
 				y: Consts.CELL_SIZE.H * 5.5,
 				letters: gm.anims.sprites.letters_keyboard,
 			}));
 			
 			this.add(new TextSprite({
-				msg: Strings.INST_RESTART,
+				message: Strings.INST_RESTART,
 				wrap: 24,
 				track: Consts.LETTERS_TRACK,
 				lead: Consts.LETTERS_LEAD,

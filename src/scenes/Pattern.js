@@ -30,7 +30,7 @@ export class Pattern extends Scene {
 		});
 
 		this.add(new TextSprite({
-			msg: Strings.INST_DRAW_PATTERN,
+			message: Strings.INST_DRAW_PATTERN,
 			track: Consts.LETTERS_TRACK,
 			lead: Consts.LETTERS_LEAD,
 			x: Consts.CELL_SIZE.W * Consts.TEXT_MARGIN.W,
@@ -44,7 +44,7 @@ export class Pattern extends Scene {
 		
 		this.isNextReady = false;
 
-		this.nextDelay = Counter(Consts.PATTERN_DELAY, () => {
+		this.nextDelay = new Counter(Consts.PATTERN_DELAY, () => {
 			gm.sfx.play("continue", { randomRate: true });
 			continueUI.isActive = true;
 			this.isNextReady = true;

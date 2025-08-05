@@ -25,7 +25,7 @@ export class InstMove extends Scene {
 
 		this.add(new TextSprite({
 			countForward: true,
-			msg: Strings.INST_MOVE_YOU,
+			message: Strings.INST_MOVE_YOU,
 			track: Consts.LETTERS_TRACK,
 			lead: Consts.LETTERS_LEAD,
 			x: Consts.CELL_SIZE.W * 0.5,
@@ -36,7 +36,7 @@ export class InstMove extends Scene {
 
 		this.add(new TextSprite({
 			countForward: true,
-			msg: Strings.INST_MOVE_KEYS,
+			message: Strings.INST_MOVE_KEYS,
 			track: Consts.LETTERS_TRACK,
 			lead: Consts.LETTERS_LEAD,
 			x: Consts.CELL_SIZE.W * 0.5,

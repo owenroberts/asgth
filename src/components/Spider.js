@@ -2,6 +2,10 @@ import { Counter, assert } from '../../cool/cool.js';
 import { Sprite } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 
+/**
+ * directions of spider art "enum"
+ * @type {object}
+ */
 const Directions = {
 	UP: 0,
 	UP_RIGHT: 1,
@@ -13,9 +17,19 @@ const Directions = {
 	UP_LEFT: 7
 };
 
+/**
+ * mapping direction to state in spider animation
+ * kind of goofy? array indexes match "enum" values
+ * @type {array}
+ */
 const directionStates = ['up', 'up_right', 'right', 'down_right', 'down', 'down_left', 'left', 'up_left'];
 
-const speed = 16;
+const speed = Consts.SPIDER_SPEED;
+
+/**
+ * speed of spider going different directions
+ * @type {array[x,y]}
+ */
 const directionSpeeds = [
 	[0, -speed],
 	[speed * 0.71, -speed * 0.71],
@@ -35,14 +49,15 @@ export class Spider extends Sprite {
 		this.bounds = gm.bounds;
 		this.input = gm.input;
 
-		// this.isDebug = true;
-
 		this.prevPosition = [0, 0];
 		this.direction = Directions.UP;
 
-		this.rightCounter = new Counter(8);
+
+		console.log(Consts.ROTATE_COUNT);
+		// counter to slow down right to left movement
+		this.rightCounter = new Counter(Consts.ROTATE_COUNT);
 		this.rightCounter.end();
-		this.leftCounter = new Counter(8);
+		this.leftCounter = new Counter(Consts.ROTATE_COUNT);
 		this.leftCounter.end();
 
 		this.animation.state = "idle_right";
@@ -67,17 +82,16 @@ export class Spider extends Sprite {
 
 	update(time) {
 
-		// for back, collision with walls
+		// to moveBack on collision with walls
 		this.prevPosition = this.bbox.position;
-		// console.log(this.input.getKey('RIGHT'))
-		
-		if (this.input.getKey('RIGHT') && !this.input.getKey('LEFT') && this.rightCounter.isDone()) {
-			this.direction = (this.direction + 1) % 8;
+
+		if (this.input.getKey('RIGHT') && !this.input.getKey('LEFT') && this.rightCounter.isDone) {
+			this.direction = (this.direction + 1) % 8; // counting through directions to the right
 			this.rightCounter.reset();
 		}
 
-		if (this.input.getKey('LEFT') && !this.input.getKey('RIGHT') && this.leftCounter.isDone()) {
-			this.direction = (8 + (this.direction - 1) % 8) % 8;
+		if (this.input.getKey('LEFT') && !this.input.getKey('RIGHT') && this.leftCounter.isDone) {
+			this.direction = (8 + (this.direction - 1) % 8) % 8; // counting through directions to the left
 			this.leftCounter.reset();
 		}
 

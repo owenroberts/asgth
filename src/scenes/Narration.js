@@ -35,7 +35,7 @@ export class Narration extends Scene {
 
 	addDialog(list) {
 		if (!Array.isArray(list)) list = [list];
-		this.text.setMsg(list[0]);
+		this.text.setMessage(list[0]);
 		this.dialogList = [];
 		for (let i = 1; i < list.length; i++) {
 			this.dialogList.push(list[i]);
@@ -47,7 +47,7 @@ export class Narration extends Scene {
 		if (this.text.isDone()) {
 			this.sfx.play('next_button', { randomRate: true });
 			if (this.dialogList.length > 0) {
-				this.text.setMsg(this.dialogList.shift());
+				this.text.setMessage(this.dialogList.shift());
 			} else {
 				this.isDone = true;
 			}

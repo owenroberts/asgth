@@ -13,6 +13,8 @@ export const Consts = {
 	NUM_LEVELS: isDebug ? 2 : 7,
 
 	SPEED_TIME: 0.01,
+	SPIDER_SPEED: 16,
+	ROTATE_COUNT: 8,
 
 	PRACTICE_PATTERN: [
 		[[1,1],[2,2]],
