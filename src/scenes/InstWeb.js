@@ -52,7 +52,6 @@ export class InstWeb extends Scene {
 			letters: gm.anims.sprites.letters_keyboard,
 		}));
 
-		// DRY w InstPattern ... 
 		this.start = { x: 0, y: 3 };
 		const ground = this.add(new Texture({ 
 			animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')]
@@ -61,7 +60,7 @@ export class InstWeb extends Scene {
 		const tileMap = new TileMap(13, 3);
 		const treeLocations = [
 			[randomInt(0, 5), randomInt(0, 2)], 
-			[randomInt(6, 11), randomInt(0, 2)]
+			[randomInt(6, 11), randomInt(0, 2)],
 		];
 
 		for (let i = 0; i < treeLocations.length; i++) {
@@ -81,7 +80,6 @@ export class InstWeb extends Scene {
 		for (let i = 0; i < tileMap.tiles.length; i++) {
 			if (tileMap.tiles[i].type === 1) continue;
 			const { x, y } = tileMap.getIndexPosition(i);
-			// console.log(x, y);
 			const blobIndex = blobMap.getBlobIndex(x, y, 0);
 			ground.addLocation(
 				(this.start.x + x) * Consts.CELL_SIZE.W, 
@@ -109,7 +107,6 @@ export class InstWeb extends Scene {
 		this.tracing.update();
 
 		const treeLocation = this.trees.getTreeLocation(this.player);
-		// console.log({treeLocation})
 		const connection = this.web.getConnection(this.player, treeLocation, this.sfx);
 
 		if (connection === Consts.WEB_CONNECTS.STARTED) {

@@ -1,5 +1,5 @@
-import { Counter, randomInt, choice } from '../../cool/cool.js';
-import { Scene, TextSprite, TileMap, BlobMap, Texture } from '../../lines/src/Engine.js';
+import { randomInt, choice } from '../../cool/cool.js';
+import { Scene, TileMap, BlobMap, Texture } from '../../lines/src/Engine.js';
 
 import { Consts } from '../Consts.js';
 import { Strings } from '../Strings.js';
@@ -10,6 +10,10 @@ import { Web } from '../components/Web.js';
 import { Sun } from '../components/Sun.js';
 import { Tracing } from '../components/Tracing.js';
 
+/**
+ * instructrions for drawing pattern
+ * @extends {Scene}
+ */
 export class InstPattern extends Scene {
 	
 	constructor(gm) {
@@ -50,7 +54,6 @@ export class InstPattern extends Scene {
 		for (let i = 0; i < tileMap.tiles.length; i++) {
 			if (tileMap.tiles[i].type === 1) continue;
 			const { x, y } = tileMap.getIndexPosition(i);
-			// console.log(x, y);
 			const blobIndex = blobMap.getBlobIndex(x, y, 0);
 			ground.addLocation(
 				(this.start.x + x) * Consts.CELL_SIZE.W, 
@@ -71,7 +74,7 @@ export class InstPattern extends Scene {
 	reset() {
 		this.web.clear();
 		this.trees.locations.forEach(l => {
-			l[2] = randomInt(25);
+			l[2] = randomInt(25); // frame index
 		});
 		this.sun.reset();
 	}

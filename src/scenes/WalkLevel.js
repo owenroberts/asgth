@@ -18,9 +18,9 @@ export class WalkLevel extends Scene {
 		this.doors = [];
 		this.walls = [];
 		
-		const map = generateBSPMap({ cols: 13, rows: 7, minRoomSize: 2, minNodeSize: 2, maxNodeSize: 6 });
-		const start = map.paths[0];
-		const end = map.paths[map.paths.length - 1];
+		const levelMap = generateBSPMap({ cols: 13, rows: 7, minRoomSize: 2, minNodeSize: 2, maxNodeSize: 6 });
+		const start = levelMap.paths[0];
+		const end = levelMap.paths[levelMap.paths.length - 1];
 		
 		this.player.spawn(
 			start.x * Consts.CELL_SIZE.W,
@@ -42,15 +42,14 @@ export class WalkLevel extends Scene {
 			(end.y + end.h - 1) * Consts.CELL_SIZE.H + Consts.CELL_SIZE.W * 0.25,
 			Consts.CELL_SIZE.W * 0.5,
 			Consts.CELL_SIZE.H * 0.5,
-			// gm.anims.sprites.end_web
 		);
 
-		for (let i = 0; i < map.paths.length - 1; i++) {
+		for (let i = 0; i < levelMap.paths.length - 1; i++) {
 			// add door to end
-			const pathStart = map.paths[i];
-			const pathEnd = map.paths[i + 1];
-			const startTile = map.tileMap.getTile(pathStart.x, pathStart.y);
-			const endTile = map.tileMap.getTile(pathEnd.x, pathEnd.y);
+			const pathStart = levelMap.paths[i];
+			const pathEnd = levelMap.paths[i + 1];
+			const startTile = levelMap.tileMap.getTile(pathStart.x, pathStart.y);
+			const endTile = levelMap.tileMap.getTile(pathEnd.x, pathEnd.y);
 
 
 			// if two paths collide, don't make the door
@@ -74,13 +73,13 @@ export class WalkLevel extends Scene {
 			this.doors.push(d);
 		}
 
-		for (let i = 0; i < map.tileMap.tiles.length; i++) {
-			if (map.tileMap.tiles[i].type >= 2) {
-				map.tileMap.tiles[i].type = TileTypes.ON;
+		for (let i = 0; i < levelMap.tileMap.tiles.length; i++) {
+			if (levelMap.tileMap.tiles[i].type >= 2) {
+				levelMap.tileMap.tiles[i].type = TileTypes.ON;
 				continue;
 			} 
-			const { x, y } = map.tileMap.getIndexPosition(i);
-			map.tileMap.tiles[i].type = TileTypes.OFF;
+			const { x, y } = levelMap.tileMap.getIndexPosition(i);
+			levelMap.tileMap.tiles[i].type = TileTypes.OFF;
 			this.walls.push(new BBox(
 				x * Consts.CELL_SIZE.W,
 				y * Consts.CELL_SIZE.H, 
@@ -89,10 +88,10 @@ export class WalkLevel extends Scene {
 			));
 		}
 
-		const blobMap = new BlobMap(map.tileMap); // is this wackadoodle?
-		for (let i = 0; i < map.tileMap.tiles.length; i++) {
-			const { x, y } = map.tileMap.getIndexPosition(i);
-			if (map.tileMap.tiles[i].type === TileTypes.ON) {
+		const blobMap = new BlobMap(levelMap.tileMap); // is this wackadoodle?
+		for (let i = 0; i < levelMap.tileMap.tiles.length; i++) {
+			const { x, y } = levelMap.tileMap.getIndexPosition(i);
+			if (levelMap.tileMap.tiles[i].type === TileTypes.ON) {
 				const blobIndex = blobMap.getBlobIndex(x, y, TileTypes.ON);
 				ground.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, blobIndex);
 			} else {

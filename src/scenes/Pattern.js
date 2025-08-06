@@ -1,4 +1,4 @@
-import { random, shuffle, coinFlip, Counter } from '../../cool/cool.js';
+import { random, Counter } from '../../cool/cool.js';
 import { Sprite, Scene, GameAnim, TextSprite } from '../../lines/src/Engine.js';
 import { Drawing, Layer, Style, Points, Animator } from '../../lines/src/Lines.js';
 import { Consts } from '../Consts.js';
@@ -23,11 +23,7 @@ export class Pattern extends Scene {
 		animation.setFrames(); // needs this for game anim that isn't loaded...
 
 		// little sprite hack
-		this.add({
-			display() {
-				animation.draw();
-			}
-		});
+		this.add({ display() { animation.draw(); } });
 
 		this.add(new TextSprite({
 			message: Strings.INST_DRAW_PATTERN,
@@ -50,21 +46,19 @@ export class Pattern extends Scene {
 			this.isNextReady = true;
 		});
 
-		const w = Consts.CELL_SIZE.W / 2;
-		const h = Consts.CELL_SIZE.H / 2;
-		const sX = w * 2; // consts?
-		const sY = h * 4; 
+		const sX = Consts.CELL_SIZE.W; // consts?
+		const sY = Consts.CELL_SIZE.H * 2; 
 
 		// pattern[lines[points[xy]]]
 		// [[[x1, y1], [x2, y2]]]
 		for (let i = 0; i < gm.states.pattern.length; i++) {
 			drawing.add([
-				sX + gm.states.pattern[i][0][0] * w, 
-				sY + gm.states.pattern[i][0][1] * h,
+				sX + gm.states.pattern[i][0][0] * Consts.CELL_SIZE.W2, 
+				sY + gm.states.pattern[i][0][1] * Consts.CELL_SIZE.H2,
 			]);
 			drawing.add([
-				sX + gm.states.pattern[i][1][0] * w, 
-				sY + gm.states.pattern[i][1][1] * h,
+				sX + gm.states.pattern[i][1][0] * Consts.CELL_SIZE.W2,
+				sY + gm.states.pattern[i][1][1] * Consts.CELL_SIZE.H2,
 			]);
 			drawing.add(Points.END);
 		}

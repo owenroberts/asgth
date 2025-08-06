@@ -4,10 +4,12 @@ import { Consts } from '../Consts.js';
 
 /**
  * option to skip or repeat, if the player has previously completed instructions
- * @param {object} gm - game manager
  */
 export class InstChoose extends Scene {
 
+	/**
+	 * @param {object} gm - game manager
+	 */
 	setup(gm) {
 		this.text = this.add(new TextSprite({
 			countForward: true,

@@ -1,6 +1,6 @@
 import { randomInt, choice, random } from '../../cool/cool.js';
 
-import { Scene, Sprite, Texture, TileMap, generateBSPMap, BSPTileTypes, BlobMap } from '../../lines/src/Engine.js';
+import { Scene, Sprite, Texture, generateBSPMap, BSPTileTypes, BlobMap } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 
 import { Trees } from '../components/Trees.js';
@@ -27,7 +27,7 @@ export class RockLevel extends Scene {
 		
 		const map = generateBSPMap({ cols: 13, rows: 7, minNodeSize: 2, maxNodeSize: 6, createPaths: false, inject: [{ type: "room", w: gm.states.patternBounds.width, h: gm.states.patternBounds.height, name: 'drawing' }] });
 
-		const tracingStartTile = map.rooms.filter(r => r.name == "drawing")[0]
+		const tracingStartTile = map.rooms.filter(r => r.name === "drawing")[0]
 		
 		this.tracing = this.add(new Tracing(gm, gm.states.pattern, tracingStartTile));
 
@@ -35,7 +35,6 @@ export class RockLevel extends Scene {
 		this.trees.clearAnimator();
 
 		let treeClusterSize = 3;
-		// don't like mixing getTexture() with .animation ... 
 		let numTrees = this.trees.texture.animation.endFrame;
 		for (let i = 0; i < map.rooms.length; i++) {
 			const treeClusterIndex = randomInt(numTrees - treeClusterSize);
@@ -60,7 +59,6 @@ export class RockLevel extends Scene {
 			ground.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, blobIndex);
 		}
 
-		// get tile type method?
 		const spawnTile = choice(map.tileMap.tiles.filter(t => t.type === BSPTileTypes.WALL));
 		const spawnLocation = map.tileMap.getPosition(spawnTile);
 		this.player.spawn(

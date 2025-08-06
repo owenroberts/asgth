@@ -25,7 +25,7 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
 const gm = new Game({
-	isDebug: true,
+	isDebug: false,
 	drawInterval: 3,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
@@ -279,7 +279,7 @@ gm.onSetup = function() {
 
 	// solve pattern practice
 	gm.sq.add({ fn: () => {
-		// if (gm.isDebug) return gm.sq.next();
+		if (gm.isDebug) return gm.sq.next();
 		if (gm.states.isSkipInstructions) return gm.sq.next();
 
 		if (gm.states.isPracticeRestart) gm.scenes.instPattern.reset();

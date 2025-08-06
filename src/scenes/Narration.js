@@ -11,7 +11,7 @@ export class Narration extends Scene {
 		this.sfx = gm.sfx;
 		this.states = gm.states;
 
-		this.dialogList = []; // sequencer?
+		this.dialogList = [];
 		this.isDone = true;
 
 		this.score = this.add(new Texture({ 
@@ -80,7 +80,7 @@ export class Narration extends Scene {
 		let scoreY = Consts.CELL_SIZE.H * (this.states.points.SPIDER + this.states.points.ROCK - 1);
 
 		let point = this.states.lastPointWinner === 'SPIDER' ? 1 : 0;
-		this.score.addLocation(scoreX, scoreY,  point);
+		this.score.addLocation(scoreX, scoreY, point);
 	}
 
 	hideScore() {
