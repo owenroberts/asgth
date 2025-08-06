@@ -52,7 +52,10 @@ export class InstMove extends Scene {
 		this.player.spawn(Consts.CELL_SIZE.W * 5, Consts.CELL_SIZE.H * 3.5);
 	}
 
-	update() {
+	update(timeElapsed) {
+
+		this.player.update(timeElapsed);
+
 		if (this.input.getKey('UP')) this.arrowsPressed[0] = true;
 		if (this.input.getKey('LEFT')) this.arrowsPressed[1] = true;
 		if (this.input.getKey('RIGHT')) this.arrowsPressed[2] = true;

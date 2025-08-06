@@ -22,10 +22,12 @@ export class Sun extends Sprite {
 	}
 
 	end() {
+		const count = this.counter.count;
+		const duration = this.counter.duration;
 		const progress = this.counter.getProgress();
-		this.counter.count = this.counter.duration - Consts.SUN_FINISH_COUNT;
+		this.counter.count = duration - Consts.SUN_FINISH_COUNT;
 		
-		const a = Consts.SUN_FINISH_COUNT * (this.counter.duration / (this.counter.duration - this.counter.count));
+		const a = Consts.SUN_FINISH_COUNT * (duration / (duration - count));
 		this.animator.duration = a;
 		this.animator.count = progress * a;
 	}

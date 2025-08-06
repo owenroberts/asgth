@@ -25,7 +25,7 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
 const gm = new Game({
-	isDebug: false,
+	// isDebug: true,
 	drawInterval: 3,
 	lineWidth: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
@@ -110,7 +110,7 @@ function resetGame() {
 		doodoo.stop();
 		doodoo.play();
 	}
-	gm.scenes.setCurrent("splash");
+	gm.sq.set("splash");
 }
 
 gm.onSetup = function() {
@@ -169,7 +169,7 @@ gm.onSetup = function() {
 	}});
 
 	// splash
-	gm.sq.add({ fn: () => {
+	gm.sq.add({ label: "splash", fn: () => {
 		if (gm.isDebug) return gm.sq.next();
 		gm.scenes.splash.onKeyDown['BTN_1'] = function() {
 			gm.states.isSoundActive = true;
@@ -203,15 +203,15 @@ gm.onSetup = function() {
 		gm.scenes.instChoose.setup(gm);
 
 		// skip instructions
-		gm.scenes.instChoose.onKeyDown["BTN_1"] = function() {
-			if (!gm.scenes.instChoose.isDone()) return;
+		gm.scenes.instChoose.onKeyUp["BTN_1"] = function() {
+			gm.sfx.play("next_button");
 			gm.states.isSkipInstructions = true;
 			gm.sq.next();
 			gm.input.reset();
 		};
 
 		// repeat instructions
-		gm.scenes.instChoose.onKeyDown["BTN_2"] = function() {
+		gm.scenes.instChoose.onKeyUp["BTN_2"] = function() {
 			gm.states.isRepeatInstructions = true;
 			gm.sq.next();
 			gm.input.reset();
@@ -267,6 +267,7 @@ gm.onSetup = function() {
 	gm.sq.add({ fn: () => {
 		if (gm.isDebug) return gm.sq.next();
 		if (gm.states.isSkipInstructions) return gm.sq.next();
+		gm.states.pattern = Consts.PRACTICE_PATTERN;
 		gm.scenes.pattern = new Pattern(gm);
 		gm.scenes.pattern.onKeyDown["BTN_1"] = function() {
 			if (gm.scenes.pattern.isNextReady) {
@@ -290,6 +291,7 @@ gm.onSetup = function() {
 	// practice pattern try again or next
 	gm.sq.add({ fn: () => {
 		if (gm.isDebug) return gm.sq.next();
+		if (gm.states.isSkipInstructions) return gm.sq.next();
 		
 		if (!gm.states.isPracticePatternSolved) {
 			gm.states.isPracticeRestart = true;
@@ -303,6 +305,7 @@ gm.onSetup = function() {
 		if (gm.isDebug) return gm.sq.next();
 
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
+		gm.scenes.narration.continue.isActive = false;
 		gm.scenes.narration.addDialog([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
 		gm.scenes.setCurrent("narration");
 	}});
@@ -387,6 +390,7 @@ gm.onSetup = function() {
 			gm.scenes.end.onKeyUp["RESET"] = function() {
 				gm.sfx.play('next_button');
 				resetGame();
+				gm.sq.next();
 			};
 			gm.scenes.setCurrent("end");
 		} else {

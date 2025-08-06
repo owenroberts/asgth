@@ -73,7 +73,7 @@ export class InstPattern extends Scene {
 
 	reset() {
 		this.web.clear();
-		this.trees.locations.forEach(l => {
+		this.trees.texture.locations.forEach(l => {
 			l[2] = randomInt(25); // frame index
 		});
 		this.sun.reset();
@@ -110,6 +110,7 @@ export class InstPattern extends Scene {
 
 		this.sun.update();
 		if (this.sun.isDone()) {
+			this.sfx.stop('web');
 			this.sfx.play('inter', { randomRate: true });
 			if (this.gotMatch) {
 				this.states.isPracticePatternSolved = true;

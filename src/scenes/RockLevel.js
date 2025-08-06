@@ -122,6 +122,7 @@ export class RockLevel extends Scene {
 		this.sun.update();
 
 		if (this.sun.isDone()) {
+			this.sfx.stop('web');
 			this.updateScore();
 			this.sq.next();
 		}
