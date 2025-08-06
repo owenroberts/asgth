@@ -279,7 +279,7 @@ gm.onSetup = function() {
 
 	// solve pattern practice
 	gm.sq.add({ fn: () => {
-		if (gm.isDebug) return gm.sq.next();
+		// if (gm.isDebug) return gm.sq.next();
 		if (gm.states.isSkipInstructions) return gm.sq.next();
 
 		if (gm.states.isPracticeRestart) gm.scenes.instPattern.reset();

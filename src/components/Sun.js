@@ -9,6 +9,7 @@ export class Sun extends Sprite {
 
 		const extraTime = gm.states.levelCount * 300 + gm.states.pattern.length * 100;
 	
+		// need separate counter and animator because if match is made, the sun animates down at a different rate than the final count
 		this.counter = new Counter(Consts.SUN_INTERVAL + extraTime);
 		this.animator = new Counter(Consts.SUN_INTERVAL + extraTime);
 	}
@@ -17,18 +18,16 @@ export class Sun extends Sprite {
 		this.counter.update();
 		this.animator.update();
 		const progress = Math.sin(this.animator.getProgress() * Math.PI);
-		this.bbox.y = map(progress, 0, 1, 5.75 * Consts.CELL_SIZE.H, Consts.CELL_SIZE.H / 4, true);
+		this.bbox.y = map(progress, 0, 1, 5.75 * Consts.CELL_SIZE.H, Consts.CELL_SIZE.H4, true);
 	}
 
 	end() {
-		const count = this.counter.getCount();
-		const duration = this.counter.getDuration();
 		const progress = this.counter.getProgress();
-		this.counter.setCount(duration - Consts.SUN_FINISH_COUNT);
+		this.counter.count = this.counter.duration - Consts.SUN_FINISH_COUNT;
 		
-		const a = Consts.SUN_FINISH_COUNT * (duration / (duration - count));
-		this.animator.setDuration(a);
-		this.animator.setCount(progress * a);
+		const a = Consts.SUN_FINISH_COUNT * (this.counter.duration / (this.counter.duration - this.counter.count));
+		this.animator.duration = a;
+		this.animator.count = progress * a;
 	}
 
 	isDone() { return this.counter.isDone; }

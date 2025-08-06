@@ -15,22 +15,23 @@ export class Web extends Sprite {
 
 		this.isDrawing = false; // toggle for starting web drawing
 
-		this.animation = new GameAnim(gm);
-		this.animation.width = gm.window.width;
-		this.animation.height = gm.window.height
-		this.addAnimation(this.animation);
+		const animation = new GameAnim(gm);
+		animation.width = gm.window.width;
+		animation.height = gm.window.height
 
 		this.drawing = new Drawing();
-		this.animation.drawings.push(this.drawing);
-		this.animation.layers.push(new Layer());
-		this.animation.styles.push(new Style({
+		animation.drawings.push(this.drawing);
+		animation.layers.push(new Layer());
+		animation.styles.push(new Style({
 			color: '#FFFFFF', 
 			segmentNum: 10,
 			wiggleRange: 4,
 			wiggleSegments: true,
 		}));
-		this.animation.setFrames();
+		animation.setFrames();
 
+		this.addAnimation(animation);
+		
 		this.treeList = []; // track connected trees
 		this.prevTreeLocation; // location of tree under player
 
@@ -77,10 +78,10 @@ export class Web extends Sprite {
 
 	/**
 	 * get clone of points in web drawing
-	 * @param  {Boolean} { trimmed } trim off dangling spider points
+	 * @param  {boolean} { trimmed } trim off dangling spider points
 	 * @returns {number[]} points
 	 */
-	getPoints(trimmed=false) {
+	getPoints({ trimmed=false }) {
 		const points = structuredClone(this.drawing.points);
 		if (trimmed) {
 			while (points.slice(-1)[0] !== Points.END && points.length > 0) {
@@ -107,8 +108,8 @@ export class Web extends Sprite {
 
 	/**
 	 * adds points web and tests connections
-	 * @param  {Player}
-	 * @param  {Boolean|Array} location of tree spider is on or false
+	 * @param  {Player} player
+	 * @param  {boolean|array} [x,y] location of tree spider is on or false
 	 * @returns {WEB_CONNECTION} type of web connection, NONE, STARTED, CONNECTED, RELEASED, CANCELED
 	 */
 	getConnection(player, treeLocation) {
@@ -177,8 +178,8 @@ export class Web extends Sprite {
 						treeLocation[0] + Consts.CELL_SIZE.W2,
 						treeLocation[1] + Consts.CELL_SIZE.H2,
 					]);
+					this.treeList.push(structuredClone(treeLocation));
 					this.prevTreeLocation = structuredClone(treeLocation);
-					this.treeList.push([...treeLocation]);
 					return Consts.WEB_CONNECTS.COMPLETED;
 				} else {
 					this.sfx.play('cancel');

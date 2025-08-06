@@ -5,7 +5,7 @@
 const isDebug = import.meta.env.DEV; // consts isDebug
 
 export const Consts = {
-	CELL_SIZE: { W: 64, H: 64, W2: 32, H2: 32, W8: 16, H8: 16 },
+	CELL_SIZE: { W: 64, H: 64, W2: 32, H2: 32, W4: 16, H4: 16 },
 	GRID_COLS: 14, /** columns in game layout grid */
 	GRID_ROWS: 7,
 	BG_COLOR: '#aeaaa6', //'#4a4047',
@@ -54,7 +54,7 @@ export const Consts = {
 	WEBS_INTERVAL: 180,
 	ROCK_SHAKE_AMOUNT: 2,
 	SUN_FINISH_COUNT: 400,
-	SUN_INTERVAL: isDebug ? 300 : 1280,
+	SUN_INTERVAL: isDebug ? 600 : 1280,
 	MOON_INTERVAL: isDebug ? 300 : 1280,
 	ROCK_SPEED: 1.8,
 	TRACING_TIMEOUT: 1000,

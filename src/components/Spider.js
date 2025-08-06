@@ -52,8 +52,6 @@ export class Spider extends Sprite {
 		this.prevPosition = [0, 0];
 		this.direction = Directions.UP;
 
-
-		console.log(Consts.ROTATE_COUNT);
 		// counter to slow down right to left movement
 		this.rightCounter = new Counter(Consts.ROTATE_COUNT);
 		this.rightCounter.end();

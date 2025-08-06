@@ -31,7 +31,7 @@ export class Trees extends SpriteCollection {
 	/**
 	 * detect if player is colliding with a tree
 	 * @param  {object}  player
-	 * @return {boolean|[x, y]}	either false, or colliding tree position array
+	 * @return {[x, y]|false}	either false, or colliding tree position array
 	 */
 	getTreeLocation(player) {
 		const treeLocation = this.texture.getCollisionLocation(player.collider);
