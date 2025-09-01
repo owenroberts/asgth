@@ -35,7 +35,7 @@ export class InstWeb extends Scene {
 		this.web = this.add(new Web(gm));
 		
 		this.instText = this.add(new TextSprite({
-			countForward: true,
+			// countForward: true,
 			message: Strings.INST_WEB_1,
 			wrap: 22,
 			track: Consts.LETTERS_TRACK,

@@ -23,7 +23,8 @@ export const Strings = {
 	INST_PATTERN_RESET: "Try creating the drawing again.",
 	INST_SUN: "Finish before the sun sets.",
 
-	INST_CHOOSE: "Press z to review instructions, press x to continue.",
+	INST_CHOOSE_REVIEW: "Review instructions",
+	INST_CHOOSE_CONTINUE: "Continue",
 
 	INST_PATTERN: "Draw in the trees to absolve yourself of sin.",
 	INST_DRAW_PATTERN: "Draw in the trees:",
@@ -37,9 +38,9 @@ export const Strings = {
 
 	NARRATIVE: {
 		SPIDER: [
-			"You see vast multitudes of of little shining webs and listening strings, brightly reflecting the sun beams.",
+			"You see vast multitudes of little shining webs and listening strings, brightly reflecting the sun beams.",
 			"These webs are so rare a substance that they are lighter than the air.",
-			"You are never flying from the sea, but always towards it, you must get there at last.",
+			"You are never flying from the sea, but always towards it. You must get there at last.",
 			"The web and spider will fall until they come to the ground.",
 			"You have seen vastly higher than the tops of the highest trees.",
 			"Your webs are between the eye, that part of the horizon that is under the sun.",

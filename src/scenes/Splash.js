@@ -27,7 +27,7 @@ export class Splash extends Scene {
 
 		this.add(new TextSprite({
 			message: Strings.START_SOUND,
-			countForward: true,
+			// countForward: true,
 			wrap: 24,
 			track: Consts.LETTERS_TRACK,
 			lead: Consts.LETTERS_LEAD,
@@ -45,7 +45,7 @@ export class Splash extends Scene {
 
 		this.add(new TextSprite({
 			message: Strings.START_SILENT,
-			countForward: true,
+			// countForward: true,
 			wrap: 14,
 			track: Consts.LETTERS_TRACK,
 			lead: Consts.LETTERS_LEAD,

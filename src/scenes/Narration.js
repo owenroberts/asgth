@@ -27,7 +27,7 @@ export class Narration extends Scene {
 			track: Consts.LETTERS_TRACK,
 			lead: Consts.LETTERS_LEAD,
 			countForward: true,
-			isDebug: true,
+			debug: true,
 		}));
 
 		this.continue = this.add(new ContinueUI(gm));
