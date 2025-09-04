@@ -46,6 +46,8 @@ export class Spider extends Sprite {
 	constructor(gm) {
 		super(0, 0, gm.anims.sprites.spider);
 
+		// this.debug = true;
+
 		this.bounds = gm.bounds;
 		this.input = gm.input;
 

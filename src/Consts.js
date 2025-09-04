@@ -68,8 +68,9 @@ export const Consts = {
 	SYMBOLS_TRACK: 64,
 	SYMBOLS_LEAD: 72,
 
+	// same but no reason to remove for now
 	WALK_COLLIDER: [16, 16, 32, 32],
-	ROCK_COLLIDER: [12, 12, 40, 40], // [8, 8, 48, 48],
+	ROCK_COLLIDER: [16, 16, 32, 32], // [8, 8, 48, 48],
 
 	WEB_CONNECTS: {
 		NONE: 0,

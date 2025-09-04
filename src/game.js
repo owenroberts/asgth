@@ -69,7 +69,6 @@ if (gm.debug) {
 }
 
 function soundSetup() {
-	console.trace('soundSetup');
 	gm.states.isSoundLoaded = true;
 
 	doodoo = new Doodoo({
