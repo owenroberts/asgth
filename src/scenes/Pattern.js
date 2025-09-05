@@ -22,8 +22,7 @@ export class Pattern extends Scene {
 		}));
 		animation.setFrames(); // needs this for game anim that isn't loaded...
 
-		// little sprite hack
-		this.add({ display() { animation.draw(); } });
+		this.add(animation);
 
 		this.add(new TextSprite({
 			message: Strings.INST_DRAW_PATTERN,

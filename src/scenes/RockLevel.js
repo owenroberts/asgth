@@ -158,7 +158,7 @@ export class RockLevel extends Scene {
 		if ((this.dir === -1 && this.rock.bbox.x < -this.rock.bbox.width) || 
 			this.dir === 1 && this.rock.bbox.x > this.width) {
 			this.rock.isActive = false;
-			this.rock.displayFunc = undefined;
+			this.rock.onDraw = undefined;
 			this.player.isActive = true;
 			this.sq.next();
 		}
