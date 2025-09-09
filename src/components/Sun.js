@@ -12,6 +12,8 @@ export class Sun extends Sprite {
 		// need separate counter and animator because if match is made, the sun animates down at a different rate than the final count
 		this.counter = new Counter(Consts.SUN_INTERVAL + extraTime);
 		this.animator = new Counter(Consts.SUN_INTERVAL + extraTime);
+
+		this.finishCount = gm.states.isSoundActive ? Consts.SUN_FINISH_COUNT_SOUND : Consts.SUN_FINISH_COUNT_SILENT;
 	}
 	
 	update() {
@@ -25,9 +27,9 @@ export class Sun extends Sprite {
 		const count = this.counter.count;
 		const duration = this.counter.duration;
 		const progress = this.counter.getProgress();
-		this.counter.count = duration - Consts.SUN_FINISH_COUNT;
+		this.counter.count = duration - this.finishCount;
 		
-		const a = Consts.SUN_FINISH_COUNT * (duration / (duration - count));
+		const a = this.finishCount * (duration / (duration - count));
 		this.animator.duration = a;
 		this.animator.count = progress * a;
 	}

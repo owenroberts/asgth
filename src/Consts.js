@@ -10,7 +10,7 @@ export const Consts = {
 	GRID_ROWS: 7,
 	BG_COLOR: '#aeaaa6', //'#4a4047',
 	
-	NUM_LEVELS: debug ? 1 : 7,
+	NUM_LEVELS: debug ? 2 : 7,
 
 	SPEED_TIME: 0.01,
 	SPIDER_SPEED: 16,
@@ -50,10 +50,11 @@ export const Consts = {
 	},
 	
 	PRACTICE_DELAY: 180,
-	PATTERN_DELAY: debug ? 180 : 180,
+	PATTERN_DELAY: debug ? 30 : 180,
 	WEBS_INTERVAL: 180,
 	ROCK_SHAKE_AMOUNT: 2,
-	SUN_FINISH_COUNT: 400,
+	SUN_FINISH_COUNT_SOUND: 400,
+	SUN_FINISH_COUNT_SILENT: 160,
 	SUN_INTERVAL: debug ? 1280 : 1280,
 	MOON_INTERVAL: debug ? 1280 : 1280,
 	ROCK_SPEED: 1.8,
@@ -70,7 +71,7 @@ export const Consts = {
 
 	// same but no reason to remove for now
 	WALK_COLLIDER: [16, 16, 32, 32],
-	ROCK_COLLIDER: [16, 16, 32, 32], // [8, 8, 48, 48],
+	ROCK_COLLIDER: [24, 24, 16, 16], // [8, 8, 48, 48],
 
 	WEB_CONNECTS: {
 		NONE: 0,

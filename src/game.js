@@ -113,7 +113,6 @@ function resetGame() {
 		doodoo.stop();
 		doodoo.play();
 	}
-	
 }
 
 gm.onSetup = function() {
@@ -349,7 +348,7 @@ gm.onSetup = function() {
 
 	// walk level
 	gm.sq.add({ label: "walk-level", fn: () => {
-		if (gm.states.levelCount === 0) return gm.sq.next();
+		// if (gm.states.levelCount === 0) return gm.sq.next();
 		gm.states.isWalkLevelExited = false;
 		gm.scenes.walkLevel = new WalkLevel(gm);
 		gm.scenes.setCurrent("walkLevel");
@@ -414,5 +413,6 @@ gm.onSetup = function() {
 		}
 	}});
 
+	gm.sq.set('walk-level');
 	gm.sq.next(); // start ... clearer way to do this?
 };

@@ -11,6 +11,8 @@ export class Trees extends SpriteCollection {
 	constructor(gm) {
 		super();
 
+		this.debug = true;
+
 		this.texture = this.add(new Texture({ animation: gm.anims.sprites.trees }));
 		
 		this.animator = new Animator(this.texture.animation, {

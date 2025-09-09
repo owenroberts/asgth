@@ -66,7 +66,7 @@ export class RockLevel extends Scene {
 			spawnLocation.y * Consts.CELL_SIZE.H,
 		); // no spawn on edge ?
 
-		this.player.setCollider(...Consts.ROCK_COLLIDER);
+		this.player.collider.set(...Consts.ROCK_COLLIDER);
 
 		this.sun = this.add(new Sun(gm));
 

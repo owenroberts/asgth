@@ -1,5 +1,5 @@
 import { Counter, assert } from '../../cool/cool.js';
-import { Sprite } from '../../lines/src/Engine.js';
+import { Sprite, BBox } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 
 /**
@@ -61,8 +61,11 @@ export class Spider extends Sprite {
 		this.leftCounter.end();
 
 		this.animation.state = "idle_right";
-		this.colliderOffset = [16, 16];
-		this.setCollider(16, 16, 32, 32);
+		this.addCollider(16, 16, 32, 32);
+	}
+
+	addCollider(x, y, w, h) {
+		this.collider = new BBox(x, y, w, h);
 	}
 
 	spawn(x, y, dir) {
@@ -115,7 +118,6 @@ export class Spider extends Sprite {
 		speed[1] *= time * Consts.SPEED_TIME;
 
 		this.bbox.addPosition(speed[0], speed[1]);
-		this.collider.setPosition(this.bbox.x + this.colliderOffset[0], this.bbox.y + this.colliderOffset[1]);
 
 		if (!this.bbox.isColliding(this.bounds)) {
 			this.moveBack();
