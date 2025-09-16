@@ -158,7 +158,7 @@ gm.onSetup = function() {
 		gm.scenes.debug.onKeyDown.BTN_1 = function() {
 			gm.sq.next();
 		};
-		gm.scenes.setCurrent("debug");
+		gm.scenes.set("debug");
 	}});
 
 	// debug loading
@@ -166,13 +166,14 @@ gm.onSetup = function() {
 		if (!gm.debug) return gm.sq.next();
 
 		loadingSprite.animation.frame = 0;
-		gm.scenes.setCurrent("loading");
+		gm.scenes.set("loading");
 		if (gm.states.isSoundLoaded) {
 			gm.sq.next();			
 		} else {
 			soundSetup();
 		}
 	}});
+
 
 	// splash
 	gm.sq.add({ label: "splash", fn: () => {
@@ -187,7 +188,7 @@ gm.onSetup = function() {
 			gm.sfx.isMuted = true;
 			gm.sq.next();
 		};
-		gm.scenes.setCurrent("splash");
+		gm.scenes.set("splash");
 	}});
 
 	// loading
@@ -196,7 +197,7 @@ gm.onSetup = function() {
 
 		if (gm.states.isSoundActive) {
 			loadingSprite.animation.frame = 0;
-			gm.scenes.setCurrent("loading");
+			gm.scenes.set("loading");
 			if (gm.states.isSoundLoaded) {
 				doodoo.play();
 				gm.sq.next();
@@ -230,7 +231,7 @@ gm.onSetup = function() {
 			gm.input.reset();
 		};
 
-		gm.scenes.setCurrent("instChoose");
+		gm.scenes.set("instChoose");
 	}});
 
 	// movement instructions
@@ -245,7 +246,7 @@ gm.onSetup = function() {
 			gm.sfx.play("next_button");
 			gm.sq.next();
 		};
-		gm.scenes.setCurrent("instMove");
+		gm.scenes.set("instMove");
 	}});
 
 	// web instructions
@@ -254,7 +255,7 @@ gm.onSetup = function() {
 		if (gm.states.isSkipInstructions) return gm.sq.next();
 		
 		gm.scenes.instWeb.setup();
-		gm.scenes.setCurrent("instWeb");
+		gm.scenes.set("instWeb");
 	}});
 
 	// pattern practice setup
@@ -263,7 +264,7 @@ gm.onSetup = function() {
 		if (gm.states.isSkipInstructions) return gm.sq.next();
 
 		gm.scenes.narration.addDialog([Strings.INST_PATTERN_PRACTICE, Strings.INST_SUN]);
-		gm.scenes.setCurrent("narration");
+		gm.scenes.set("narration");
 	}});
 
 	// pattern practice restart
@@ -273,7 +274,7 @@ gm.onSetup = function() {
 		if (!gm.states.isPracticeRestart) return gm.sq.next();
 
 		gm.scenes.narration.addDialog([Strings.INST_PATTERN_RESET]);
-		gm.scenes.setCurrent("narration");
+		gm.scenes.set("narration");
 	}});
 
 	// show pattern practice
@@ -288,7 +289,7 @@ gm.onSetup = function() {
 				gm.sq.next();
 			}
 		};
-		gm.scenes.setCurrent('pattern');
+		gm.scenes.set('pattern');
 	}});
 
 	// solve pattern practice
@@ -298,7 +299,7 @@ gm.onSetup = function() {
 
 		if (gm.states.isPracticeRestart) gm.scenes.instPattern.reset();
 		else gm.scenes.instPattern.setup();
-		gm.scenes.setCurrent("instPattern");
+		gm.scenes.set("instPattern");
 	}});
 
 	// practice pattern try again or next
@@ -320,7 +321,7 @@ gm.onSetup = function() {
 		localStorage.setItem(Strings.LOCAL_STORAGE, true);
 		gm.scenes.narration.continue.isActive = false;
 		gm.scenes.narration.addDialog([Strings.EDWARDS_QUOTE_1, Strings.EDWARDS_QUOTE_2]);
-		gm.scenes.setCurrent("narration");
+		gm.scenes.set("narration");
 	}});
 
 	// start game loop
@@ -329,7 +330,7 @@ gm.onSetup = function() {
 	gm.sq.add({ label: "game-loop-start", fn: () => {
 		// if (gm.debug) return gm.sq.next();
 		gm.scenes.narration.addDialog([Strings.INST_PATTERN]);
-		gm.scenes.setCurrent("narration");
+		gm.scenes.set("narration");
 	}});
 
 	// pattern
@@ -343,7 +344,7 @@ gm.onSetup = function() {
 				gm.sq.next();
 			}
 		};
-		gm.scenes.setCurrent('pattern');
+		gm.scenes.set('pattern');
 	}});
 
 	// walk level
@@ -351,7 +352,7 @@ gm.onSetup = function() {
 		// if (gm.states.levelCount === 0) return gm.sq.next();
 		gm.states.isWalkLevelExited = false;
 		gm.scenes.walkLevel = new WalkLevel(gm);
-		gm.scenes.setCurrent("walkLevel");
+		gm.scenes.set("walkLevel");
 	}});
 
 	// repeat walk level
@@ -364,7 +365,7 @@ gm.onSetup = function() {
 	// rock level
 	gm.sq.add({ fn: () => {
 		gm.scenes.rockLevel = new RockLevel(gm);
-		gm.scenes.setCurrent("rockLevel");
+		gm.scenes.set("rockLevel");
 	}});
 
 	// webs or rock rolls based on score
@@ -372,7 +373,7 @@ gm.onSetup = function() {
 		if (gm.states.lastPointWinner === "SPIDER") {
 			gm.sfx.play("inter");
 			gm.scenes.interWebs.setup();
-			gm.scenes.setCurrent("interWebs");
+			gm.scenes.set("interWebs");
 		} else {
 			gm.scenes.rockLevel.rockSetup();
 		}
@@ -385,7 +386,7 @@ gm.onSetup = function() {
 		gm.scenes.narration.setScore();
 		gm.sfx.play('level_start', { randomRate: true });
 		gm.states.levelCount++;
-		gm.scenes.setCurrent("narration");
+		gm.scenes.set("narration");
 	}});
 
 	// end dialog
@@ -393,7 +394,7 @@ gm.onSetup = function() {
 		if (gm.states.levelCount < Consts.NUM_LEVELS) return gm.sq.next();
 		const winner = gm.states.points.SPIDER > gm.states.points.ROCK ? "SPIDER" : "ROCK"; 
 		gm.scenes.narration.addDialog(Strings.NARRATIVE.END[winner]);
-		gm.scenes.setCurrent("narration");
+		gm.scenes.set("narration");
 	}});
 
 	// next loop or end
@@ -406,13 +407,12 @@ gm.onSetup = function() {
 				gm.sq.set("splash");
 				gm.sq.next();
 			};
-			gm.scenes.setCurrent("end");
+			gm.scenes.set("end");
 		} else {
 			gm.sq.set("game-loop-start");
 			gm.sq.next();
 		}
 	}});
 
-	gm.sq.set('walk-level');
 	gm.sq.next(); // start ... clearer way to do this?
 };

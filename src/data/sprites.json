@@ -13,7 +13,7 @@
 	"walk_tiles": { "src": "../lines/drawings/walk_tiles.json" },
 	"levels": { "src": "../lines/drawings/inters_2.json" },
 	"webs_1": { "src": "../lines/drawings/webs_1.json" },
-	"webs_2": { "src": "../lines/drawings/webs_2.json" },
+	"interwebs": { "src": "../lines/drawings/interwebs_.json" },
 	"spider": { "src": "../lines/drawings/spider.json" },
 	"select": { "src": "../lines/drawings/select.json" },
 	"trees": { "src": "../lines/drawings/trees.json" },

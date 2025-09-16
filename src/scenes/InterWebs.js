@@ -9,26 +9,19 @@ export class InterWebs extends Scene {
 	constructor(gm) {
 		super();
 
-		this.sq = gm.sq;
+		this.sprite = this.add(new Sprite(0, 0, gm.anims.sprites.interwebs));
+		this.sprite.animation.play();
+		this.sprite.animation.onPlayedState = () => {
+			gm.sq.next();
+		};
 
-		this.sprite = this.add(new Sprite(0, 0, gm.anims.sprites.webs_2));
-		this.counter = new Counter(Consts.WEBS_INTERVAL);
 		this.animator = new Animator(this.sprite.animation, {
 			segmentNum: [1, 3],
 			jiggleRange: [1, 2],
-		});
+		}, ['startIndex', 'endIndex']);
 	}
 
 	setup() {
-		this.sprite.animation.frame = randomInt(0, 6);
 		this.animator.set();
-		this.counter.reset();
-	}
-
-	update() {
-		this.counter.update();
-		if (this.counter.isDone) {
-			this.sq.next();
-		}
 	}
 }
