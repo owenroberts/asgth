@@ -14,6 +14,8 @@ export class WalkLevel extends Scene {
 		this.states = gm.states;
 		this.height = gm.window.height;
 		this.input = gm.input;
+		
+		this.drawDebug = gm.drawDebug.bind(gm); // fuck! bind! well at least it works ... 
 
 		this.doors = [];
 		this.walls = [];
@@ -44,31 +46,87 @@ export class WalkLevel extends Scene {
 			Consts.CELL_SIZE.H * 0.5,
 		);
 
+		// make bsp areas bbox?
+		function checkOverlapOrAdjacent(p1, p2) {
+			if (p1.x < p2.x + p2.w &&
+				p1.x + p1.w > p2.x &&
+				p1.y < p2.y + p2.h &&
+				p1.y + p1.h > p2.y) {
+				return true;
+			}
+
+			if ((p1.x + p1.w === p2.x || p2.x + p2.w === p1.x) &&
+         		(Math.max(p1.y, p2.y) < Math.min(p1.y + p1.h, p2.y + p2.h))) {
+        		return true
+			}
+
+			if ((p1.y + p1.h === p2.y || p2.y + p2.h === p1.y) &&
+         		(Math.max(p1.x, p2.x) < Math.min(p1.x + p1.w, p2.x + p2.w))) {
+        		return true
+			}
+
+			return false;
+		}
+		
+		let groupNumber = 0;
+		for (let i = 0; i < levelMap.paths.length; i++) {
+			if (i === 0) {
+				levelMap.paths[i].groupNumber = groupNumber;
+				continue;
+			}
+
+			const p1 = levelMap.paths[i];
+
+			let isInExistingGroup = false;
+			for (let j = 0; j < levelMap.paths.length; j++) {
+				
+				if (j === i) continue;
+				const p2 = levelMap.paths[j];
+				if (!p2.hasOwnProperty('groupNumber')) continue;
+				
+				if (checkOverlapOrAdjacent(p1, p2)) {
+					isInExistingGroup = true;
+					p1.groupNumber = p2.groupNumber;
+					break;
+				}
+			}
+
+			if (!isInExistingGroup) {
+				groupNumber++;
+				p1.groupNumber = groupNumber;
+			}
+		}
+
 		for (let i = 0; i < levelMap.paths.length - 1; i++) {
-			// add door to end
-			const pathStart = levelMap.paths[i];
-			const pathEnd = levelMap.paths[i + 1];
-			const startTile = levelMap.tileMap.getTile(pathStart.x, pathStart.y);
-			const endTile = levelMap.tileMap.getTile(pathEnd.x, pathEnd.y);
 
+			// check if last path in group
+			let path = levelMap.paths[i];
 
-			// if two paths collide, don't make the door
-			if (pathStart.x < pathEnd.x + pathEnd.w &&
-				pathStart.x + pathStart.w > pathEnd.x &&
-				pathStart.y < pathEnd.y + pathEnd.h &&
-				pathStart.y + pathStart.h > pathEnd.y) {
+			// last group is exit
+			if (path.groupNumber === groupNumber) continue;
+
+			let isLastPathInGroup = true;
+			for (let j = i + 1; j < levelMap.paths.length; j++) {
+				if (levelMap.paths[j].groupNumber === path.groupNumber) {
+					isLastPathInGroup = false;
+				}
+			}
+
+			if (!isLastPathInGroup) {
 				continue;
 			}
 
 			const d = new BBox(
-				(pathStart.x + pathStart.w - 1) * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.32,
-				(pathStart.y + pathStart.h - 1) * Consts.CELL_SIZE.H + Consts.CELL_SIZE.H * 0.32,
-				Consts.CELL_SIZE.W * 0.25,
-				Consts.CELL_SIZE.H * 0.25,
+				(path.x + path.w - 1) * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W4 + Consts.CELL_SIZE.W8,
+				(path.y + path.h - 1) * Consts.CELL_SIZE.H + Consts.CELL_SIZE.H4 + Consts.CELL_SIZE.H8,
+				Consts.CELL_SIZE.W4,
+				Consts.CELL_SIZE.H4,
 			);
+
+			const destination = levelMap.paths[i + 1];
 			d.destination = {
-				x: pathEnd.x * Consts.CELL_SIZE.W, 
-				y: pathEnd.y * Consts.CELL_SIZE.H,
+				x: destination.x * Consts.CELL_SIZE.W, 
+				y: destination.y * Consts.CELL_SIZE.H,
 			};
 			this.doors.push(d);
 		}
@@ -109,6 +167,7 @@ export class WalkLevel extends Scene {
 
 		for (let i = 0; i < this.doors.length; i++) {
 			// doorColliders[i].drawDebug();
+			this.drawDebug({ bbox: this.doors[i] });
 			if (this.player.isColliding(this.doors[i])) {
 				this.player.spawn(
 					this.doors[i].destination.x,
@@ -127,13 +186,14 @@ export class WalkLevel extends Scene {
 		
 		// exit.drawDebug("#ffbb00");
 		if (this.player.isColliding(this.exit)) {
+			console.log('exit');
 			this.sfx.play("walk", { randomRate: true });
 			this.states.isWalkLevelExited = true;
 			this.input.reset();
 			this.sq.next();
 		}
 
-		this.moonAnim.update();
+		// this.moonAnim.update();
 		this.moon.bbox.y = map(Math.sin(this.moonAnim.getProgress() * Math.PI), 0, 1, this.height - 64, 0, true);
 		
 		if (this.moonAnim.isDone) {

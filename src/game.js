@@ -174,6 +174,13 @@ gm.onSetup = function() {
 		}
 	}});
 
+	for (let i = 0; i < 10; i++) {
+	gm.sq.add({ fn: () => {
+		gm.scenes.walkLevel = new WalkLevel(gm);
+		console.log('walkLevel', gm.scenes.walkLevel);
+		gm.scenes.set('walkLevel');
+	}});
+	}
 
 	// splash
 	gm.sq.add({ label: "splash", fn: () => {

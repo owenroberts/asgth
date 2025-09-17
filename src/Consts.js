@@ -5,7 +5,7 @@
 const debug = import.meta.env.DEV; // consts debug
 
 export const Consts = {
-	CELL_SIZE: { W: 64, H: 64, W2: 32, H2: 32, W4: 16, H4: 16 },
+	CELL_SIZE: { W: 64, H: 64, W2: 32, H2: 32, W4: 16, H4: 16, W8: 8, H8: 8 },
 	GRID_COLS: 14, /** columns in game layout grid */
 	GRID_ROWS: 7,
 	BG_COLOR: '#aeaaa6', //'#4a4047',
