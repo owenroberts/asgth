@@ -167,7 +167,7 @@ export class WalkLevel extends Scene {
 
 		for (let i = 0; i < this.doors.length; i++) {
 			// doorColliders[i].drawDebug();
-			this.drawDebug({ bbox: this.doors[i] });
+			// this.drawDebug({ bbox: this.doors[i] });
 			if (this.player.isColliding(this.doors[i])) {
 				this.player.spawn(
 					this.doors[i].destination.x,
@@ -186,7 +186,6 @@ export class WalkLevel extends Scene {
 		
 		// exit.drawDebug("#ffbb00");
 		if (this.player.isColliding(this.exit)) {
-			console.log('exit');
 			this.sfx.play("walk", { randomRate: true });
 			this.states.isWalkLevelExited = true;
 			this.input.reset();

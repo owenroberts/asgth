@@ -25,9 +25,10 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
 const gm = new Game({
-	debug: true,
+	// debug: true,
 	drawInterval: 3,
 	lineWidth: 1,
+	// zoom: 1,
 	// zoom: isMobile ? 1 : 1.5, --> fuck zoom doesn't work
 	width: Consts.CELL_SIZE.W * Consts.GRID_COLS,
 	height: Consts.CELL_SIZE.H * Consts.GRID_ROWS,
@@ -173,14 +174,6 @@ gm.onSetup = function() {
 			soundSetup();
 		}
 	}});
-
-	for (let i = 0; i < 10; i++) {
-	gm.sq.add({ fn: () => {
-		gm.scenes.walkLevel = new WalkLevel(gm);
-		console.log('walkLevel', gm.scenes.walkLevel);
-		gm.scenes.set('walkLevel');
-	}});
-	}
 
 	// splash
 	gm.sq.add({ label: "splash", fn: () => {
