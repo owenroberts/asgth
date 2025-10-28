@@ -26,18 +26,26 @@ export function patternMatch(pattern, drawing) {
 
 	// normalize pattern to start at 0,0
 	pattern = normalizeTopLeft(pattern);
-	// sort by sum, then x
 
 	// get segments of the drawing, normalize for top-left, drawing bounds
 	let points = drawing
 		.filter(p => p !== Points.END)
 		.map(p => p.map(c => (c - Consts.CELL_SIZE.W / 2) / Consts.CELL_SIZE.W));
 
+	// console.log('points', JSON.stringify(points));
+
 	// get lines from points pairs
 	let lines = [];
 	for (let i = 0; i < points.length; i += 2) {
 		lines.push(sortPoints([points[i], points[i + 1]]));
 	}
+
+	// console.log('sort 1', JSON.stringify(lines));
+
+	// sort again for edge case where p2 x < p1 x but higher sum	
+	lines = lines.sort((a, b) => a[0][0] - b[0][0]);
+
+	// console.log('sort 2', JSON.stringify(lines));
 
 	// break up lines into segments
 	for (let i = 0; i < lines.length; i++) {
@@ -61,10 +69,12 @@ export function patternMatch(pattern, drawing) {
 		else if (dy > 1) {
 			lines[i][1][1] = y1 + 1;
 			for (let y = y1 + 1; y < y2; y++) {
-				lines.push([[x1, y1 + y], [x1, y1 + y + 1]]);
+				lines.push([[x1, y], [x1, y + 1]]);
 			}
 		}
 	}
+
+	// console.log('segment', JSON.stringify(lines));
 	
 	// remove duplicates
 	let nodupes = [];
@@ -74,16 +84,17 @@ export function patternMatch(pattern, drawing) {
 		}
 		nodupes.push(lines[i]);
 	}
-
 	// console.log('no dupes', JSON.stringify(nodupes));
+
 	nodupes = normalizeTopLeft(nodupes);
-	// console.log('sortPattern', JSON.stringify(nodupes));
+
+	// console.log('top left', JSON.stringify(nodupes));
+
 	// nodupes = sortPattern(nodupes);
-	// console.log('sort', JSON.stringify(nodupes));
 
-
-	// console.log('nodupes', nodupes);
-	// console.log('pattern', pattern);
+	// console.log('nodupes', JSON.stringify(nodupes));
+	// console.log('pattern', JSON.stringify(pattern));
+	
 	// simple check before all the map and sort
 	if (nodupes.length !== pattern.length) return false;
 
@@ -93,3 +104,18 @@ export function patternMatch(pattern, drawing) {
 	// console.log('match', drawingString === patternString);
 	return drawingString === patternString;
 }
+
+/*
+broken patterns
+
+[
+	[[0,1], [1,2]],
+	[[1,0], [1,1]],
+	[[1,2], [2,1]],
+	[[2,0], [3,1]],
+	[[2,1], [3,0]],
+	[[2,1], [2,2]],
+	[[2,2], [2,3]],
+]
+
+ */

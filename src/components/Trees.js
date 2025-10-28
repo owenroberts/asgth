@@ -20,8 +20,8 @@ export class Trees extends SpriteCollection {
 			segmentNum: [2, 3],
 		});
 		
-		this.animCounter = new Counter(24, () => { 
-			this.animator.set(); 
+		this.animCounter = new Counter(24, () => {
+			this.animator.set();
 		});
 		this.animCounter.isLoop = true;
 	
@@ -36,7 +36,7 @@ export class Trees extends SpriteCollection {
 	 * @return {[x, y]|false}	either false, or colliding tree position array
 	 */
 	getTreeLocation(player) {
-		const treeLocation = this.texture.getCollisionLocation(player.collider);
+		const treeLocation = this.texture.getCollisionLocation(player);
 		if (treeLocation) {
 			this.select.setPosition(treeLocation[0], treeLocation[1]);
 			this.select.isActive = true;
@@ -69,7 +69,7 @@ export class Trees extends SpriteCollection {
 		this.texture.clear(); 
 	}
 
-	clearAnimator() { 
+	clearAnimator() {
 		this.animator.clear();
 		this.texture.offset = [0, 0];
 	}

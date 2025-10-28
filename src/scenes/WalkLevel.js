@@ -192,7 +192,7 @@ export class WalkLevel extends Scene {
 			this.sq.next();
 		}
 
-		// this.moonAnim.update();
+		this.moonAnim.update();
 		this.moon.bbox.y = map(Math.sin(this.moonAnim.getProgress() * Math.PI), 0, 1, this.height - 64, 0, true);
 		
 		if (this.moonAnim.isDone) {

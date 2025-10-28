@@ -2,8 +2,7 @@ import { Sequencer } from '../cool/cool.js';
 import { Doodoo } from '../doodoo/src/Doodoo.js';
 import { Game, Sprite, TextSprite, Scene } from '../lines/src/Engine.js';
 
-import { Spider } from './components/Spider.js'; // not a scene?
-
+import { Spider } from './components/Spider.js';
 import { Splash } from './scenes/Splash.js';
 import { InstMove } from './scenes/InstMove.js';
 import { InstChoose } from './scenes/InstChoose.js';
@@ -44,6 +43,22 @@ const gm = new Game({
 });
 gm.load({ animations: { sprites: spritePaths }, }, false);
 if (gm.debug) console.log('game', gm);
+
+
+// screen cap
+// gm.setScale(2);
+// function keyDown(ev) {
+// 	if (ev.code === 'KeyF') getFullscreen();
+// }
+// document.addEventListener('keydown', keyDown);
+// function getFullscreen() {
+// 	if (!document.fullscreenElement) {
+// 		document.documentElement.requestFullscreen();
+// 	} else if (document.exitFullscreen) {
+// 		document.exitFullscreen();
+// 	}
+// }
+
 
 // props that need to be tracked
 gm.states = {
@@ -116,6 +131,7 @@ function resetGame() {
 	}
 }
 
+// feel like gm.setup was fine ... 
 gm.onSetup = function() {
 
 	gm.player = new Spider(gm);
@@ -193,7 +209,7 @@ gm.onSetup = function() {
 
 	// loading
 	gm.sq.add({ fn: () => {
-		// if (gm.debug) return gm.sq.next();
+		if (gm.debug) return gm.sq.next();
 
 		if (gm.states.isSoundActive) {
 			loadingSprite.animation.frame = 0;
@@ -251,7 +267,7 @@ gm.onSetup = function() {
 
 	// web instructions
 	gm.sq.add({ fn: () => {
-		if (gm.debug) return gm.sq.next();
+		// if (gm.debug) return gm.sq.next();
 		if (gm.states.isSkipInstructions) return gm.sq.next();
 		
 		gm.scenes.instWeb.setup();
@@ -349,7 +365,7 @@ gm.onSetup = function() {
 
 	// walk level
 	gm.sq.add({ label: "walk-level", fn: () => {
-		// if (gm.states.levelCount === 0) return gm.sq.next();
+		if (gm.states.levelCount === 0) return gm.sq.next();
 		gm.states.isWalkLevelExited = false;
 		gm.scenes.walkLevel = new WalkLevel(gm);
 		gm.scenes.set("walkLevel");

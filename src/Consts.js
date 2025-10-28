@@ -3,6 +3,7 @@
  * @type {object}
  */
 const debug = import.meta.env.DEV; // consts debug
+// how to tie this to gm.debug?
 
 export const Consts = {
 	CELL_SIZE: { W: 64, H: 64, W2: 32, H2: 32, W4: 16, H4: 16, W8: 8, H8: 8 },
@@ -10,7 +11,7 @@ export const Consts = {
 	GRID_ROWS: 7,
 	BG_COLOR: '#aeaaa6', //'#4a4047',
 	
-	NUM_LEVELS: debug ? 2 : 7,
+	NUM_LEVELS: debug ? 7 : 7,
 
 	SPEED_TIME: 0.01,
 	SPIDER_SPEED: 16,
@@ -50,7 +51,7 @@ export const Consts = {
 	},
 	
 	PRACTICE_DELAY: 180,
-	PATTERN_DELAY: debug ? 30 : 180,
+	PATTERN_DELAY: debug ? 180 : 180,
 	WEBS_INTERVAL: 180,
 	ROCK_SHAKE_AMOUNT: 2,
 	SUN_FINISH_COUNT_SOUND: 400,

@@ -51,7 +51,7 @@ export const Strings = {
 			"The things you depended on for peace and safety were nothing but thin air and empty shadows.",
 			"The lake of burning brimstone, the world of misery, is extended to you.",
 			"The earth would not bear you for one moment.",
-			"Every tree that bring forth bad fruit may be cast into the fire.",
+			"Every tree that brings forth bad fruit may be cast into the fire.",
 			"The glittering sword is held over you, and a pit hath opened under you.",
 			"You will eternally curse this day, and will curse the day you were born to see such a season.",
 		],

@@ -112,3 +112,4 @@ export function getBounds(pattern) {
 		height: bottom - top + 1,
 	};
 }
+
