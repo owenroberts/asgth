@@ -46,7 +46,7 @@ export class Spider extends Sprite {
 	constructor(gm) {
 		super(0, 0, gm.anims.sprites.spider);
 
-		// this.debug = true;
+		this.debug = true;
 
 		this.bounds = gm.bounds;
 		this.input = gm.input;
@@ -61,11 +61,17 @@ export class Spider extends Sprite {
 		this.leftCounter.end();
 
 		this.animation.state = "idle_right";
-		this.addCollider(16, 16, 32, 32);
+		this.addCollider(...Consts.WALK_COLLIDER);
+		this.colliderOffset = [this.collider.x, this.collider.y];
 	}
 
-	addCollider(x, y, w, h) {
-		this.collider = new BBox(x, y, w, h);
+	resetCollider(x, y, w, h) {
+		// add difference in size to current position?
+		this.colliderOffset = [x, y];
+		this.collider.x += this.colliderOffset[0] - x;
+		this.collider.y += this.colliderOffset[1] - y;
+		this.collider.w = w;
+		this.collider.h = h;
 	}
 
 	spawn(x, y, dir) {
@@ -118,6 +124,10 @@ export class Spider extends Sprite {
 		speed[1] *= time * Consts.SPEED_TIME;
 
 		this.bbox.addPosition(speed[0], speed[1]);
+		this.collider.setPosition(
+			this.bbox.x + this.colliderOffset[0], 
+			this.bbox.y + this.colliderOffset[1],
+		);
 
 		if (!this.bbox.isColliding(this.bounds)) {
 			this.moveBack();

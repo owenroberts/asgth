@@ -1,6 +1,6 @@
 import { randomInt, choice, random } from '../../cool/cool.js';
 
-import { Scene, Sprite, Texture, generateBSPMap, BSPTileTypes, BlobMap } from '../../lines/src/Engine.js';
+import { Scene, Sprite, TileSet, BSPMap, BSPTileTypes, BlobMap } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 
 import { Trees } from '../components/Trees.js';
@@ -25,7 +25,7 @@ export class RockLevel extends Scene {
 		this.isRockRolled = false;
 		this.gotMatch = false;
 		
-		const map = generateBSPMap({ cols: 13, rows: 7, minNodeSize: 2, maxNodeSize: 6, createPaths: false, inject: [{ type: "room", w: gm.states.patternBounds.width, h: gm.states.patternBounds.height, name: 'drawing' }] });
+		const map = BSPMap.create({ cols: 13, rows: 7, minNodeSize: 2, maxNodeSize: 6, createPaths: false, inject: [{ type: "room", w: gm.states.patternBounds.width, h: gm.states.patternBounds.height, name: 'drawing' }] });
 
 		const tracingStartTile = map.rooms.filter(r => r.name === "drawing")[0]
 		
@@ -35,13 +35,13 @@ export class RockLevel extends Scene {
 		this.trees.clearAnimator();
 
 		let treeClusterSize = 3;
-		let numTrees = this.trees.texture.animation.endFrame;
+		let numTrees = this.trees.tileSet.animation.endFrame;
 		for (let i = 0; i < map.rooms.length; i++) {
 			const treeClusterIndex = randomInt(numTrees - treeClusterSize);
 			const r = map.rooms[i];
 			for (let x = r.x; x < r.x + r.w; x++) {
 				for (let y = r.y; y < r.y + r.h; y++) {
-					this.trees.addLocation(
+					this.trees.tileSet.add(
 						x * Consts.CELL_SIZE.W, 
 						y * Consts.CELL_SIZE.H, 
 						randomInt(treeClusterIndex, treeClusterIndex + treeClusterSize, false),
@@ -50,13 +50,13 @@ export class RockLevel extends Scene {
 			}
 		}
 
-		const ground = this.add(new Texture({ animation: gm.anims.sprites[choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt')] }));
+		const ground = this.add(new TileSet({ animation: gm.anims.sprites[choice('tiles_grass', 'tiles_stones', 'tiles_sparse_grass', 'tiles_dirt')] }));
 		const blobMap = new BlobMap(map.tileMap);
 		const wallTiles = map.tileMap.getTilesByType(BSPTileTypes.WALL);
 		for (let i = 0; i < wallTiles.length; i++) {
 			const { x, y } = map.tileMap.getPosition(wallTiles[i]);
 			const blobIndex = blobMap.getBlobIndex(x, y, BSPTileTypes.WALL);
-			ground.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, blobIndex);
+			ground.add(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, blobIndex);
 		}
 
 		const spawnTile = choice(map.tileMap.tiles.filter(t => t.type === BSPTileTypes.WALL));
@@ -66,7 +66,7 @@ export class RockLevel extends Scene {
 			spawnLocation.y * Consts.CELL_SIZE.H,
 		); // no spawn on edge ?
 
-		this.player.collider.set(...Consts.ROCK_COLLIDER);
+		this.player.resetCollider(...Consts.ROCK_COLLIDER);
 
 		this.sun = this.add(new Sun(gm));
 

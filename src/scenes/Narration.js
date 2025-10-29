@@ -1,4 +1,4 @@
-import { Scene, Texture, TextSprite } from '../../lines/src/Engine.js';
+import { Scene, TileSet, TextSprite } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 import { Strings } from '../Strings.js';
 import { ContinueUI } from '../components/ContinueUI.js';
@@ -14,7 +14,7 @@ export class Narration extends Scene {
 		this.dialogList = [];
 		this.isDone = true;
 
-		this.score = this.add(new Texture({ 
+		this.score = this.add(new TileSet({ 
 			animation: gm.anims.sprites.score,
 			isActive: false, 
 		}));
@@ -81,7 +81,7 @@ export class Narration extends Scene {
 		let scoreY = Consts.CELL_SIZE.H * (this.states.points.SPIDER + this.states.points.ROCK - 1);
 
 		let point = this.states.lastPointWinner === 'SPIDER' ? 1 : 0;
-		this.score.addLocation(scoreX, scoreY, point);
+		this.score.add(scoreX, scoreY, point);
 	}
 
 	hideScore() {

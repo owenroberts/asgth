@@ -1,5 +1,5 @@
 import { randomInt, choice } from '../../cool/cool.js';
-import { Scene, TileMap, BlobMap, Texture } from '../../lines/src/Engine.js';
+import { Scene, TileMap, BlobMap, TileSet } from '../../lines/src/Engine.js';
 
 import { Consts } from '../Consts.js';
 import { Strings } from '../Strings.js';
@@ -34,14 +34,14 @@ export class InstPattern extends Scene {
 
 		this.tracing = this.add(new Tracing(gm, Consts.PRACTICE_PATTERN, this.start, true));
 		
-		const ground = this.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }));
+		const ground = this.add(new TileSet({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')] }));
 
 		const tileMap = new TileMap(5, 5);
 		const treeLocations = [[1,1], [1,2], [1,3], [2,1], [2,2], [2,3], [3,1], [3,2], [3,3]];
 
 		for (let i = 0; i < treeLocations.length; i++) {
 			let [x, y] = treeLocations[i];
-			this.trees.addLocation(
+			this.trees.tileSet.add(
 				(this.start.x + x) * Consts.CELL_SIZE.W,
 				(this.start.y + y) * Consts.CELL_SIZE.H,
 				randomInt(25),
@@ -55,7 +55,7 @@ export class InstPattern extends Scene {
 			if (tileMap.tiles[i].type === 1) continue;
 			const { x, y } = tileMap.getIndexPosition(i);
 			const blobIndex = blobMap.getBlobIndex(x, y, 0);
-			ground.addLocation(
+			ground.add(
 				(this.start.x + x) * Consts.CELL_SIZE.W, 
 				(this.start.y + y) * Consts.CELL_SIZE.H,
 				blobIndex,
@@ -73,7 +73,7 @@ export class InstPattern extends Scene {
 
 	reset() {
 		this.web.clear();
-		this.trees.texture.locations.forEach(l => {
+		this.trees.tileSet.tiles.forEach(l => {
 			l[2] = randomInt(25); // frame index
 		});
 		this.sun.reset();

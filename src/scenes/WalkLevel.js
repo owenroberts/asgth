@@ -1,5 +1,5 @@
 import { Counter, randomInt, choice, map } from '../../cool/cool.js';
-import { BlobMap, TileMap, TileTypes, BBox, Scene, Texture, Sprite, generateBSPMap, BSPTileTypes } from '../../lines/src/Engine.js';
+import { BlobMap, TileMap, TileTypes, BBox, Scene, TileSet, Sprite, BSPMap, BSPTileTypes } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 import level_bounds from '../data/level_bounds.json';
 
@@ -20,7 +20,7 @@ export class WalkLevel extends Scene {
 		this.doors = [];
 		this.walls = [];
 		
-		const levelMap = generateBSPMap({ cols: 13, rows: 7, minRoomSize: 2, minNodeSize: 2, maxNodeSize: 6 });
+		const levelMap = BSPMap.create({ cols: 13, rows: 7, minRoomSize: 2, minNodeSize: 2, maxNodeSize: 6 });
 		const start = levelMap.paths[0];
 		const end = levelMap.paths[levelMap.paths.length - 1];
 		
@@ -29,15 +29,18 @@ export class WalkLevel extends Scene {
 			start.y * Consts.CELL_SIZE.H,
 			"RIGHT"
 		);
-		this.player.collider.set(...Consts.WALK_COLLIDER);
+		this.player.resetCollider(...Consts.WALK_COLLIDER);
 
 		this.moon = this.add(new Sprite(13 * Consts.CELL_SIZE.W, 7 * Consts.CELL_SIZE.H, gm.anims.sprites.moon));
 		this.moonAnim = new Counter(Consts.MOON_INTERVAL);
 
-		const ground = this.add(new Texture({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_sparse_grass', 'tiles_dirt')] }));
+		const ground = this.add(new TileSet({ animation: gm.anims.sprites[choice('tiles_stones', 'tiles_sparse_grass', 'tiles_dirt')] }));
 
-		const bgTexture = this.add(new Texture({ animation: gm.anims.sprites.walk_tiles }));
-		const bgIndex = randomInt(0, (bgTexture.animation.endFrame - 1) / 4) * 4;
+		this.bgTileSet = this.add(new TileSet({ 
+			animation: gm.anims.sprites.walk_tiles,
+			hasColliders: true,
+		}));
+		const bgIndex = randomInt(0, (this.bgTileSet.animation.endFrame - 1) / 4) * 4;
 
 		this.exit = new BBox(
 			(end.x + end.w - 1) * Consts.CELL_SIZE.W + Consts.CELL_SIZE.W * 0.25,
@@ -138,12 +141,6 @@ export class WalkLevel extends Scene {
 			} 
 			const { x, y } = levelMap.tileMap.getIndexPosition(i);
 			levelMap.tileMap.tiles[i].type = TileTypes.OFF;
-			this.walls.push(new BBox(
-				x * Consts.CELL_SIZE.W,
-				y * Consts.CELL_SIZE.H, 
-				Consts.CELL_SIZE.W, 
-				Consts.CELL_SIZE.H
-			));
 		}
 
 		const blobMap = new BlobMap(levelMap.tileMap); // is this wackadoodle?
@@ -151,12 +148,12 @@ export class WalkLevel extends Scene {
 			const { x, y } = levelMap.tileMap.getIndexPosition(i);
 			if (levelMap.tileMap.tiles[i].type === TileTypes.ON) {
 				const blobIndex = blobMap.getBlobIndex(x, y, TileTypes.ON);
-				ground.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, blobIndex);
+				ground.add(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, blobIndex);
 			} else {
 				const f = bgIndex + randomInt(0, 3);
-				bgTexture.addLocation(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, f);
+				this.bgTileSet.add(x * Consts.CELL_SIZE.W, y * Consts.CELL_SIZE.H, f);
 			}
-	}
+		}
 	}
 
 	update(timeElapsed) {
@@ -178,10 +175,8 @@ export class WalkLevel extends Scene {
 			}
 		}
 
-		for (let i = 0; i < this.walls.length; i++) {
-			if (this.player.isColliding(this.walls[i])) {
-				this.player.moveBack();
-			}
+		if (this.bgTileSet.isColliding(this.player.collider)) {
+			this.player.moveBack();
 		}
 		
 		// exit.drawDebug("#ffbb00");

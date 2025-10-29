@@ -24,7 +24,7 @@ import themeFile from '../doodoo/compositions/inf3_theme_v.json';
 import spritePaths from './data/sprites.json';
 
 const gm = new Game({
-	// debug: true,
+	debug: true,
 	drawInterval: 3,
 	lineWidth: 1,
 	// zoom: 1,
@@ -191,6 +191,14 @@ gm.onSetup = function() {
 		}
 	}});
 
+	// walk level
+	gm.sq.add({ label: "walk-level", fn: () => {
+		// if (gm.states.levelCount === 0) return gm.sq.next();
+		gm.states.isWalkLevelExited = false;
+		gm.scenes.walkLevel = new WalkLevel(gm);
+		gm.scenes.set("walkLevel");
+	}});
+
 	// splash
 	gm.sq.add({ label: "splash", fn: () => {
 		// if (gm.debug) return gm.sq.next();
@@ -267,7 +275,7 @@ gm.onSetup = function() {
 
 	// web instructions
 	gm.sq.add({ fn: () => {
-		// if (gm.debug) return gm.sq.next();
+		if (gm.debug) return gm.sq.next();
 		if (gm.states.isSkipInstructions) return gm.sq.next();
 		
 		gm.scenes.instWeb.setup();

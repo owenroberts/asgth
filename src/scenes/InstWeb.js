@@ -1,5 +1,5 @@
 import { Counter, randomInt, choice } from '../../cool/cool.js';
-import { Scene, TextSprite, TileMap, BlobMap, Texture } from '../../lines/src/Engine.js';
+import { Scene, TextSprite, TileMap, BlobMap, TileSet } from '../../lines/src/Engine.js';
 import { Consts } from '../Consts.js';
 import { Strings } from '../Strings.js';
 
@@ -53,7 +53,7 @@ export class InstWeb extends Scene {
 		}));
 
 		this.start = { x: 0, y: 3 };
-		const ground = this.add(new Texture({ 
+		const ground = this.add(new TileSet({ 
 			animation: gm.anims.sprites[choice('tiles_stones', 'tiles_dirt')]
 		}));
 
@@ -65,7 +65,7 @@ export class InstWeb extends Scene {
 
 		for (let i = 0; i < treeLocations.length; i++) {
 			let [x, y] = treeLocations[i];
-			this.trees.addLocation(
+			this.trees.tileSet.add(
 				(this.start.x + x) * Consts.CELL_SIZE.W,
 				(this.start.y + y) * Consts.CELL_SIZE.H,
 				randomInt(25),
@@ -81,7 +81,7 @@ export class InstWeb extends Scene {
 			if (tileMap.tiles[i].type === 1) continue;
 			const { x, y } = tileMap.getIndexPosition(i);
 			const blobIndex = blobMap.getBlobIndex(x, y, 0);
-			ground.addLocation(
+			ground.add(
 				(this.start.x + x) * Consts.CELL_SIZE.W, 
 				(this.start.y + y) * Consts.CELL_SIZE.H,
 				blobIndex,
